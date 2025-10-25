@@ -1,6 +1,6 @@
 import { ChefHat } from "lucide-react";
 
-export const Footer = () => {
+const Footer = () => {
   return (
     <footer className="bg-muted/30 border-t border-border py-12">
       <div className="container mx-auto px-4">
@@ -56,3 +56,5 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export default Footer;

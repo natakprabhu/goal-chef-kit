@@ -1,0 +1,258 @@
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Heart, Clock, Flame, Users, ArrowLeft, RefreshCw } from "lucide-react";
+
+const RecipeDetail = () => {
+  const { recipeId } = useParams();
+  const [servings, setServings] = useState(2);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Mock recipe data - will be fetched based on recipeId
+  const recipe = {
+    id: recipeId,
+    title: "Grilled Chicken & Quinoa Bowl",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&auto=format&fit=crop",
+    description: "A perfectly balanced, protein-packed meal featuring tender grilled chicken breast, fluffy quinoa, and a rainbow of fresh vegetables.",
+    cookTime: 25,
+    prepTime: 10,
+    difficulty: "Easy",
+    calories: 485,
+    protein: 42,
+    carbs: 45,
+    fats: 15,
+    tags: ["High Protein", "Gluten-Free", "Meal Prep Friendly"],
+    ingredients: [
+      { name: "Chicken breast", amount: 200, unit: "g", substitutable: true },
+      { name: "Quinoa", amount: 100, unit: "g", substitutable: true },
+      { name: "Cherry tomatoes", amount: 150, unit: "g", substitutable: false },
+      { name: "Cucumber", amount: 100, unit: "g", substitutable: false },
+      { name: "Red onion", amount: 50, unit: "g", substitutable: false },
+      { name: "Olive oil", amount: 15, unit: "ml", substitutable: true },
+      { name: "Lemon juice", amount: 30, unit: "ml", substitutable: false },
+      { name: "Garlic", amount: 2, unit: "cloves", substitutable: false },
+      { name: "Fresh herbs", amount: 10, unit: "g", substitutable: true }
+    ],
+    instructions: [
+      "Cook quinoa according to package directions. Fluff with a fork and set aside to cool slightly.",
+      "Season chicken breast with salt, pepper, and your favorite spices. Grill over medium-high heat for 6-7 minutes per side until internal temperature reaches 165°F.",
+      "While chicken is cooking, dice cucumber, halve cherry tomatoes, and thinly slice red onion.",
+      "Prepare the dressing by whisking together olive oil, lemon juice, minced garlic, salt, and pepper.",
+      "Let chicken rest for 5 minutes, then slice into strips.",
+      "Assemble bowls with quinoa as the base, top with sliced chicken and fresh vegetables.",
+      "Drizzle with lemon dressing and garnish with fresh herbs. Serve immediately or store in meal prep containers."
+    ]
+  };
+
+  const adjustedIngredients = recipe.ingredients.map(ing => ({
+    ...ing,
+    amount: (ing.amount * servings) / 2 // Base recipe is for 2 servings
+  }));
+
+  const adjustedNutrition = {
+    calories: Math.round((recipe.calories * servings) / 2),
+    protein: Math.round((recipe.protein * servings) / 2),
+    carbs: Math.round((recipe.carbs * servings) / 2),
+    fats: Math.round((recipe.fats * servings) / 2)
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <Navigation />
+      
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Back Button */}
+          <Link to="/recipes">
+            <Button variant="ghost" className="mb-4">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Recipes
+            </Button>
+          </Link>
+
+          {/* Hero Image & Title */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="relative aspect-video lg:aspect-square rounded-xl overflow-hidden">
+              <img 
+                src={recipe.image} 
+                alt={recipe.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {recipe.title}
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  {recipe.description}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {recipe.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Time</p>
+                    <p className="font-semibold">{recipe.cookTime + recipe.prepTime} min</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Difficulty</p>
+                    <p className="font-semibold">{recipe.difficulty}</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                variant={isFavorite ? "default" : "outline"}
+                className="w-full"
+                onClick={() => setIsFavorite(!isFavorite)}
+              >
+                <Heart className={`mr-2 h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+                {isFavorite ? 'Saved to Favorites' : 'Save to Favorites'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Nutrition & Portions */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            {/* Nutrition Card */}
+            <Card className="lg:col-span-2 border-primary/20 bg-gradient-to-br from-card to-primary/5">
+              <CardHeader>
+                <CardTitle>Precision Nutrition</CardTitle>
+                <CardDescription>Per serving nutritional breakdown</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-primary">{adjustedNutrition.calories}</div>
+                    <div className="text-sm text-muted-foreground">Calories</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-secondary">{adjustedNutrition.protein}g</div>
+                    <div className="text-sm text-muted-foreground">Protein</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-accent">{adjustedNutrition.carbs}g</div>
+                    <div className="text-sm text-muted-foreground">Carbs</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-primary-light">{adjustedNutrition.fats}g</div>
+                    <div className="text-sm text-muted-foreground">Fats</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Portion Adjuster */}
+            <Card className="border-secondary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Adjust Servings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => setServings(Math.max(1, servings - 1))}
+                  >
+                    -
+                  </Button>
+                  <Input
+                    type="number"
+                    value={servings}
+                    onChange={(e) => setServings(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="text-center text-2xl font-bold"
+                    min="1"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => setServings(servings + 1)}
+                  >
+                    +
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground text-center mt-4">
+                  Ingredients adjust automatically
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Ingredients & Instructions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Ingredients */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ingredients</CardTitle>
+                <CardDescription>For {servings} serving{servings !== 1 ? 's' : ''}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {adjustedIngredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                      <span className="flex-1">
+                        {ingredient.amount} {ingredient.unit} {ingredient.name}
+                      </span>
+                      {ingredient.substitutable && (
+                        <Button variant="ghost" size="sm" className="text-primary">
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Swap
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Instructions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Instructions</CardTitle>
+                <CardDescription>Step-by-step cooking guide</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ol className="space-y-4">
+                  {recipe.instructions.map((step, index) => (
+                    <li key={index} className="flex gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                        {index + 1}
+                      </div>
+                      <p className="text-muted-foreground pt-1">{step}</p>
+                    </li>
+                  ))}
+                </ol>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default RecipeDetail;
