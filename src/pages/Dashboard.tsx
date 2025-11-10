@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import YouTubeModal from "@/components/YouTubeModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, TrendingUp, Heart, ChefHat } from "lucide-react";
+import { Calendar, TrendingUp, Heart, ChefHat, Play } from "lucide-react";
 
 const Dashboard = () => {
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  
   // Mock data - will be replaced with real data later
   const dailyCalories = { consumed: 1420, target: 2200 };
   const macros = {
@@ -24,12 +28,33 @@ const Dashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
-              Welcome Back!
-            </h1>
-            <p className="text-muted-foreground">Track your progress and stay on target</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
+                Welcome Back!
+              </h1>
+              <p className="text-muted-foreground">Track your progress and stay on target</p>
+            </div>
+            <Card className="w-64 border-primary/20">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-3">
+                  <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                    <Play className="h-10 w-10 text-white" />
+                  </div>
+                  <h3 className="font-semibold">Your Path to Precision Nutrition</h3>
+                  <Button onClick={() => setShowVideoModal(true)} variant="outline" className="w-full">
+                    See How It Works
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          <YouTubeModal 
+            open={showVideoModal} 
+            onOpenChange={setShowVideoModal}
+            videoId="dQw4w9WgXcQ"
+          />
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

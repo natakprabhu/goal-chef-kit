@@ -22,8 +22,15 @@ const Navigation = () => {
           <Link to="/planner">
             <Button variant="ghost">Planner</Button>
           </Link>
-          <Button variant="outline">Sign In</Button>
-          <Button>Get Started</Button>
+          <Link to="/my-progress">
+            <Button variant="ghost">My Progress</Button>
+          </Link>
+          <Link to="/sign-in">
+            <Button variant="outline">Sign In</Button>
+          </Link>
+          <Link to="/get-started">
+            <Button>Get Started</Button>
+          </Link>
         </div>
       </div>
     </nav>
