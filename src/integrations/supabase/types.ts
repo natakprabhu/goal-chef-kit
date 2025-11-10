@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_goals: {
+        Row: {
+          created_at: string | null
+          estimated_timeline_days: number | null
+          goal_type: string
+          id: string
+          target_body_type: string | null
+          target_weight: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_timeline_days?: number | null
+          goal_type: string
+          id?: string
+          target_body_type?: string | null
+          target_weight?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          estimated_timeline_days?: number | null
+          goal_type?: string
+          id?: string
+          target_body_type?: string | null
+          target_weight?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_medical: {
+        Row: {
+          allergies: string[] | null
+          blood_pressure: string | null
+          created_at: string | null
+          diabetes: boolean | null
+          id: string
+          other_conditions: string | null
+          thyroid: boolean | null
+          updated_at: string | null
+          uric_acid: boolean | null
+          user_id: string
+        }
+        Insert: {
+          allergies?: string[] | null
+          blood_pressure?: string | null
+          created_at?: string | null
+          diabetes?: boolean | null
+          id?: string
+          other_conditions?: string | null
+          thyroid?: boolean | null
+          updated_at?: string | null
+          uric_acid?: boolean | null
+          user_id: string
+        }
+        Update: {
+          allergies?: string[] | null
+          blood_pressure?: string | null
+          created_at?: string | null
+          diabetes?: boolean | null
+          id?: string
+          other_conditions?: string | null
+          thyroid?: boolean | null
+          updated_at?: string | null
+          uric_acid?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_nutrition_summary: {
+        Row: {
+          created_at: string | null
+          daily_calories: number | null
+          daily_carbs: number | null
+          daily_fats: number | null
+          daily_fiber: number | null
+          daily_protein: number | null
+          daily_water: number | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          daily_calories?: number | null
+          daily_carbs?: number | null
+          daily_fats?: number | null
+          daily_fiber?: number | null
+          daily_protein?: number | null
+          daily_water?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          daily_calories?: number | null
+          daily_carbs?: number | null
+          daily_fats?: number | null
+          daily_fiber?: number | null
+          daily_protein?: number | null
+          daily_water?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          age: number | null
+          body_type: string | null
+          created_at: string | null
+          full_name: string | null
+          gender: string | null
+          has_onboarded: boolean | null
+          height: number | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          age?: number | null
+          body_type?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_onboarded?: boolean | null
+          height?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          age?: number | null
+          body_type?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_onboarded?: boolean | null
+          height?: number | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      user_progress_entries: {
+        Row: {
+          body_fat_percentage: number | null
+          created_at: string | null
+          entry_date: string
+          id: string
+          milestone_notes: string | null
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          body_fat_percentage?: number | null
+          created_at?: string | null
+          entry_date?: string
+          id?: string
+          milestone_notes?: string | null
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          body_fat_percentage?: number | null
+          created_at?: string | null
+          entry_date?: string
+          id?: string
+          milestone_notes?: string | null
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
