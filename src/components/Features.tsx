@@ -1,81 +1,68 @@
 import { Card } from "@/components/ui/card";
-import progressImage from "@/assets/1.png";
-import personalizedImage from "@/assets/2.png";
-import achievementImage from "@/assets/3.png";
-import communityImage from "@/assets/4.png";
+import { Brain, Calculator, RefreshCw } from "lucide-react";
+import aiPlannerImage from "@/assets/feature-ai-planner.png";
+import precisionImage from "@/assets/feature-precision.png";
+import substitutionImage from "@/assets/feature-substitution.png";
 
 const features = [
   {
-    title: "Track Your Progress",
-    description:
-      "Monitor your calorie, macro, and meal trends in real-time. Stay consistent and visualize your growth with clear weekly insights.",
-    image: progressImage,
+    icon: Brain,
+    title: "AI Meal Planner",
+    description: "Let AI build your perfect week. Our smart planner creates meal plans that hit your exact calorie and macro targets, automatically adapting to your goals.",
+    image: aiPlannerImage,
+    color: "from-secondary to-secondary-light"
   },
   {
-    title: "Personalized Dashboard",
-    description:
-      "Access a nutrition dashboard tailored just for you — updated daily with goals, progress, and recommendations.",
-    image: personalizedImage,
+    icon: Calculator,
+    title: "Precision Nutrition",
+    description: "Every recipe includes exact calorie breakdowns and macro ratios. Adjust portions dynamically and watch the numbers update in real-time.",
+    image: precisionImage,
+    color: "from-primary to-primary-light"
   },
   {
-    title: "Goal Milestones & Rewards",
-    description:
-      "Celebrate every achievement — earn milestones, track streaks, and stay motivated through your transformation journey.",
-    image: achievementImage,
-  },
-  {
-    title: "Community & Challenges",
-    description:
-      "Be part of a growing community. Join challenges, share progress, and stay inspired with people chasing the same goals.",
-    image: communityImage,
-  },
+    icon: RefreshCw,
+    title: "Smart Substitutions",
+    description: "Swap ingredients while maintaining your nutrition targets. Our AI suggests alternatives that keep you on track with your goals.",
+    image: substitutionImage,
+    color: "from-accent to-primary-light"
+  }
 ];
 
 export const Features = () => {
   return (
     <section id="features" className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold mb-4">
-            Explore What You Get with{" "}
+            Everything You Need to{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              GoalChef Membership
+              Crush Your Goals
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Your all-in-one space for personalized nutrition, progress tracking, and lasting motivation.
+            Stop guessing with generic recipes. Get precision nutrition designed for your specific targets.
           </p>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card
+            <Card 
               key={index}
-              className="rounded-2xl border border-border shadow-[var(--shadow-card)] hover:shadow-[0_0_25px_rgba(var(--color-primary-rgb),0.15)] transition-all duration-500 overflow-hidden bg-card"
+              className="p-6 hover:shadow-[var(--shadow-card)] transition-[var(--transition-smooth)] border-border bg-card group cursor-pointer"
             >
-              {/* Title Section */}
-              <div className="border-b border-border bg-background/60 px-4 py-3 text-center">
-                <h3 className="text-lg lg:text-xl font-semibold text-card-foreground">
-                  {feature.title}
-                </h3>
+              <div className={`bg-gradient-to-br ${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-[var(--transition-smooth)]`}>
+                <feature.icon className="h-8 w-8 text-primary-foreground" />
               </div>
-
-              {/* Image Section */}
-              <div className="flex justify-center items-center bg-background">
-                <img
-                  src={feature.image}
+              
+              <h3 className="text-2xl font-bold mb-3 text-card-foreground">{feature.title}</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">{feature.description}</p>
+              
+              <div className="rounded-xl overflow-hidden border border-border">
+                <img 
+                  src={feature.image} 
                   alt={feature.title}
-                  className="max-h-72 w-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-[var(--transition-smooth)]"
                 />
-              </div>
-
-              {/* Description Section */}
-              <div className="border-t border-border bg-background/50 px-5 py-4 text-center">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
             </Card>
           ))}
