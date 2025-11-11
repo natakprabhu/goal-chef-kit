@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Target, TrendingUp } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, Play } from "lucide-react";
+import YouTubeModal from "@/components/YouTubeModal"; // ✅ import your modal
 import heroImage from "@/assets/hero-nutrition.jpg";
 
 export const Hero = () => {
+  const [showVideoModal, setShowVideoModal] = useState(false);
+
   return (
     <section className="relative min-h-screen flex items-center pt-20">
       {/* Background gradient */}
@@ -30,12 +34,21 @@ export const Hero = () => {
               with calorie-precise recipes to help you cut, maintain, or bulk with confidence.
             </p>
 
+            {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="hero" size="lg" className="text-lg">
                 Start Free Trial
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="lg" className="text-lg">
+
+              {/* ✅ "See How It Works" now opens YouTube modal */}
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg flex items-center gap-2"
+                onClick={() => setShowVideoModal(true)}
+              >
+                <Play className="h-5 w-5" />
                 See How It Works
               </Button>
             </div>
@@ -78,6 +91,13 @@ export const Hero = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ YouTube Modal */}
+      <YouTubeModal
+        open={showVideoModal}
+        onOpenChange={setShowVideoModal}
+        videoId="dQw4w9WgXcQ" // replace with your actual walkthrough video ID
+      />
     </section>
   );
 };
