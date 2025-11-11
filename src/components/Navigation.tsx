@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Play } from "lucide-react";
+import YouTubeModal from "@/components/YouTubeModal";
 
 const Navigation = () => {
   // State to control modal open/close
@@ -21,8 +22,8 @@ const Navigation = () => {
 
           {/* Right side: Navigation links */}
           <div className="flex items-center gap-4">
-            <Link to="/homepage">
-              <Button variant="ghost">Homepage</Button>
+            <Link to="/dashboard">
+              <Button variant="ghost">Dashboard</Button>
             </Link>
             <Link to="/recipes">
               <Button variant="ghost">Recipes</Button>
@@ -34,6 +35,16 @@ const Navigation = () => {
               <Button variant="ghost">My Progress</Button>
             </Link>
 
+            {/* ✅ “See How It Works” button */}
+            <Button
+              variant="outline"
+              onClick={() => setShowVideoModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Play className="h-4 w-4 text-primary" />
+              See How It Works
+            </Button>
+
             <Link to="/sign-in">
               <Button variant="outline">Sign In</Button>
             </Link>
@@ -44,6 +55,12 @@ const Navigation = () => {
         </div>
       </nav>
 
+      {/* ✅ Include YouTube Modal */}
+      <YouTubeModal
+        open={showVideoModal}
+        onOpenChange={setShowVideoModal}
+        videoId="dQw4w9WgXcQ" // replace with your real video ID
+      />
     </>
   );
 };
