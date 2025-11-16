@@ -14,6 +14,148 @@ export type Database = {
   }
   public: {
     Tables: {
+      meal_plans: {
+        Row: {
+          created_at: string | null
+          day_of_week: string
+          id: string
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          recipe_id: string
+          servings: number
+          updated_at: string | null
+          user_id: string
+          week_start_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: string
+          id?: string
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          recipe_id: string
+          servings?: number
+          updated_at?: string | null
+          user_id: string
+          week_start_date: string
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: string
+          id?: string
+          meal_type?: Database["public"]["Enums"]["meal_type"]
+          recipe_id?: string
+          servings?: number
+          updated_at?: string | null
+          user_id?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          calories: number
+          carbs: number
+          cook_time: number | null
+          created_at: string | null
+          description: string | null
+          diet_type: Database["public"]["Enums"]["diet_type"]
+          difficulty: string | null
+          fats: number
+          fiber: number | null
+          id: string
+          image_url: string | null
+          ingredients: Json
+          instructions: Json
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          prep_time: number | null
+          protein: number
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          calories: number
+          carbs: number
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          diet_type: Database["public"]["Enums"]["diet_type"]
+          difficulty?: string | null
+          fats: number
+          fiber?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          prep_time?: number | null
+          protein: number
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          calories?: number
+          carbs?: number
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          diet_type?: Database["public"]["Enums"]["diet_type"]
+          difficulty?: string | null
+          fats?: number
+          fiber?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          meal_type?: Database["public"]["Enums"]["meal_type"]
+          prep_time?: number | null
+          protein?: number
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_goals: {
         Row: {
           created_at: string | null
@@ -197,6 +339,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          start_date: string
+          subscription_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          subscription_type?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          subscription_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -205,7 +380,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      access_level: "guest" | "logged_in" | "subscribed"
+      diet_type: "veg" | "non_veg"
+      meal_type: "breakfast" | "lunch" | "dinner" | "snack"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -332,6 +509,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      access_level: ["guest", "logged_in", "subscribed"],
+      diet_type: ["veg", "non_veg"],
+      meal_type: ["breakfast", "lunch", "dinner", "snack"],
+    },
   },
 } as const
