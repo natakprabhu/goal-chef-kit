@@ -7,58 +7,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Heart, Clock, Flame, Users, ArrowLeft, RefreshCw } from "lucide-react";
+import { useRecipe } from "@/hooks/useRecipes";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
   const [servings, setServings] = useState(2);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { recipe, loading } = useRecipe(recipeId);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  // Mock recipe data - will be fetched based on recipeId
-  const recipe = {
-    id: recipeId,
-    title: "Grilled Chicken & Quinoa Bowl",
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&auto=format&fit=crop",
-    description: "A perfectly balanced, protein-packed meal featuring tender grilled chicken breast, fluffy quinoa, and a rainbow of fresh vegetables.",
-    cookTime: 25,
-    prepTime: 10,
-    difficulty: "Easy",
-    calories: 485,
-    protein: 42,
-    carbs: 45,
-    fats: 15,
-    tags: ["High Protein", "Gluten-Free", "Meal Prep Friendly"],
-    ingredients: [
-      { name: "Chicken breast", amount: 200, unit: "g", substitutable: true },
-      { name: "Quinoa", amount: 100, unit: "g", substitutable: true },
-      { name: "Cherry tomatoes", amount: 150, unit: "g", substitutable: false },
-      { name: "Cucumber", amount: 100, unit: "g", substitutable: false },
-      { name: "Red onion", amount: 50, unit: "g", substitutable: false },
-      { name: "Olive oil", amount: 15, unit: "ml", substitutable: true },
-      { name: "Lemon juice", amount: 30, unit: "ml", substitutable: false },
-      { name: "Garlic", amount: 2, unit: "cloves", substitutable: false },
-      { name: "Fresh herbs", amount: 10, unit: "g", substitutable: true }
-    ],
-    instructions: [
-      "Cook quinoa according to package directions. Fluff with a fork and set aside to cool slightly.",
-      "Season chicken breast with salt, pepper, and your favorite spices. Grill over medium-high heat for 6-7 minutes per side until internal temperature reaches 165°F.",
-      "While chicken is cooking, dice cucumber, halve cherry tomatoes, and thinly slice red onion.",
-      "Prepare the dressing by whisking together olive oil, lemon juice, minced garlic, salt, and pepper.",
-      "Let chicken rest for 5 minutes, then slice into strips.",
-      "Assemble bowls with quinoa as the base, top with sliced chicken and fresh vegetables.",
-      "Drizzle with lemon dressing and garnish with fresh herbs. Serve immediately or store in meal prep containers."
-    ]
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+        <Navigation />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <p className="text-muted-foreground">Loading recipe...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-  const adjustedIngredients = recipe.ingredients.map(ing => ({
+  if (!recipe) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+        <Navigation />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <p className="text-muted-foreground">Recipe not found</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const baseServings = 2;
+  const adjustedIngredients = (recipe.ingredients as any[]).map((ing: any) => ({
     ...ing,
-    amount: (ing.amount * servings) / 2 // Base recipe is for 2 servings
+    amount: (ing.amount * servings) / baseServings
   }));
 
   const adjustedNutrition = {
-    calories: Math.round((recipe.calories * servings) / 2),
-    protein: Math.round((recipe.protein * servings) / 2),
-    carbs: Math.round((recipe.carbs * servings) / 2),
-    fats: Math.round((recipe.fats * servings) / 2)
+    calories: Math.round((recipe.calories * servings) / baseServings),
+    protein: Math.round((Number(recipe.protein) * servings) / baseServings),
+    carbs: Math.round((Number(recipe.carbs) * servings) / baseServings),
+    fats: Math.round((Number(recipe.fats) * servings) / baseServings)
   };
 
   return (
@@ -79,7 +71,7 @@ const RecipeDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="relative aspect-video lg:aspect-square rounded-xl overflow-hidden">
               <img 
-                src={recipe.image} 
+                src={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&auto=format&fit=crop"} 
                 alt={recipe.title}
                 className="w-full h-full object-cover"
               />
@@ -96,11 +88,11 @@ const RecipeDetail = () => {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {recipe.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
+                  {recipe.tags && recipe.tags.map((tag: string) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -108,25 +100,25 @@ const RecipeDetail = () => {
                   <Clock className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm text-muted-foreground">Total Time</p>
-                    <p className="font-semibold">{recipe.cookTime + recipe.prepTime} min</p>
+                    <p className="font-semibold">{(recipe.cook_time || 0) + (recipe.prep_time || 0)} min</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Flame className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm text-muted-foreground">Difficulty</p>
-                    <p className="font-semibold">{recipe.difficulty}</p>
+                    <p className="font-semibold">{recipe.difficulty || "Medium"}</p>
                   </div>
                 </div>
               </div>
 
               <Button 
-                variant={isFavorite ? "default" : "outline"}
+                variant={isFavorite(recipe.id) ? "default" : "outline"}
                 className="w-full"
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={() => toggleFavorite(recipe.id)}
               >
-                <Heart className={`mr-2 h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
-                {isFavorite ? 'Saved to Favorites' : 'Save to Favorites'}
+                <Heart className={`mr-2 h-4 w-4 ${isFavorite(recipe.id) ? 'fill-current' : ''}`} />
+                {isFavorite(recipe.id) ? 'Saved to Favorites' : 'Save to Favorites'}
               </Button>
             </div>
           </div>

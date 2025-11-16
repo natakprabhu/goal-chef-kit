@@ -6,68 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Clock, Flame, Heart } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Search, Filter, Clock, Flame, Heart, Lock } from "lucide-react";
+import { useRecipes } from "@/hooks/useRecipes";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [dietType, setDietType] = useState<"veg" | "non_veg">("veg");
+  const { recipes, loading } = useRecipes(dietType);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { user } = useAuth();
+  const { isSubscribed } = useSubscription();
 
-  // Mock recipe data
-  const recipes = [
-    {
-      id: "1",
-      title: "Grilled Chicken & Quinoa Bowl",
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
-      calories: 485,
-      protein: 42,
-      cookTime: 25,
-      tags: ["High Protein", "Gluten-Free"]
-    },
-    {
-      id: "2",
-      title: "Salmon with Roasted Vegetables",
-      image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&auto=format&fit=crop",
-      calories: 520,
-      protein: 38,
-      cookTime: 30,
-      tags: ["Omega-3", "Low Carb"]
-    },
-    {
-      id: "3",
-      title: "Vegan Buddha Bowl",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop",
-      calories: 420,
-      protein: 18,
-      cookTime: 20,
-      tags: ["Vegan", "High Fiber"]
-    },
-    {
-      id: "4",
-      title: "Turkey & Sweet Potato Hash",
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&auto=format&fit=crop",
-      calories: 450,
-      protein: 35,
-      cookTime: 35,
-      tags: ["High Protein", "Whole30"]
-    },
-    {
-      id: "5",
-      title: "Greek Yogurt Parfait",
-      image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&auto=format&fit=crop",
-      calories: 310,
-      protein: 24,
-      cookTime: 5,
-      tags: ["Breakfast", "Quick"]
-    },
-    {
-      id: "6",
-      title: "Beef Stir-Fry with Broccoli",
-      image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&auto=format&fit=crop",
-      calories: 495,
-      protein: 40,
-      cookTime: 20,
-      tags: ["High Protein", "Low Carb"]
-    }
-  ];
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const canAccessRecipe = (accessLevel: string) => {
+    if (accessLevel === "guest") return true;
+    if (accessLevel === "logged_in") return !!user;
+    if (accessLevel === "subscribed") return isSubscribed;
+    return false;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
@@ -95,10 +59,19 @@ const Recipes = () => {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" className="sm:w-auto">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
+            <div className="flex items-center gap-4 px-4 py-2 border rounded-lg bg-background">
+              <Label htmlFor="diet-toggle" className="text-sm font-medium">
+                Veg
+              </Label>
+              <Switch
+                id="diet-toggle"
+                checked={dietType === "non_veg"}
+                onCheckedChange={(checked) => setDietType(checked ? "non_veg" : "veg")}
+              />
+              <Label htmlFor="diet-toggle" className="text-sm font-medium">
+                Non-Veg
+              </Label>
+            </div>
           </div>
 
           {/* Recipe Grid */}
@@ -108,7 +81,7 @@ const Recipes = () => {
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20 hover:border-primary/40 h-full group">
                   <div className="relative aspect-video overflow-hidden">
                     <img 
-                      src={recipe.image} 
+                      src={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop"} 
                       alt={recipe.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -133,7 +106,7 @@ const Recipes = () => {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-secondary" />
-                        {recipe.cookTime} min
+                        {recipe.cook_time} min
                       </span>
                     </CardDescription>
                   </CardHeader>
