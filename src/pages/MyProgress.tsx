@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import OnboardingForm from "@/components/OnboardingForm";
 import HealthCard from "@/components/HealthCard";
+import EditProfileDialog from "@/components/EditProfileDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,6 +56,10 @@ const MyProgress = () => {
     setHasOnboarded(true);
   };
 
+  const handleProfileUpdate = () => {
+    checkAuthAndOnboarding();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
@@ -74,7 +79,12 @@ const MyProgress = () => {
         {!hasOnboarded ? (
           <OnboardingForm userId={userId!} onComplete={handleOnboardingComplete} />
         ) : (
-          <HealthCard userId={userId!} />
+          <div className="space-y-6">
+            <div className="flex justify-end">
+              <EditProfileDialog userId={userId!} onUpdate={handleProfileUpdate} />
+            </div>
+            <HealthCard userId={userId!} />
+          </div>
         )}
       </main>
 

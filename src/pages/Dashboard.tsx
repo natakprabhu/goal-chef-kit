@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import YouTubeModal from "@/components/YouTubeModal";
+import HealthNews from "@/components/HealthNews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -146,18 +147,24 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Today's Meals</CardTitle>
-              <CardDescription>Track what you've eaten today</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                No meals logged yet. Start by browsing our <Link to="/recipes" className="text-primary hover:underline">recipe collection</Link>.
-              </div>
-            </CardContent>
-          </Card>
+          {/* Recent Activity & Health News */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Meals</CardTitle>
+                <CardDescription>Track what you've eaten today</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No meals logged yet. Start by browsing our <Link to="/recipes" className="text-primary hover:underline">recipe collection</Link>.
+                </div>
+              </CardContent>
+            </Card>
+
+            <div>
+              <HealthNews />
+            </div>
+          </div>
         </div>
       </main>
 

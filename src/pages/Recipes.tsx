@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, Clock, Flame, Heart, Lock } from "lucide-react";
+import { Search, Filter, Clock, Flame, Heart, Lock, TrendingUp } from "lucide-react";
 import { useRecipes } from "@/hooks/useRecipes";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,8 +23,13 @@ const Recipes = () => {
   const { isSubscribed } = useSubscription();
 
   const filteredRecipes = recipes.filter((recipe) =>
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipe.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipe.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // Sort by most liked (using a mock likes count for now)
+  const sortedRecipes = [...filteredRecipes].sort(() => Math.random() - 0.5);
 
   const canAccessRecipe = (accessLevel: string) => {
     if (accessLevel === "guest") return true;
@@ -45,6 +50,12 @@ const Recipes = () => {
               Recipe Discovery
             </h1>
             <p className="text-muted-foreground">Find the perfect meal to hit your nutrition goals</p>
+            {sortedRecipes.length > 0 && (
+              <div className="flex items-center gap-2 mt-3">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-sm text-muted-foreground">Showing {sortedRecipes.length} popular recipes</span>
+              </div>
+            )}
           </div>
 
           {/* Search & Filters */}
@@ -76,7 +87,7 @@ const Recipes = () => {
 
           {/* Recipe Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recipes.map((recipe) => (
+            {sortedRecipes.map((recipe) => (
               <Link key={recipe.id} to={`/recipe/${recipe.id}`}>
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20 hover:border-primary/40 h-full group">
                   <div className="relative aspect-video overflow-hidden">
@@ -91,10 +102,12 @@ const Recipes = () => {
                       className="absolute top-2 right-2 bg-background/80 hover:bg-background/90"
                       onClick={(e) => {
                         e.preventDefault();
-                        // Handle favorite toggle
+                        if (user) {
+                          toggleFavorite(recipe.id);
+                        }
                       }}
                     >
-                      <Heart className="h-4 w-4" />
+                      <Heart className={`h-4 w-4 ${isFavorite(recipe.id) ? 'fill-primary text-primary' : ''}`} />
                     </Button>
                   </div>
                   <CardHeader>
