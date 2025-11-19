@@ -15,6 +15,9 @@ export const useMealPlan = (weekStartDate: string) => {
   const { user } = useAuth();
   const [mealPlan, setMealPlan] = useState<MealPlanEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refetch = () => setRefreshTrigger(prev => prev + 1);
 
   useEffect(() => {
     const fetchMealPlan = async () => {
@@ -44,7 +47,7 @@ export const useMealPlan = (weekStartDate: string) => {
     };
 
     fetchMealPlan();
-  }, [user, weekStartDate]);
+  }, [user, weekStartDate, refreshTrigger]);
 
-  return { mealPlan, loading };
+  return { mealPlan, loading, refetch };
 };
