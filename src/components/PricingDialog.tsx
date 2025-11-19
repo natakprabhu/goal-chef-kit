@@ -125,42 +125,6 @@ const PricingDialog = ({ open, onOpenChange }: PricingDialogProps) => {
             </CardContent>
           </Card>
         </div>
-
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-          <h4 className="font-semibold mb-3">Feature Comparison</h4>
-          <div className="space-y-2 text-sm">
-            <div className="grid grid-cols-3 gap-4 font-medium border-b pb-2">
-              <div>Feature</div>
-              <div>Basic (Free)</div>
-              <div>Premium (Pro)</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 py-2">
-              <div>Recipes</div>
-              <div>Standard</div>
-              <div className="font-medium text-amber-600">Full Access</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 py-2">
-              <div>Meal Logging</div>
-              <div>Manual</div>
-              <div className="font-medium text-amber-600">AI Scanner</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 py-2">
-              <div>Progress History</div>
-              <div>30 Days</div>
-              <div className="font-medium text-amber-600">Unlimited</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 py-2">
-              <div>Analytics</div>
-              <div>Weight Only</div>
-              <div className="font-medium text-amber-600">Full Dashboard</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 py-2">
-              <div>Meal Planner</div>
-              <div>Today's View</div>
-              <div className="font-medium text-amber-600">Weekly + Swap</div>
-            </div>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
