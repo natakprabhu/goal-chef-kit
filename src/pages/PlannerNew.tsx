@@ -32,6 +32,114 @@ const PlannerNew = () => {
   const day = daysOfWeek[currentDayIndex];
   const dayDate = format(addDays(currentWeek, currentDayIndex), "yyyy-MM-dd");
 
+  // Auto-generate meal plan if none exists for this week (Pro Feature)
+  useEffect(() => {
+    const autoGenerateMealPlan = async () => {
+      if (!user || loading) return;
+      
+      // If no meal plan exists for this week, generate one automatically
+      if (mealPlan.length === 0) {
+        try {
+          // Fetch user profile
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("diet_preference")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          setUserDietPreference(profile?.diet_preference || "both");
+
+          const dietPreference = profile?.diet_preference || "both";
+
+          // Fetch recipes
+          let recipesQuery = supabase.from("recipes").select("*");
+          if (dietPreference !== "both") {
+            recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
+          }
+
+          const { data: recipes } = await recipesQuery;
+          if (!recipes || recipes.length === 0) return;
+
+          // Group recipes by meal type
+          const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
+          const lunches = recipes.filter(r => r.meal_type === "lunch");
+          const dinners = recipes.filter(r => r.meal_type === "dinner");
+          const snacks = recipes.filter(r => r.meal_type === "snack");
+
+          // Shuffle for variety
+          const shuffle = <T,>(array: T[]): T[] => {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+          };
+
+          const shuffledBreakfasts = shuffle(breakfasts);
+          const shuffledLunches = shuffle(lunches);
+          const shuffledDinners = shuffle(dinners);
+          const shuffledSnacks = shuffle(snacks);
+
+          // Create meal plan entries
+          const mealPlansToInsert = daysOfWeek.flatMap((day, index) => {
+            const entries = [];
+            if (shuffledBreakfasts.length > 0) {
+              entries.push({
+                user_id: user.id,
+                week_start_date: weekStartDate,
+                day_of_week: day,
+                meal_type: "breakfast" as const,
+                recipe_id: shuffledBreakfasts[index % shuffledBreakfasts.length].id,
+                servings: 1,
+              });
+            }
+            if (shuffledLunches.length > 0) {
+              entries.push({
+                user_id: user.id,
+                week_start_date: weekStartDate,
+                day_of_week: day,
+                meal_type: "lunch" as const,
+                recipe_id: shuffledLunches[index % shuffledLunches.length].id,
+                servings: 1,
+              });
+            }
+            if (shuffledDinners.length > 0) {
+              entries.push({
+                user_id: user.id,
+                week_start_date: weekStartDate,
+                day_of_week: day,
+                meal_type: "dinner" as const,
+                recipe_id: shuffledDinners[index % shuffledDinners.length].id,
+                servings: 1,
+              });
+            }
+            if (shuffledSnacks.length > 0) {
+              entries.push({
+                user_id: user.id,
+                week_start_date: weekStartDate,
+                day_of_week: day,
+                meal_type: "snack" as const,
+                recipe_id: shuffledSnacks[index % shuffledSnacks.length].id,
+                servings: 1,
+              });
+            }
+            return entries;
+          });
+
+          // Insert meal plans
+          await supabase.from("meal_plans").insert(mealPlansToInsert);
+          refetch();
+        } catch (error) {
+          console.error("Error auto-generating meal plan:", error);
+        }
+      }
+    };
+
+    autoGenerateMealPlan();
+  }, [user, loading, mealPlan.length, weekStartDate, refetch]);
+
+  // Fetch user preference separately
   useEffect(() => {
     const fetchUserPreference = async () => {
       if (!user) return;
@@ -40,7 +148,7 @@ const PlannerNew = () => {
         .from("user_profiles")
         .select("diet_preference")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       setUserDietPreference(data?.diet_preference || "both");
     };

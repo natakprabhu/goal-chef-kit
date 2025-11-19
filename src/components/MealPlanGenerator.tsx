@@ -116,13 +116,13 @@ export const MealPlanGenerator = () => {
       const shuffledDinners = shuffle(dinners);
       const shuffledSnacks = shuffle(snacks);
 
-      // Assign meals to each day
+      // Assign meals to each day (only if recipes exist)
       daysOfWeek.forEach((day, index) => {
         plan[day] = {
-          breakfast: shuffledBreakfasts[index % shuffledBreakfasts.length],
-          lunch: shuffledLunches[index % shuffledLunches.length],
-          dinner: shuffledDinners[index % shuffledDinners.length],
-          snack: shuffledSnacks[index % shuffledSnacks.length],
+          breakfast: shuffledBreakfasts.length > 0 ? shuffledBreakfasts[index % shuffledBreakfasts.length] : undefined,
+          lunch: shuffledLunches.length > 0 ? shuffledLunches[index % shuffledLunches.length] : undefined,
+          dinner: shuffledDinners.length > 0 ? shuffledDinners[index % shuffledDinners.length] : undefined,
+          snack: shuffledSnacks.length > 0 ? shuffledSnacks[index % shuffledSnacks.length] : undefined,
         };
       });
 
@@ -138,17 +138,19 @@ export const MealPlanGenerator = () => {
         .eq("user_id", user.id)
         .eq("week_start_date", weekStart);
 
-      // Insert new meal plans
+      // Insert new meal plans (filter out undefined recipes)
       const mealPlansToInsert = daysOfWeek.flatMap((day) => {
         const dayMeals = plan[day];
-        return Object.entries(dayMeals).map(([mealType, recipe]) => ({
-          user_id: user.id,
-          week_start_date: weekStart,
-          day_of_week: day,
-          meal_type: mealType as "breakfast" | "lunch" | "dinner" | "snack",
-          recipe_id: recipe.id,
-          servings: 1,
-        }));
+        return Object.entries(dayMeals)
+          .filter(([_, recipe]) => recipe !== undefined)
+          .map(([mealType, recipe]) => ({
+            user_id: user.id,
+            week_start_date: weekStart,
+            day_of_week: day,
+            meal_type: mealType as "breakfast" | "lunch" | "dinner" | "snack",
+            recipe_id: recipe!.id,
+            servings: 1,
+          }));
       });
 
       const { error: insertError } = await supabase
