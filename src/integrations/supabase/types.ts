@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      meal_logs: {
+        Row: {
+          calories: number
+          carbs: number
+          created_at: string | null
+          custom_meal_ingredients: string | null
+          custom_meal_name: string | null
+          fats: number
+          id: string
+          log_date: string
+          logged_at: string
+          meal_type: string
+          protein: number
+          recipe_id: string | null
+          user_id: string
+        }
+        Insert: {
+          calories: number
+          carbs: number
+          created_at?: string | null
+          custom_meal_ingredients?: string | null
+          custom_meal_name?: string | null
+          fats: number
+          id?: string
+          log_date?: string
+          logged_at?: string
+          meal_type: string
+          protein: number
+          recipe_id?: string | null
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs?: number
+          created_at?: string | null
+          custom_meal_ingredients?: string | null
+          custom_meal_name?: string | null
+          fats?: number
+          id?: string
+          log_date?: string
+          logged_at?: string
+          meal_type?: string
+          protein?: number
+          recipe_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_logs_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_milestones: {
+        Row: {
+          completed_at: string
+          created_at: string | null
+          id: string
+          meal_type: string | null
+          milestone_date: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string | null
+          id?: string
+          meal_type?: string | null
+          milestone_date: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string | null
+          id?: string
+          meal_type?: string | null
+          milestone_date?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           created_at: string | null
