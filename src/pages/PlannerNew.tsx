@@ -584,9 +584,11 @@ const PlannerNew = () => {
                   // Create a meal log entry with the selected date
                   const { error } = await supabase.from("meal_logs").insert({
                     user_id: user.id,
-                    log_date: selectedMilestone.date,
+                    // Store date as YYYY-MM-DD string so Dashboard can match it correctly
+                    log_date: format(selectedMilestone.date, "yyyy-MM-dd"),
                     meal_type: selectedMilestone.mealType,
                     recipe_id: mealEntry.recipe.id,
+                    custom_meal_name: mealEntry.recipe.title,
                     calories: mealEntry.recipe.calories,
                     protein: mealEntry.recipe.protein,
                     carbs: mealEntry.recipe.carbs,
