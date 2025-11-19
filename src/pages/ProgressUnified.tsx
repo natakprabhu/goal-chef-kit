@@ -291,12 +291,8 @@ const ProgressUnified = () => {
                 </CardContent>
               </Card>
             </div>
-
             {/* Health Card */}
-            <div className="mb-8">
-              <HealthCard userId={userId!} />
-            </div>
-
+            <HealthCard userId={userId!} />
             {/* Charts and Analytics Tabs */}
             <Tabs defaultValue="weight" className="mb-8">
               <TabsList className="grid w-full grid-cols-3">
