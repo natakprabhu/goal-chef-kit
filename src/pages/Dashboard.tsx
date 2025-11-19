@@ -14,7 +14,7 @@ import { format } from "date-fns";
 
 const Dashboard = () => {
   const today = format(new Date(), "yyyy-MM-dd");
-  const { mealLogs, loading: logsLoading, deleteMealLog } = useMealLogs(today);
+  const { mealLogs, loading: logsLoading, deleteMealLog, refetch } = useMealLogs(today);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
 
@@ -41,17 +41,25 @@ const Dashboard = () => {
 
   const mealTimes = useMemo(() => {
     const now = new Date();
+    const currentHour = now.getHours();
     const sortedLogs = [...mealLogs].sort((a, b) => 
       new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime()
     );
     
     const lastMeal = sortedLogs.length > 0 ? new Date(sortedLogs[sortedLogs.length - 1].logged_at) : null;
-    const nextMeal = sortedLogs.find(log => new Date(log.logged_at) > now);
+    
+    // Determine next meal based on current time and what's been logged
+    let nextMealType = "dinner";
+    if (currentHour < 12 && !mealLogs.some(m => m.meal_type === "breakfast")) {
+      nextMealType = "breakfast";
+    } else if (currentHour < 17 && !mealLogs.some(m => m.meal_type === "lunch")) {
+      nextMealType = "lunch";
+    }
 
     return {
       current: format(now, "h:mm a"),
       last: lastMeal ? format(lastMeal, "h:mm a") : "No meals yet",
-      next: nextMeal ? format(new Date(nextMeal.logged_at), "h:mm a") : "No upcoming meals"
+      next: nextMealType.charAt(0).toUpperCase() + nextMealType.slice(1)
     };
   }, [mealLogs]);
 
@@ -77,12 +85,16 @@ const Dashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex justify-between items-start">
+          <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
                 Welcome Back!
               </h1>
               <p className="text-muted-foreground">Track your progress and stay on target</p>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="text-lg font-semibold text-foreground">{mealTimes.current}</span>
             </div>
           </div>
           {/* Main Grid */}
@@ -94,41 +106,41 @@ const Dashboard = () => {
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Today's Calorie Progress
                 </CardTitle>
-                <CardDescription>You're doing great! Keep it up.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <Clock className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Current Time</p>
-                      <p className="font-semibold">{mealTimes.current}</p>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <Clock className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Last Meal</p>
-                      <p className="font-semibold text-sm">{mealTimes.last}</p>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <Clock className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Next Meal</p>
-                      <p className="font-semibold text-sm">{mealTimes.next}</p>
-                    </div>
+              <CardContent className="space-y-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Calories</span>
+                    <span className="text-sm font-medium">
+                      {dailyCalories.consumed} / {dailyCalories.target} kcal
+                    </span>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {dailyCalories.consumed}
-                    </div>
-                    <div className="text-2xl text-muted-foreground">
-                      / {dailyCalories.target} kcal
-                    </div>
+                  <Progress value={calorieProgress} className="h-3" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Last Meal</div>
+                    <div className="text-lg font-semibold">{mealTimes.last}</div>
                   </div>
-                  <Progress value={calorieProgress} className="h-4" />
-                  <div className="text-center text-sm text-muted-foreground">
-                    {dailyCalories.target - dailyCalories.consumed} calories remaining
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Next Meal</div>
+                    <div className="text-lg font-semibold">{mealTimes.next}</div>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-3 gap-4 mt-6">
+                  {Object.entries(macros).map(([name, values]) => (
+                    <div key={name} className="text-center">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {name.charAt(0).toUpperCase() + name.slice(1)}
+                      </div>
+                      <div className="text-2xl font-bold">{values.consumed}g</div>
+                      <div className="text-xs text-muted-foreground">/ {values.target}g</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
               </CardContent>
             </Card>
 
@@ -277,12 +289,13 @@ const Dashboard = () => {
 
       <Footer />
       
-      <LogMealDialog
-        open={logDialogOpen}
-        onOpenChange={setLogDialogOpen}
-        mealType={selectedMealType}
-        date={today}
-      />
+        <LogMealDialog
+          open={logDialogOpen}
+          onOpenChange={setLogDialogOpen}
+          mealType={selectedMealType}
+          date={today}
+          onMealLogged={refetch}
+        />
     </div>
   );
 };
