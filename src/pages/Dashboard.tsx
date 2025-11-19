@@ -6,7 +6,7 @@ import HealthNews from "@/components/HealthNews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock } from "lucide-react";
+import { Calendar, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import { useMealLogs } from "@/hooks/useMealLogs";
 import { LogMealDialog } from "@/components/LogMealDialog";
 import { Badge } from "@/components/ui/badge";
@@ -206,76 +206,83 @@ const Dashboard = () => {
 
           {/* Recent Activity & Health News */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Today's Meals</CardTitle>
-                    <CardDescription>Track what you've eaten today</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    {(["breakfast", "lunch", "dinner", "snack"] as const).map((type) => (
-                      <Button
-                        key={type}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleLogMeal(type)}
-                        className="gap-1"
-                      >
-                        <Plus className="h-3 w-3" />
-                        {type.charAt(0).toUpperCase()}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+                <CardTitle className="flex items-center gap-2">
+                  <ChefHat className="h-5 w-5 text-primary" />
+                  Today's Meals
+                </CardTitle>
+                <CardDescription>Track your meals from recipes or custom entries</CardDescription>
               </CardHeader>
-              <CardContent>
-                {logsLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading meals...</div>
-                ) : mealLogs.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No meals logged yet. Click buttons above to log meals or browse our{" "}
-                    <Link to="/recipes" className="text-primary hover:underline">
-                      recipe collection
-                    </Link>
-                    .
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {mealLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 flex-1">
-                          <Badge className={getMealTypeColor(log.meal_type)}>
-                            {log.meal_type}
-                          </Badge>
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {log.custom_meal_name || "Recipe from collection"}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {log.calories} kcal • {log.protein}g protein • {log.carbs}g carbs • {log.fats}g fats
-                            </p>
-                            {log.logged_at && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Logged at {format(new Date(log.logged_at), "h:mm a")}
-                              </p>
-                            )}
+              <CardContent className="space-y-4 pt-6">
+                <div className="grid gap-4">
+                  {(["breakfast", "lunch", "dinner", "snack"] as const).map((mealType) => {
+                    const todayMeals = mealLogs.filter(m => m.log_date === today);
+                    const mealsForType = todayMeals.filter(m => m.meal_type === mealType);
+                    const totalCalories = mealsForType.reduce((sum, m) => sum + m.calories, 0);
+                    const hasLogged = mealsForType.length > 0;
+                    
+                    return (
+                      <Card key={mealType} className={`overflow-hidden transition-all ${hasLogged ? 'border-green-500/50 bg-green-500/5' : ''}`}>
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                hasLogged ? 'bg-green-500/20' : 'bg-muted'
+                              }`}>
+                                {hasLogged ? (
+                                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <span className="text-xl">
+                                    {mealType === 'breakfast' ? '🍳' : mealType === 'lunch' ? '🍱' : mealType === 'dinner' ? '🍽️' : '🍎'}
+                                  </span>
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold capitalize text-base">{mealType}</h4>
+                                {hasLogged ? (
+                                  <p className="text-sm text-green-600 font-medium">{totalCalories} cal logged</p>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">Not logged yet</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button 
+                              size="sm"
+                              variant={hasLogged ? "outline" : "default"}
+                              onClick={() => handleLogMeal(mealType)}
+                            >
+                              {hasLogged ? 'Add More' : 'Log Meal'}
+                            </Button>
                           </div>
+                          
+                          {mealsForType.length > 0 && (
+                            <div className="space-y-2 pt-3 border-t">
+                              {mealsForType.map((meal) => (
+                                <div key={meal.id} className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    {meal.custom_meal_name || 'Recipe meal'}
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{meal.calories} cal</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => deleteMealLog(meal.id)}
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteMealLog(log.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </Card>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
 
