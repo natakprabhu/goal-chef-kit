@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw } from "lucide-react";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -27,6 +28,7 @@ const PlannerNew = () => {
   const [userDietPreference, setUserDietPreference] = useState<string>("both");
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
   const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack"; day: string } | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
   const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
   const { addMilestone, hasMilestone } = useMilestones();
@@ -38,7 +40,12 @@ const PlannerNew = () => {
   // Auto-generate meal plan if none exists for this week (Pro Feature)
   useEffect(() => {
     const autoGenerateMealPlan = async () => {
-      if (!user || loading) return;
+      if (!user) {
+        setInitialLoading(false);
+        return;
+      }
+      
+      if (loading) return;
       
       // If no meal plan exists for this week, generate one automatically
       if (mealPlan.length === 0) {
@@ -425,9 +432,30 @@ const PlannerNew = () => {
             </CardHeader>
 
             <CardContent className="p-6">
-              {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              {initialLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="p-3 rounded-lg border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-24 mb-1" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                      </div>
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        {[1, 2, 3, 4].map((j) => (
+                          <Skeleton key={j} className="h-12 w-full" />
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-8 flex-1" />
+                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-8 flex-1" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : dayMeals.length === 0 ? (
                 <div className="text-center py-12 space-y-4">
@@ -540,9 +568,39 @@ const PlannerNew = () => {
       <MilestoneDialog
         open={milestoneDialogOpen}
         onOpenChange={setMilestoneDialogOpen}
-        onConfirm={(notes) => {
-          if (selectedMilestone) {
+        onConfirm={async (notes) => {
+          if (selectedMilestone && user) {
+            // Add milestone
             addMilestone(selectedMilestone.date, selectedMilestone.mealType || undefined, notes);
+            
+            // Also create a meal log entry if meal type is specified
+            if (selectedMilestone.mealType) {
+              // Find the meal plan entry for this day and meal type
+              const dayMeals = mealPlan.filter((entry) => entry.day_of_week === daysOfWeek[currentDayIndex]);
+              const mealEntry = dayMeals.find((m) => m.meal_type === selectedMilestone.mealType);
+              
+              if (mealEntry?.recipe) {
+                try {
+                  // Create a meal log entry
+                  const { error } = await supabase.from("meal_logs").insert({
+                    user_id: user.id,
+                    log_date: selectedMilestone.date,
+                    meal_type: selectedMilestone.mealType,
+                    recipe_id: mealEntry.recipe.id,
+                    calories: mealEntry.recipe.calories,
+                    protein: mealEntry.recipe.protein,
+                    carbs: mealEntry.recipe.carbs,
+                    fats: mealEntry.recipe.fats,
+                  });
+                  
+                  if (error) throw error;
+                  toast.success("Meal logged successfully!");
+                } catch (error) {
+                  console.error("Error logging meal:", error);
+                  toast.error("Failed to log meal");
+                }
+              }
+            }
           }
         }}
         mealName={selectedMilestone?.mealName}
