@@ -16,7 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [dietType, setDietType] = useState<"veg" | "non_veg">("veg");
+  const [dietType, setDietType] = useState<"veg" | "non_veg" | undefined>(undefined);
   const { recipes, loading } = useRecipes(dietType);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { user } = useAuth();
@@ -70,18 +70,28 @@ const Recipes = () => {
                 className="pl-10"
               />
             </div>
-            <div className="flex items-center gap-4 px-4 py-2 border rounded-lg bg-background">
-              <Label htmlFor="diet-toggle" className="text-sm font-medium">
-                Veg
-              </Label>
-              <Switch
-                id="diet-toggle"
-                checked={dietType === "non_veg"}
-                onCheckedChange={(checked) => setDietType(checked ? "non_veg" : "veg")}
-              />
-              <Label htmlFor="diet-toggle" className="text-sm font-medium">
-                Non-Veg
-              </Label>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={dietType === undefined ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDietType(undefined)}
+              >
+                All
+              </Button>
+              <Button
+                variant={dietType === "veg" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDietType("veg")}
+              >
+                🥗 Veg
+              </Button>
+              <Button
+                variant={dietType === "non_veg" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDietType("non_veg")}
+              >
+                🍗 Non-Veg
+              </Button>
             </div>
           </div>
 

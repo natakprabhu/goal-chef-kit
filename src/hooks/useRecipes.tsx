@@ -8,7 +8,7 @@ export type Recipe = Database["public"]["Tables"]["recipes"]["Row"] & {
   instructions: any[];
 };
 
-export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" | "lunch" | "dinner" | "snack") => {
+export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" | "lunch" | "dinner" | "snack", respectUserPreference: boolean = false) => {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,10 @@ export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" 
 
   useEffect(() => {
     const fetchUserPreference = async () => {
-      if (!user) return;
+      if (!user) {
+        setUserDietPreference("both");
+        return;
+      }
       
       const { data } = await supabase
         .from("user_profiles")
@@ -40,8 +43,8 @@ export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" 
       if (dietType) {
         query = query.eq("diet_type", dietType);
       } 
-      // Otherwise, filter by user's preference
-      else if (user && userDietPreference && userDietPreference !== "both") {
+      // If respectUserPreference is true, filter by user's preference
+      else if (respectUserPreference && user && userDietPreference && userDietPreference !== "both") {
         query = query.eq("diet_type", userDietPreference as "veg" | "non_veg");
       }
 
@@ -62,7 +65,7 @@ export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" 
     if (userDietPreference !== null) {
       fetchRecipes();
     }
-  }, [user, dietType, mealType, userDietPreference]);
+  }, [user, dietType, mealType, userDietPreference, respectUserPreference]);
 
   return { recipes, loading, error };
 };
