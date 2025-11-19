@@ -5,11 +5,12 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw } from "lucide-react";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { MilestoneDialog } from "@/components/MilestoneDialog";
 import { MealPlanGenerator } from "@/components/MealPlanGenerator";
+import RecipeSwapDialog from "@/components/RecipeSwapDialog";
 import { format, addDays, startOfWeek } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,9 +22,12 @@ const PlannerNew = () => {
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: "breakfast" | "lunch" | "dinner" | "snack"; mealName?: string }>();
   const [userDietPreference, setUserDietPreference] = useState<string>("both");
+  const [swapDialogOpen, setSwapDialogOpen] = useState(false);
+  const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack"; day: string } | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
-  const { mealPlan, loading } = useMealPlan(weekStartDate);
+  const { mealPlan, loading } = useMealPlan(weekStartDate + `-${refreshKey}`);
   const { addMilestone, hasMilestone } = useMilestones();
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -236,6 +240,17 @@ const PlannerNew = () => {
                               </Button>
                             </Link>
                             <Button
+                              variant="outline"
+                              onClick={() => {
+                                setSwapData({ recipe, mealType: type, day });
+                                setSwapDialogOpen(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                              Swap
+                            </Button>
+                            <Button
                               onClick={() => {
                                 setSelectedMilestone({ date: dayDate, mealType: type, mealName: recipe.title });
                                 setMilestoneDialogOpen(true);
@@ -269,6 +284,18 @@ const PlannerNew = () => {
         }}
         mealName={selectedMilestone?.mealName}
       />
+
+      {swapData && (
+        <RecipeSwapDialog
+          open={swapDialogOpen}
+          onOpenChange={setSwapDialogOpen}
+          currentRecipe={swapData.recipe}
+          mealType={swapData.mealType}
+          day={swapData.day}
+          weekStartDate={weekStartDate}
+          onSwapComplete={() => setRefreshKey(prev => prev + 1)}
+        />
+      )}
     </div>
   );
 };

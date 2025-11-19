@@ -172,24 +172,58 @@ export const MealPlanGenerator = () => {
     }
   };
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     if (!mealPlan) return;
+
+    // Fetch user profile and nutrition summary for PDF
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("diet_preference")
+      .eq("user_id", user?.id)
+      .single();
+
+    const { data: nutritionSummary } = await supabase
+      .from("user_nutrition_summary")
+      .select("daily_calories, daily_protein, daily_carbs, daily_fats")
+      .eq("user_id", user?.id)
+      .maybeSingle();
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Title
-    doc.setFontSize(20);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Weekly Meal Plan", pageWidth / 2, 20, { align: "center" });
-
-    // Date
+    // Header with branding
+    doc.setFillColor(249, 115, 22); // orange-500
+    doc.rect(0, 0, pageWidth, 40, "F");
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.text("GoalChef", pageWidth / 2, 20, { align: "center" });
+    
+    doc.setFontSize(14);
+    doc.text("Your Personalized Weekly Meal Plan", pageWidth / 2, 30, { align: "center" });
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    doc.text(`Week of ${format(weekStart, "MMMM d, yyyy")}`, pageWidth / 2, 28, { align: "center" });
+    doc.text(`Generated on: ${format(new Date(), "MMMM d, yyyy")}`, 14, 48);
+    doc.text(`Week of ${format(weekStart, "MMMM d, yyyy")}`, 14, 54);
+    
+    // User info and daily targets
+    if (profile) {
+      doc.setFontSize(11);
+      doc.text(`Diet Preference: ${profile.diet_preference === "veg" ? "Vegetarian" : profile.diet_preference === "non_veg" ? "Non-Vegetarian" : "Both"}`, 14, 62);
+    }
+    
+    if (nutritionSummary) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, "bold");
+      doc.text("Daily Nutritional Targets:", 14, 70);
+      doc.setFont(undefined, "normal");
+      doc.text(`Calories: ${nutritionSummary.daily_calories || "N/A"} kcal  |  Protein: ${nutritionSummary.daily_protein || "N/A"}g  |  Carbs: ${nutritionSummary.daily_carbs || "N/A"}g  |  Fats: ${nutritionSummary.daily_fats || "N/A"}g`, 14, 77);
+    }
 
-    let yPos = 40;
+    let yPos = 85;
 
     // Loop through each day
     Object.entries(mealPlan).forEach(([day, meals], dayIndex) => {
@@ -217,8 +251,18 @@ export const MealPlanGenerator = () => {
         head: [["Meal", "Recipe", "Calories", "Protein"]],
         body: tableData,
         theme: "grid",
-        headStyles: { fillColor: [99, 102, 241], fontSize: 10 },
-        styles: { fontSize: 9 },
+        headStyles: { 
+          fillColor: [249, 115, 22], // orange-500
+          textColor: [255, 255, 255],
+          fontSize: 10,
+          fontStyle: "bold"
+        },
+        bodyStyles: {
+          fontSize: 9
+        },
+        alternateRowStyles: {
+          fillColor: [254, 243, 199] // orange-100
+        },
         margin: { left: 14, right: 14 },
       });
 
