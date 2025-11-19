@@ -10,8 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
 import Planner from "./pages/Planner";
-import Progress from "./pages/Progress";
-import MyProgress from "./pages/MyProgress";
+import ProgressUnified from "./pages/ProgressUnified";
 import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 
@@ -31,8 +30,8 @@ const App = () => (
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
           <Route path="/planner" element={<Planner />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/my-progress" element={<MyProgress />} />
+          <Route path="/progress" element={<ProgressUnified />} />
+          <Route path="/my-progress" element={<ProgressUnified />} />
           <Route path="/favorites" element={<Favorites />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

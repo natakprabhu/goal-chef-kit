@@ -24,7 +24,8 @@ const EditProfileDialog = ({ userId, onUpdate }: EditProfileDialogProps) => {
     gender: "",
     height: "",
     weight: "",
-    body_type: ""
+    body_type: "",
+    diet_preference: "both"
   });
 
   useEffect(() => {
@@ -47,7 +48,8 @@ const EditProfileDialog = ({ userId, onUpdate }: EditProfileDialogProps) => {
         gender: data.gender || "",
         height: data.height?.toString() || "",
         weight: data.weight?.toString() || "",
-        body_type: data.body_type || ""
+        body_type: data.body_type || "",
+        diet_preference: data.diet_preference || "both"
       });
     }
   };
@@ -64,7 +66,8 @@ const EditProfileDialog = ({ userId, onUpdate }: EditProfileDialogProps) => {
         gender: formData.gender,
         height: parseFloat(formData.height) || null,
         weight: parseFloat(formData.weight) || null,
-        body_type: formData.body_type
+        body_type: formData.body_type,
+        diet_preference: formData.diet_preference
       })
       .eq("user_id", userId);
 
@@ -178,6 +181,23 @@ const EditProfileDialog = ({ userId, onUpdate }: EditProfileDialogProps) => {
                 <SelectItem value="endomorph">Endomorph (Curvy)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="diet_preference">Food Preference</Label>
+            <Select value={formData.diet_preference} onValueChange={(value) => setFormData({ ...formData, diet_preference: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select food preference" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="veg">🥗 Vegetarian Only</SelectItem>
+                <SelectItem value="non_veg">🍗 Non-Vegetarian</SelectItem>
+                <SelectItem value="both">🍽️ Both (No Preference)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              This filters recipes throughout the app to match your preference
+            </p>
           </div>
 
           <div className="flex gap-3 pt-4">
