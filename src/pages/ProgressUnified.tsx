@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import OnboardingForm from "@/components/OnboardingForm";
 import HealthCard from "@/components/HealthCard";
 import EditProfileDialog from "@/components/EditProfileDialog";
+import ProfileDetailsDialog from "@/components/ProfileDetailsDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -222,7 +223,7 @@ const ProgressUnified = () => {
                 </h1>
                 <p className="text-muted-foreground">Track your fitness journey and celebrate achievements</p>
               </div>
-              <EditProfileDialog userId={userId!} onUpdate={handleProfileUpdate} />
+              <ProfileDetailsDialog userId={userId!} onUpdate={handleProfileUpdate} />
             </div>
 
             {/* Key Stats */}
