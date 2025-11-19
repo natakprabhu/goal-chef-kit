@@ -35,28 +35,8 @@ const Dashboard = () => {
                 Welcome Back!
               </h1>
               <p className="text-muted-foreground">Track your progress and stay on target</p>
-            </div>
-            <Card className="w-64 border-primary/20">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-3">
-                  <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                    <Play className="h-10 w-10 text-white" />
-                  </div>
-                  <h3 className="font-semibold">Your Path to Precision Nutrition</h3>
-                  <Button onClick={() => setShowVideoModal(true)} variant="outline" className="w-full">
-                    See How It Works
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            </div>            
           </div>
-
-          <YouTubeModal 
-            open={showVideoModal} 
-            onOpenChange={setShowVideoModal}
-            videoId="dQw4w9WgXcQ"
-          />
-
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Calorie Tracker - Large Card */}
