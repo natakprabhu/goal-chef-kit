@@ -18,9 +18,10 @@ type LogMealDialogProps = {
   onOpenChange: (open: boolean) => void;
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
   date: string;
+  onMealLogged?: () => void;
 };
 
-export const LogMealDialog = ({ open, onOpenChange, mealType, date }: LogMealDialogProps) => {
+export const LogMealDialog = ({ open, onOpenChange, mealType, date, onMealLogged }: LogMealDialogProps) => {
   const { recipes, loading: recipesLoading } = useRecipes();
   const { addMealLog } = useMealLogs(date);
   const [selectedRecipeId, setSelectedRecipeId] = useState("");
@@ -41,6 +42,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date }: LogMealDia
       fats: Number(recipe.fats),
     });
 
+    onMealLogged?.();
     onOpenChange(false);
     setSelectedRecipeId("");
   };
@@ -70,6 +72,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date }: LogMealDia
         fats: Number(data.fats.toFixed(1)),
       });
 
+      onMealLogged?.();
       onOpenChange(false);
       setCustomIngredients("");
     } catch (error) {
