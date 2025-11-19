@@ -24,10 +24,8 @@ const PlannerNew = () => {
   const [userDietPreference, setUserDietPreference] = useState<string>("both");
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
   const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack"; day: string } | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
-  const { mealPlan, loading } = useMealPlan(weekStartDate + `-${refreshKey}`);
+  const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
   const { addMilestone, hasMilestone } = useMilestones();
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -293,7 +291,7 @@ const PlannerNew = () => {
           mealType={swapData.mealType}
           day={swapData.day}
           weekStartDate={weekStartDate}
-          onSwapComplete={() => setRefreshKey(prev => prev + 1)}
+          onSwapComplete={refetch}
         />
       )}
     </div>
