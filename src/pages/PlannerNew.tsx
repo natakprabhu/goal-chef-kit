@@ -9,7 +9,10 @@ import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, R
 import { useMilestones } from "@/hooks/useMilestones";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { MilestoneDialog } from "@/components/MilestoneDialog";
-import { MealPlanGenerator } from "@/components/MealPlanGenerator";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 import RecipeSwapDialog from "@/components/RecipeSwapDialog";
 import { format, addDays, startOfWeek } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -174,6 +177,158 @@ const PlannerNew = () => {
 
   const totalCalories = dayMeals.reduce((sum, m) => sum + (m.recipe?.calories || 0), 0);
 
+  const generateWeeklyPDF = async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch all meal plans for the current week
+      const { data: weekMealPlans } = await supabase
+        .from("meal_plans")
+        .select(`
+          id,
+          day_of_week,
+          meal_type,
+          servings,
+          recipe:recipes(*)
+        `)
+        .eq("user_id", user.id)
+        .eq("week_start_date", weekStartDate);
+
+      if (!weekMealPlans || weekMealPlans.length === 0) {
+        toast.error("No meal plan available for this week");
+        return;
+      }
+
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("full_name, diet_preference")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const { data: nutritionSummary } = await supabase
+        .from("user_nutrition_summary")
+        .select("daily_calories, daily_protein, daily_carbs, daily_fats")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+
+      // Title
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("Weekly Meal Plan", pageWidth / 2, 20, { align: "center" });
+
+      // User info
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const weekStart = format(currentWeek, "MMM d, yyyy");
+      const weekEnd = format(addDays(currentWeek, 6), "MMM d, yyyy");
+      doc.text(`${weekStart} - ${weekEnd}`, pageWidth / 2, 28, { align: "center" });
+      
+      if (profile?.full_name) {
+        doc.text(`Prepared for: ${profile.full_name}`, 14, 38);
+      }
+      if (profile?.diet_preference) {
+        doc.text(`Diet: ${profile.diet_preference === "veg" ? "Vegetarian" : profile.diet_preference === "non_veg" ? "Non-Vegetarian" : "All"}`, 14, 44);
+      }
+
+      let yPos = 52;
+
+      // Daily targets
+      if (nutritionSummary) {
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Daily Targets:", 14, yPos);
+        yPos += 6;
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Calories: ${nutritionSummary.daily_calories || "N/A"} | Protein: ${nutritionSummary.daily_protein || "N/A"}g | Carbs: ${nutritionSummary.daily_carbs || "N/A"}g | Fats: ${nutritionSummary.daily_fats || "N/A"}g`, 14, yPos);
+        yPos += 10;
+      }
+
+      // Group meals by day
+      const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      
+      for (const day of daysOfWeek) {
+        const dayMeals = weekMealPlans.filter((m: any) => m.day_of_week === day);
+        
+        if (dayMeals.length === 0) continue;
+
+        // Check if we need a new page
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text(day, 14, yPos);
+        yPos += 8;
+
+        const tableData = dayMeals.map((meal: any) => [
+          meal.meal_type.charAt(0).toUpperCase() + meal.meal_type.slice(1),
+          meal.recipe?.title || "N/A",
+          meal.recipe?.calories || "N/A",
+          `${meal.recipe?.protein || 0}g`,
+          `${meal.recipe?.carbs || 0}g`,
+          `${meal.recipe?.fats || 0}g`,
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [["Meal", "Recipe", "Cal", "Protein", "Carbs", "Fats"]],
+          body: tableData,
+          theme: "grid",
+          headStyles: { fillColor: [79, 70, 229] },
+          margin: { left: 14, right: 14 },
+          styles: { fontSize: 9 },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Weekly summary
+      const totalWeeklyCalories = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.calories || 0), 0);
+      const totalWeeklyProtein = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.protein || 0), 0);
+      const totalWeeklyCarbs = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.carbs || 0), 0);
+      const totalWeeklyFats = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.fats || 0), 0);
+
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Weekly Summary", 14, yPos);
+      yPos += 8;
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [["Nutrient", "Total", "Daily Avg"]],
+        body: [
+          ["Calories", totalWeeklyCalories.toString(), Math.round(totalWeeklyCalories / 7).toString()],
+          ["Protein", `${totalWeeklyProtein}g`, `${Math.round(totalWeeklyProtein / 7)}g`],
+          ["Carbs", `${totalWeeklyCarbs}g`, `${Math.round(totalWeeklyCarbs / 7)}g`],
+          ["Fats", `${totalWeeklyFats}g`, `${Math.round(totalWeeklyFats / 7)}g`],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [79, 70, 229] },
+        margin: { left: 14, right: 14 },
+        styles: { fontSize: 10 },
+      });
+
+      doc.save(`meal-plan-${format(currentWeek, "yyyy-MM-dd")}.pdf`);
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
       <Navigation />
@@ -193,7 +348,10 @@ const PlannerNew = () => {
                 <Calendar className="h-3 w-3 mr-1" />
                 {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
               </Badge>
-              <MealPlanGenerator />
+              <Button onClick={generateWeeklyPDF} className="gap-2">
+                <Download className="h-4 w-4" />
+                Generate PDF
+              </Button>
             </div>
           </div>
 
@@ -289,83 +447,82 @@ const PlannerNew = () => {
 
                     return (
                       <div key={type} className="relative">
-                        <div
-                          className={`p-6 rounded-xl border-2 transition-all ${
+                      <div
+                          className={`p-3 rounded-lg border transition-all ${
                             isCompleted
                               ? "bg-primary/5 border-primary/30"
-                              : "bg-card hover:bg-muted/30 border-border hover:border-primary/50"
+                              : "bg-card hover:bg-muted/20 border-border hover:border-primary/50"
                           }`}
                         >
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">{emoji}</span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{emoji}</span>
                               <div>
-                                <h3 className="text-xl font-semibold capitalize">{type}</h3>
-                                <p className="text-sm text-muted-foreground">
+                                <h3 className="text-base font-semibold capitalize">{type}</h3>
+                                <p className="text-xs text-muted-foreground">
                                   {recipe.cook_time ? `${recipe.cook_time} min` : "Quick prep"}
                                 </p>
                               </div>
                             </div>
                             {isCompleted && (
-                              <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
+                              <Badge variant="secondary" className="text-xs">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Completed
+                                Done
                               </Badge>
                             )}
                           </div>
 
-                          <div className="mb-4">
-                            <h4 className="text-lg font-medium mb-2">{recipe.title}</h4>
-                            <p className="text-muted-foreground text-sm">{recipe.description}</p>
-                          </div>
+                          <h4 className="text-sm font-medium mb-1">{recipe.title}</h4>
 
-                          <div className="grid grid-cols-4 gap-4 mb-4">
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.calories}</div>
-                              <div className="text-xs text-muted-foreground">Calories</div>
+                          <div className="grid grid-cols-4 gap-2 mb-3">
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.calories}</div>
+                              <div className="text-[10px] text-muted-foreground">Cal</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.protein}g</div>
-                              <div className="text-xs text-muted-foreground">Protein</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.protein}g</div>
+                              <div className="text-[10px] text-muted-foreground">Protein</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.carbs}g</div>
-                              <div className="text-xs text-muted-foreground">Carbs</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.carbs}g</div>
+                              <div className="text-[10px] text-muted-foreground">Carbs</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.fats}g</div>
-                              <div className="text-xs text-muted-foreground">Fats</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.fats}g</div>
+                              <div className="text-[10px] text-muted-foreground">Fats</div>
                             </div>
                           </div>
 
                           <div className="flex gap-2">
                             <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                              <Button variant="outline" className="w-full gap-2">
-                                <Eye className="h-4 w-4" />
-                                View Recipe
+                              <Button variant="outline" size="sm" className="w-full gap-1 text-xs h-8">
+                                <Eye className="h-3 w-3" />
+                                View
                               </Button>
                             </Link>
                             <Button
                               variant="outline"
+                              size="sm"
                               onClick={() => {
                                 setSwapData({ recipe, mealType: type, day });
                                 setSwapDialogOpen(true);
                               }}
-                              className="gap-2"
+                              className="gap-1 text-xs h-8"
                             >
-                              <RefreshCw className="h-4 w-4" />
+                              <RefreshCw className="h-3 w-3" />
                               Swap
                             </Button>
                             <Button
+                              size="sm"
                               onClick={() => {
                                 setSelectedMilestone({ date: dayDate, mealType: type, mealName: recipe.title });
                                 setMilestoneDialogOpen(true);
                               }}
                               disabled={isCompleted}
-                              className="flex-1 gap-2"
+                              className="flex-1 gap-1 text-xs h-8"
                             >
-                              <CheckCircle2 className="h-4 w-4" />
-                              {isCompleted ? "Completed" : "Mark Complete"}
+                              <CheckCircle2 className="h-3 w-3" />
+                              {isCompleted ? "Done" : "Complete"}
                             </Button>
                           </div>
                         </div>

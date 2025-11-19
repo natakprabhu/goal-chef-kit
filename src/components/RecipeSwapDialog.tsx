@@ -2,11 +2,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Clock } from "lucide-react";
+import { Flame, Clock, Sparkles } from "lucide-react";
 import { useRecipes, type Recipe } from "@/hooks/useRecipes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface RecipeSwapDialogProps {
   open: boolean;
@@ -29,9 +30,90 @@ const RecipeSwapDialog = ({
 }: RecipeSwapDialogProps) => {
   const { user } = useAuth();
   const { recipes, loading } = useRecipes(undefined, mealType, true);
+  const [generating, setGenerating] = useState(false);
 
   // Filter out the current recipe
   const availableRecipes = recipes.filter(r => r.id !== currentRecipe.id);
+
+  const generateMyMeal = async () => {
+    if (!user) return;
+    
+    setGenerating(true);
+    try {
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("diet_preference")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const dietPreference = profile?.diet_preference || "both";
+
+      // Fetch recipes matching diet preference and meal type
+      let recipesQuery = supabase
+        .from("recipes")
+        .select("*")
+        .eq("meal_type", mealType);
+
+      if (dietPreference !== "both") {
+        recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
+      }
+
+      const { data: matchingRecipes } = await recipesQuery;
+
+      if (!matchingRecipes || matchingRecipes.length === 0) {
+        toast.error("No recipes available for this meal type");
+        setGenerating(false);
+        return;
+      }
+
+      // Randomly select a recipe
+      const randomRecipe = matchingRecipes[Math.floor(Math.random() * matchingRecipes.length)];
+
+      // Update the meal plan
+      const { data: existingPlan, error: fetchError } = await supabase
+        .from("meal_plans")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("week_start_date", weekStartDate)
+        .eq("day_of_week", day)
+        .eq("meal_type", mealType)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existingPlan) {
+        const { error: updateError } = await supabase
+          .from("meal_plans")
+          .update({ recipe_id: randomRecipe.id })
+          .eq("id", existingPlan.id);
+
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from("meal_plans")
+          .insert({
+            user_id: user.id,
+            week_start_date: weekStartDate,
+            day_of_week: day,
+            meal_type: mealType,
+            recipe_id: randomRecipe.id,
+            servings: 1
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      toast.success(`Generated new ${mealType}: ${randomRecipe.title}`);
+      onSwapComplete();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error generating meal:", error);
+      toast.error("Failed to generate meal");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleSwap = async (newRecipe: Recipe) => {
     if (!user) return;
@@ -92,7 +174,19 @@ const RecipeSwapDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="mb-4">
+          <Button 
+            onClick={generateMyMeal} 
+            disabled={generating}
+            className="w-full gap-2"
+            variant="default"
+          >
+            <Sparkles className="h-4 w-4" />
+            {generating ? "Generating..." : "Generate My Meal (AI)"}
+          </Button>
+        </div>
+
+        <div className="space-y-4">
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
