@@ -20,6 +20,21 @@ const Dashboard = () => {
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
 
+  // Refetch meal logs when dashboard loads or becomes visible
+  useEffect(() => {
+    refetch();
+    
+    // Also refetch when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refetch();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refetch]);
+
   const dailyTotals = useMemo(() => {
     return mealLogs.reduce(
       (acc, log) => ({

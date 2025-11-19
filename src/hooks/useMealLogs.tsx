@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
@@ -23,22 +23,18 @@ export const useMealLogs = (date?: string) => {
   const [mealLogs, setMealLogs] = useState<MealLog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchMealLogs = useCallback(async () => {
     if (!user) {
       setMealLogs([]);
       setLoading(false);
       return;
     }
 
-    fetchMealLogs();
-  }, [user, date]);
-
-  const fetchMealLogs = async () => {
     setLoading(true);
     let query = supabase
       .from("meal_logs")
       .select("*")
-      .eq("user_id", user!.id);
+      .eq("user_id", user.id);
 
     if (date) {
       query = query.eq("log_date", date);
@@ -50,10 +46,39 @@ export const useMealLogs = (date?: string) => {
       console.error("Error fetching meal logs:", error);
       toast.error("Failed to load meal logs");
     } else {
+      console.log("Fetched meal logs from database:", data);
       setMealLogs(data as MealLog[] || []);
     }
     setLoading(false);
-  };
+  }, [user, date]);
+
+  useEffect(() => {
+    fetchMealLogs();
+
+    // Set up realtime subscription for meal_logs table
+    if (user) {
+      const channel = supabase
+        .channel('meal_logs_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'meal_logs',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('Meal log changed:', payload);
+            fetchMealLogs();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user, date, fetchMealLogs]);
 
   const addMealLog = async (mealLog: Omit<MealLog, "id" | "user_id" | "logged_at">) => {
     if (!user) {
