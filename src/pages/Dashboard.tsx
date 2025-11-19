@@ -6,16 +6,23 @@ import HealthNews from "@/components/HealthNews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2, Scale } from "lucide-react";
+import { Calendar as CalendarIcon, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2, Scale, Info } from "lucide-react";
 import { useMealLogs } from "@/hooks/useMealLogs";
 import { LogMealDialog } from "@/components/LogMealDialog";
 import { LogWeightDialog } from "@/components/LogWeightDialog";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Dashboard = () => {
-  const today = format(new Date(), "yyyy-MM-dd");
-  const { mealLogs, loading: logsLoading, deleteMealLog, refetch } = useMealLogs(today);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const formattedDate = format(selectedDate, "yyyy-MM-dd");
+  const isToday = formattedDate === format(new Date(), "yyyy-MM-dd");
+  
+  const { mealLogs, loading: logsLoading, deleteMealLog, refetch } = useMealLogs(formattedDate);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
@@ -241,8 +248,7 @@ const Dashboard = () => {
               <CardContent className="space-y-4 pt-6">
                 <div className="grid gap-4">
                   {(["breakfast", "lunch", "dinner", "snack"] as const).map((mealType) => {
-                    const todayMeals = mealLogs.filter(m => m.log_date === today);
-                    const mealsForType = todayMeals.filter(m => m.meal_type === mealType);
+                    const mealsForType = mealLogs.filter(m => m.meal_type === mealType);
                     const totalCalories = mealsForType.reduce((sum, m) => sum + m.calories, 0);
                     const hasLogged = mealsForType.length > 0;
                     
@@ -323,7 +329,7 @@ const Dashboard = () => {
         open={logDialogOpen}
         onOpenChange={setLogDialogOpen}
         mealType={selectedMealType}
-        date={today}
+        date={formattedDate}
         onMealLogged={refetch}
       />
 
