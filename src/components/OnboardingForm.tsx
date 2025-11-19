@@ -27,6 +27,7 @@ const OnboardingForm = ({ userId, onComplete }: OnboardingFormProps) => {
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [bodyType, setBodyType] = useState("");
+  const [dietPreference, setDietPreference] = useState("both");
 
   // Medical Info
   const [thyroid, setThyroid] = useState(false);
@@ -96,6 +97,7 @@ const OnboardingForm = ({ userId, onComplete }: OnboardingFormProps) => {
           weight: parseFloat(weight),
           height: parseFloat(height),
           body_type: bodyType,
+          diet_preference: dietPreference,
           has_onboarded: true,
         })
         .eq("user_id", userId);
@@ -257,6 +259,22 @@ const OnboardingForm = ({ userId, onComplete }: OnboardingFormProps) => {
                     <SelectItem value="large">Large</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dietPreference">Food Preference *</Label>
+                <Select value={dietPreference} onValueChange={setDietPreference}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your food preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="veg">🥗 Vegetarian Only</SelectItem>
+                    <SelectItem value="non_veg">🍗 Non-Vegetarian</SelectItem>
+                    <SelectItem value="both">🍽️ Both (No Preference)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  This will filter recipes throughout the app to match your preference. You can change this later.
+                </p>
               </div>
             </div>
             <div className="flex justify-end">

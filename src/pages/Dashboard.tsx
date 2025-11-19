@@ -6,9 +6,10 @@ import HealthNews from "@/components/HealthNews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2 } from "lucide-react";
+import { Calendar, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2, Scale } from "lucide-react";
 import { useMealLogs } from "@/hooks/useMealLogs";
 import { LogMealDialog } from "@/components/LogMealDialog";
+import { LogWeightDialog } from "@/components/LogWeightDialog";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const today = format(new Date(), "yyyy-MM-dd");
   const { mealLogs, loading: logsLoading, deleteMealLog, refetch } = useMealLogs(today);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
+  const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
 
   const dailyTotals = useMemo(() => {
@@ -149,6 +151,13 @@ const Dashboard = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Button 
+                  className="w-full justify-start gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:opacity-90"
+                  onClick={() => setWeightDialogOpen(true)}
+                >
+                  <Scale className="h-4 w-4" />
+                  Log Today's Weight
+                </Button>
                 <Link to="/planner" className="block">
                   <Button className="w-full justify-start gap-2 bg-gradient-to-r from-primary to-primary-light hover:opacity-90">
                     <Calendar className="h-4 w-4" />
@@ -295,13 +304,19 @@ const Dashboard = () => {
 
       <Footer />
       
-        <LogMealDialog
-          open={logDialogOpen}
-          onOpenChange={setLogDialogOpen}
-          mealType={selectedMealType}
-          date={today}
-          onMealLogged={refetch}
-        />
+      <LogMealDialog
+        open={logDialogOpen}
+        onOpenChange={setLogDialogOpen}
+        mealType={selectedMealType}
+        date={today}
+        onMealLogged={refetch}
+      />
+
+      <LogWeightDialog
+        open={weightDialogOpen}
+        onOpenChange={setWeightDialogOpen}
+        onWeightLogged={() => {}}
+      />
     </div>
   );
 };

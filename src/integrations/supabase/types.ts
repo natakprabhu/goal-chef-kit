@@ -358,6 +358,7 @@ export type Database = {
           age: number | null
           body_type: string | null
           created_at: string | null
+          diet_preference: string | null
           full_name: string | null
           gender: string | null
           has_onboarded: boolean | null
@@ -371,6 +372,7 @@ export type Database = {
           age?: number | null
           body_type?: string | null
           created_at?: string | null
+          diet_preference?: string | null
           full_name?: string | null
           gender?: string | null
           has_onboarded?: boolean | null
@@ -384,6 +386,7 @@ export type Database = {
           age?: number | null
           body_type?: string | null
           created_at?: string | null
+          diet_preference?: string | null
           full_name?: string | null
           gender?: string | null
           has_onboarded?: boolean | null

@@ -13,14 +13,36 @@ export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userDietPreference, setUserDietPreference] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserPreference = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("diet_preference")
+        .eq("user_id", user.id)
+        .single();
+      
+      setUserDietPreference(data?.diet_preference || "both");
+    };
+
+    fetchUserPreference();
+  }, [user]);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
       let query = supabase.from("recipes").select("*");
 
+      // Apply diet type filter from parameter
       if (dietType) {
         query = query.eq("diet_type", dietType);
+      } 
+      // Otherwise, filter by user's preference
+      else if (user && userDietPreference && userDietPreference !== "both") {
+        query = query.eq("diet_type", userDietPreference as "veg" | "non_veg");
       }
 
       if (mealType) {
@@ -37,8 +59,10 @@ export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" 
       setLoading(false);
     };
 
-    fetchRecipes();
-  }, [user, dietType, mealType]);
+    if (userDietPreference !== null) {
+      fetchRecipes();
+    }
+  }, [user, dietType, mealType, userDietPreference]);
 
   return { recipes, loading, error };
 };
