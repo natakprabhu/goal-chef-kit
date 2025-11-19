@@ -89,17 +89,8 @@ const ProgressUnified = () => {
     checkAuthAndOnboarding();
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // ALL HOOKS AND CALCULATIONS MUST BE BEFORE ANY RETURNS
+  // Calculate all data first
   const latestEntry = getLatestEntry();
   const weightChange = getWeightChange();
   const currentWeight = latestEntry?.weight || userProfile?.weight || 0;
@@ -201,6 +192,18 @@ const ProgressUnified = () => {
     { title: "5kg Achievement", description: "Lost 5 kilograms", unlocked: Math.abs(weightChange) >= 5 },
     { title: "Goal Achieved", description: "Reached your target weight", unlocked: targetWeight && currentWeight <= targetWeight }
   ];
+
+  // NOW we can do conditional returns
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
