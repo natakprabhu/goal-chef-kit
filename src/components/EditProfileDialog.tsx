@@ -176,9 +176,12 @@ const EditProfileDialog = ({ userId, onUpdate }: EditProfileDialogProps) => {
                 <SelectValue placeholder="Select body type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ectomorph">Ectomorph (Lean)</SelectItem>
-                <SelectItem value="mesomorph">Mesomorph (Athletic)</SelectItem>
-                <SelectItem value="endomorph">Endomorph (Curvy)</SelectItem>
+                <SelectItem value="short">Short</SelectItem>
+                <SelectItem value="tall">Tall</SelectItem>
+                <SelectItem value="lean">Lean</SelectItem>
+                <SelectItem value="toned">Toned</SelectItem>
+                <SelectItem value="muscular">Muscular</SelectItem>
+                <SelectItem value="large">Large</SelectItem>
               </SelectContent>
             </Select>
           </div>
