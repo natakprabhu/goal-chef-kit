@@ -51,16 +51,6 @@ export const MilestoneDialog = ({ open, onOpenChange, onConfirm, mealName }: Mil
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
             <p className="text-sm italic text-foreground">{quote}</p>
           </div>
-
-          <div className="space-y-2">
-            <Label>Notes (Optional)</Label>
-            <Textarea
-              placeholder="How did you feel? Any observations?"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-            />
-          </div>
         </div>
 
         <DialogFooter>
