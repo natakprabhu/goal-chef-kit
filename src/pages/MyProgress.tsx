@@ -83,7 +83,7 @@ const MyProgress = () => {
             <div className="flex justify-end">
               <EditProfileDialog userId={userId!} onUpdate={handleProfileUpdate} />
             </div>
-            <HealthCard userId={userId!} />
+            {/*<HealthCard userId={userId!} />*/}
           </div>
         )}
       </main>
