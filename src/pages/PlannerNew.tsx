@@ -381,7 +381,7 @@ const PlannerNew = () => {
                   const isPast = i < currentDayIndex;
 
                   return (
-                    <button
+                  <button
                       key={d}
                       onClick={() => setCurrentDayIndex(i)}
                       className={`
@@ -390,13 +390,13 @@ const PlannerNew = () => {
                           isActive
                             ? "bg-primary text-primary-foreground shadow-lg scale-110"
                             : isPast
-                            ? "bg-muted/50 text-muted-foreground scale-95 opacity-60"
-                            : "bg-card border border-border hover:border-primary/50 scale-95 opacity-80"
+                            ? "bg-muted/50 text-muted-foreground scale-95 hover:bg-muted hover:scale-100"
+                            : "bg-card border border-border hover:border-primary hover:bg-accent hover:scale-100 text-foreground"
                         }
                       `}
                     >
-                      <div className="text-sm">{d}</div>
-                      <div className="text-xs opacity-70 mt-1">{format(addDays(currentWeek, i), "MMM d")}</div>
+                      <div className="text-sm font-medium">{d}</div>
+                      <div className="text-xs mt-1">{format(addDays(currentWeek, i), "MMM d")}</div>
                     </button>
                   );
                 })}
@@ -581,7 +581,7 @@ const PlannerNew = () => {
               
               if (mealEntry?.recipe) {
                 try {
-                  // Create a meal log entry
+                  // Create a meal log entry with the selected date
                   const { error } = await supabase.from("meal_logs").insert({
                     user_id: user.id,
                     log_date: selectedMilestone.date,
@@ -594,7 +594,16 @@ const PlannerNew = () => {
                   });
                   
                   if (error) throw error;
-                  toast.success("Meal logged successfully!");
+                  
+                  // Show appropriate message based on whether the logged date is today
+                  const loggedDate = format(new Date(selectedMilestone.date), "yyyy-MM-dd");
+                  const todayDate = format(new Date(), "yyyy-MM-dd");
+                  
+                  if (loggedDate === todayDate) {
+                    toast.success("Meal logged and will appear in your Dashboard!");
+                  } else {
+                    toast.success(`Meal logged for ${format(new Date(selectedMilestone.date), "EEEE, MMM d")}. It will appear in your Dashboard on that day.`);
+                  }
                 } catch (error) {
                   console.error("Error logging meal:", error);
                   toast.error("Failed to log meal");
