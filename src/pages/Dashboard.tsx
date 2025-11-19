@@ -333,7 +333,7 @@ const Dashboard = () => {
                           </div>
                           
                           {mealsForType.length > 0 && (
-                            <div className="space-y-2 pt-3 border-t">
+                            <div className="space-y-3 pt-3 border-t">
                               {mealsForType.map((meal) => (
                                 <div key={meal.id} className="flex items-start justify-between text-sm gap-3">
                                   <div className="flex-1">
@@ -341,20 +341,20 @@ const Dashboard = () => {
                                       {meal.custom_meal_name || 'Recipe meal'}
                                     </span>
                                     <div className="flex gap-3 text-xs text-muted-foreground">
-                                      <span>P: {Math.round(Number(meal.protein))}g</span>
-                                      <span>C: {Math.round(Number(meal.carbs))}g</span>
-                                      <span>F: {Math.round(Number(meal.fats))}g</span>
+                                      <span className="font-medium">P: {Math.round(Number(meal.protein))}g</span>
+                                      <span className="font-medium">C: {Math.round(Number(meal.carbs))}g</span>
+                                      <span className="font-medium">F: {Math.round(Number(meal.fats))}g</span>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{meal.calories} cal</span>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    <span className="font-semibold text-primary">{meal.calories} cal</span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      className="h-6 w-6 p-0"
+                                      className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
                                       onClick={() => deleteMealLog(meal.id)}
                                     >
-                                      ×
+                                      <Trash2 className="h-3 w-3" />
                                     </Button>
                                   </div>
                                 </div>
