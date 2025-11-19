@@ -9,7 +9,7 @@ import GetStarted from "./pages/GetStarted";
 import Dashboard from "./pages/Dashboard";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
-import Planner from "./pages/Planner";
+import PlannerNew from "./pages/PlannerNew";
 import ProgressUnified from "./pages/ProgressUnified";
 import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
-          <Route path="/planner" element={<Planner />} />
+          <Route path="/planner" element={<PlannerNew />} />
           <Route path="/progress" element={<ProgressUnified />} />
           <Route path="/my-progress" element={<ProgressUnified />} />
           <Route path="/favorites" element={<Favorites />} />

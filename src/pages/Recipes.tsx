@@ -17,7 +17,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dietType, setDietType] = useState<"veg" | "non_veg" | undefined>(undefined);
-  const { recipes, loading } = useRecipes(dietType);
+  const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack" | undefined>(undefined);
+  const { recipes, loading } = useRecipes(dietType, mealType);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { user } = useAuth();
   const { isSubscribed } = useSubscription();
@@ -59,39 +60,84 @@ const Recipes = () => {
           </div>
 
           {/* Search & Filters */}
-          <div className="mb-8 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search recipes by name, ingredient, or cuisine..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="mb-8 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search recipes by name, ingredient, or cuisine..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={dietType === undefined ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDietType(undefined)}
-              >
-                All
-              </Button>
-              <Button
-                variant={dietType === "veg" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDietType("veg")}
-              >
-                🥗 Veg
-              </Button>
-              <Button
-                variant={dietType === "non_veg" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDietType("non_veg")}
-              >
-                🍗 Non-Veg
-              </Button>
+            
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-muted-foreground">Diet:</Label>
+                <Button
+                  variant={dietType === undefined ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDietType(undefined)}
+                >
+                  All
+                </Button>
+                <Button
+                  variant={dietType === "veg" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDietType("veg")}
+                >
+                  🥗 Veg
+                </Button>
+                <Button
+                  variant={dietType === "non_veg" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDietType("non_veg")}
+                >
+                  🍗 Non-Veg
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-muted-foreground">Meal:</Label>
+                <Button
+                  variant={mealType === undefined ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMealType(undefined)}
+                >
+                  All
+                </Button>
+                <Button
+                  variant={mealType === "breakfast" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMealType("breakfast")}
+                >
+                  🌅 Breakfast
+                </Button>
+                <Button
+                  variant={mealType === "lunch" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMealType("lunch")}
+                >
+                  ☀️ Lunch
+                </Button>
+                <Button
+                  variant={mealType === "dinner" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMealType("dinner")}
+                >
+                  🌙 Dinner
+                </Button>
+                <Button
+                  variant={mealType === "snack" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMealType("snack")}
+                >
+                  🍿 Snacks
+                </Button>
+              </div>
             </div>
           </div>
 
