@@ -109,17 +109,63 @@ const Dashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
-                Welcome Back!
-              </h1>
-              <p className="text-muted-foreground">Track your progress and stay on target</p>
+          <div className="mb-8">
+            <div className="flex justify-between items-start gap-4 mb-4">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
+                  Welcome Back!
+                </h1>
+                <p className="text-muted-foreground text-lg flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Current time: {mealTimes.current}
+                </p>
+              </div>
+              
+              {/* Date Picker */}
+              <div className="flex items-center gap-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal min-w-[240px]",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50 bg-popover border shadow-lg" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => date && setSelectedDate(date)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {isToday && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Today
+                  </Badge>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-lg font-semibold text-foreground">{mealTimes.current}</span>
-            </div>
+
+            {/* Info Alert */}
+            <Alert className="bg-muted/50 border-primary/20">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                {isToday ? (
+                  <>Viewing today's meals and progress. Meals marked complete in the planner will appear here on their scheduled date.</>
+                ) : (
+                  <>Viewing meals for {format(selectedDate, "EEEE, MMMM d, yyyy")}. Change the date above to view different days.</>
+                )}
+              </AlertDescription>
+            </Alert>
           </div>
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
