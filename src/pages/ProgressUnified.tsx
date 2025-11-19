@@ -219,7 +219,7 @@ const ProgressUnified = () => {
             <div className="mb-8 flex justify-between items-start">
               <div>
                 <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
-                  Your Health Progress
+                  Your Health Progressfff
                 </h1>
                 <p className="text-muted-foreground">Track your fitness journey and celebrate achievements</p>
               </div>
