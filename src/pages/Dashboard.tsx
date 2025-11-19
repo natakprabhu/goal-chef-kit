@@ -109,18 +109,55 @@ const Dashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex justify-between items-center">
+          <div className="mb-8 flex justify-between items-center flex-wrap gap-4">
             <div>
               <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
                 Welcome Back!
               </h1>
               <p className="text-muted-foreground">Track your progress and stay on target</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-lg font-semibold text-foreground">{mealTimes.current}</span>
+            <div className="flex items-center gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                    {isToday && <Badge variant="secondary" className="ml-2">Today</Badge>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="text-lg font-semibold text-foreground">{mealTimes.current}</span>
+              </div>
             </div>
           </div>
+          
+          {/* Date Info Alert */}
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              {isToday ? (
+                <>Viewing today's meals and progress. Meals logged in your planner will appear on their scheduled dates.</>
+              ) : (
+                <>Viewing meals for {format(selectedDate, "MMMM d, yyyy")}. Switch to today to see current progress.</>
+              )}
+            </AlertDescription>
+          </Alert>
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Calorie Tracker - Large Card */}
@@ -128,7 +165,7 @@ const Dashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Today's Calorie Progress
+                  {isToday ? "Today's" : format(selectedDate, "MMM d")} Calorie Progress
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -241,7 +278,7 @@ const Dashboard = () => {
               <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
                 <CardTitle className="flex items-center gap-2">
                   <ChefHat className="h-5 w-5 text-primary" />
-                  Today's Meals
+                  {isToday ? "Today's" : format(selectedDate, "MMM d")} Meals
                 </CardTitle>
                 <CardDescription>Track your meals from recipes or custom entries</CardDescription>
               </CardHeader>
@@ -289,20 +326,27 @@ const Dashboard = () => {
                           {mealsForType.length > 0 && (
                             <div className="space-y-2 pt-3 border-t">
                               {mealsForType.map((meal) => (
-                                <div key={meal.id} className="flex items-center justify-between text-sm">
-                                  <span className="text-muted-foreground">
-                                    {meal.custom_meal_name || 'Recipe meal'}
-                                  </span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{meal.calories} cal</span>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-6 w-6 p-0"
-                                      onClick={() => deleteMealLog(meal.id)}
-                                    >
-                                      ×
-                                    </Button>
+                                <div key={meal.id} className="space-y-1">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="font-medium text-foreground">
+                                      {meal.custom_meal_name || meal.recipe_id ? 'Logged Meal' : 'Custom Meal'}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold">{meal.calories} cal</span>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-6 w-6 p-0"
+                                        onClick={() => deleteMealLog(meal.id)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-3 text-xs text-muted-foreground">
+                                    <span>P: {meal.protein}g</span>
+                                    <span>C: {meal.carbs}g</span>
+                                    <span>F: {meal.fats}g</span>
                                   </div>
                                 </div>
                               ))}
