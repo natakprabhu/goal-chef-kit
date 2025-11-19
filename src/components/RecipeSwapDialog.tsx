@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, Clock } from "lucide-react";
+import { Flame, Clock, Sparkles } from "lucide-react";
 import { useRecipes, type Recipe } from "@/hooks/useRecipes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +30,7 @@ const RecipeSwapDialog = ({
 }: RecipeSwapDialogProps) => {
   const { user } = useAuth();
   const { recipes, loading } = useRecipes(undefined, mealType, true);
+  const [generating, setGenerating] = useState(false);
 
   // Filter out the current recipe
   const availableRecipes = recipes.filter(r => r.id !== currentRecipe.id);
@@ -82,6 +84,77 @@ const RecipeSwapDialog = ({
     }
   };
 
+  const handleGenerateNewMeal = async () => {
+    if (!user) return;
+
+    setGenerating(true);
+    try {
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("diet_preference")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const dietPreference = profile?.diet_preference || "both";
+
+      // Fetch recipes for this meal type
+      let recipesQuery = supabase.from("recipes").select("*").eq("meal_type", mealType);
+      if (dietPreference !== "both") {
+        recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
+      }
+
+      const { data: allRecipes } = await recipesQuery;
+      if (!allRecipes || allRecipes.length === 0) {
+        toast.error("No recipes available");
+        return;
+      }
+
+      // Filter out current recipe
+      const filteredRecipes = allRecipes.filter(r => r.id !== currentRecipe.id);
+      
+      // Pick random recipe
+      const randomRecipe = filteredRecipes[Math.floor(Math.random() * filteredRecipes.length)];
+
+      // Update the meal plan
+      const { data: existingPlan } = await supabase
+        .from("meal_plans")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("week_start_date", weekStartDate)
+        .eq("day_of_week", day)
+        .eq("meal_type", mealType)
+        .maybeSingle();
+
+      if (existingPlan) {
+        await supabase
+          .from("meal_plans")
+          .update({ recipe_id: randomRecipe.id })
+          .eq("id", existingPlan.id);
+      } else {
+        await supabase
+          .from("meal_plans")
+          .insert({
+            user_id: user.id,
+            week_start_date: weekStartDate,
+            day_of_week: day,
+            meal_type: mealType,
+            recipe_id: randomRecipe.id,
+            servings: 1
+          });
+      }
+
+      toast.success(`Generated new ${mealType}: ${randomRecipe.title}`);
+      onSwapComplete();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error generating meal:", error);
+      toast.error("Failed to generate meal");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -91,6 +164,24 @@ const RecipeSwapDialog = ({
             Choose a different {mealType} recipe to replace <span className="font-semibold">{currentRecipe.title}</span>
           </DialogDescription>
         </DialogHeader>
+
+        <Button
+          onClick={handleGenerateNewMeal}
+          disabled={generating}
+          className="w-full gap-2 mb-4"
+        >
+          {generating ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" />
+              Generate My Meal (AI)
+            </>
+          )}
+        </Button>
 
         <div className="space-y-4 mt-4">
           {loading ? (

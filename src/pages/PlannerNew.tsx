@@ -5,11 +5,11 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw, Download } from "lucide-react";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { MilestoneDialog } from "@/components/MilestoneDialog";
-import { MealPlanGenerator } from "@/components/MealPlanGenerator";
+
 import RecipeSwapDialog from "@/components/RecipeSwapDialog";
 import { format, addDays, startOfWeek } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -193,7 +193,51 @@ const PlannerNew = () => {
                 <Calendar className="h-3 w-3 mr-1" />
                 {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
               </Badge>
-              <MealPlanGenerator />
+              <Button
+                onClick={async () => {
+                  // Generate PDF of weekly meal plan
+                  const jsPDF = (await import("jspdf")).default;
+                  const autoTable = (await import("jspdf-autotable")).default;
+                  
+                  const doc = new jsPDF();
+                  const weekStart = currentWeek;
+                  
+                  doc.setFontSize(20);
+                  doc.text("Weekly Meal Plan", 14, 20);
+                  doc.setFontSize(10);
+                  doc.text(`Week of ${format(weekStart, "MMM d, yyyy")}`, 14, 28);
+                  
+                  const tableData = daysOfWeek.map((day, index) => {
+                    const dayMeals = mealPlan.filter((entry) => entry.day_of_week === day);
+                    const breakfast = dayMeals.find((m) => m.meal_type === "breakfast");
+                    const lunch = dayMeals.find((m) => m.meal_type === "lunch");
+                    const dinner = dayMeals.find((m) => m.meal_type === "dinner");
+                    const snack = dayMeals.find((m) => m.meal_type === "snack");
+                    
+                    return [
+                      `${day}\n${format(addDays(weekStart, index), "MMM d")}`,
+                      breakfast?.recipe?.title || "-",
+                      lunch?.recipe?.title || "-",
+                      dinner?.recipe?.title || "-",
+                      snack?.recipe?.title || "-",
+                    ];
+                  });
+                  
+                  autoTable(doc, {
+                    head: [["Day", "Breakfast", "Lunch", "Dinner", "Snack"]],
+                    body: tableData,
+                    startY: 35,
+                    styles: { fontSize: 9 },
+                    headStyles: { fillColor: [99, 102, 241] },
+                  });
+                  
+                  doc.save(`meal-plan-${format(weekStart, "yyyy-MM-dd")}.pdf`);
+                }}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Generate PDF
+              </Button>
             </div>
           </div>
 
@@ -290,82 +334,82 @@ const PlannerNew = () => {
                     return (
                       <div key={type} className="relative">
                         <div
-                          className={`p-6 rounded-xl border-2 transition-all ${
+                          className={`p-4 rounded-lg border transition-all ${
                             isCompleted
                               ? "bg-primary/5 border-primary/30"
-                              : "bg-card hover:bg-muted/30 border-border hover:border-primary/50"
+                              : "bg-card hover:bg-muted/20 border-border"
                           }`}
                         >
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">{emoji}</span>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{emoji}</span>
                               <div>
-                                <h3 className="text-xl font-semibold capitalize">{type}</h3>
-                                <p className="text-sm text-muted-foreground">
+                                <h3 className="font-semibold capitalize">{type}</h3>
+                                <p className="text-xs text-muted-foreground">
                                   {recipe.cook_time ? `${recipe.cook_time} min` : "Quick prep"}
                                 </p>
                               </div>
                             </div>
                             {isCompleted && (
-                              <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
+                              <Badge variant="secondary" className="text-xs">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Completed
+                                Done
                               </Badge>
                             )}
                           </div>
 
-                          <div className="mb-4">
-                            <h4 className="text-lg font-medium mb-2">{recipe.title}</h4>
-                            <p className="text-muted-foreground text-sm">{recipe.description}</p>
-                          </div>
+                          <h4 className="font-medium mb-1">{recipe.title}</h4>
+                          <p className="text-muted-foreground text-xs mb-3 line-clamp-1">{recipe.description}</p>
 
-                          <div className="grid grid-cols-4 gap-4 mb-4">
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.calories}</div>
-                              <div className="text-xs text-muted-foreground">Calories</div>
+                          <div className="grid grid-cols-4 gap-2 mb-3">
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.calories}</div>
+                              <div className="text-[10px] text-muted-foreground">Cal</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.protein}g</div>
-                              <div className="text-xs text-muted-foreground">Protein</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.protein}g</div>
+                              <div className="text-[10px] text-muted-foreground">Pro</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.carbs}g</div>
-                              <div className="text-xs text-muted-foreground">Carbs</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.carbs}g</div>
+                              <div className="text-[10px] text-muted-foreground">Carbs</div>
                             </div>
-                            <div className="text-center p-3 rounded-lg bg-background/50">
-                              <div className="text-2xl font-bold text-primary">{recipe.fats}g</div>
-                              <div className="text-xs text-muted-foreground">Fats</div>
+                            <div className="text-center p-2 rounded bg-background/50">
+                              <div className="text-sm font-bold text-primary">{recipe.fats}g</div>
+                              <div className="text-[10px] text-muted-foreground">Fats</div>
                             </div>
                           </div>
 
                           <div className="flex gap-2">
                             <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                              <Button variant="outline" className="w-full gap-2">
-                                <Eye className="h-4 w-4" />
-                                View Recipe
+                              <Button variant="outline" size="sm" className="w-full gap-1">
+                                <Eye className="h-3 w-3" />
+                                View
                               </Button>
                             </Link>
                             <Button
                               variant="outline"
+                              size="sm"
                               onClick={() => {
                                 setSwapData({ recipe, mealType: type, day });
                                 setSwapDialogOpen(true);
                               }}
-                              className="gap-2"
+                              className="gap-1"
                             >
-                              <RefreshCw className="h-4 w-4" />
+                              <RefreshCw className="h-3 w-3" />
                               Swap
                             </Button>
                             <Button
+                              size="sm"
                               onClick={() => {
                                 setSelectedMilestone({ date: dayDate, mealType: type, mealName: recipe.title });
                                 setMilestoneDialogOpen(true);
                               }}
                               disabled={isCompleted}
-                              className="flex-1 gap-2"
+                              className="flex-1 gap-1"
                             >
-                              <CheckCircle2 className="h-4 w-4" />
-                              {isCompleted ? "Completed" : "Mark Complete"}
+                              <CheckCircle2 className="h-3 w-3" />
+                              {isCompleted ? "Done" : "Complete"}
                             </Button>
                           </div>
                         </div>
