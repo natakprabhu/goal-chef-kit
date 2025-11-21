@@ -466,7 +466,7 @@ const PlannerNew = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {meals.map(({ type, data, emoji }) => {
                     if (!data) return null;
 
@@ -475,55 +475,46 @@ const PlannerNew = () => {
 
                     return (
                       <div key={type} className="relative">
-                      <div
+                        <div
                           className={`p-3 rounded-lg border transition-all ${
                             isCompleted
                               ? "bg-primary/5 border-primary/30"
                               : "bg-card hover:bg-muted/20 border-border hover:border-primary/50"
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl">{emoji}</span>
-                              <div>
-                                <h3 className="text-base font-semibold capitalize">{type}</h3>
-                                <p className="text-xs text-muted-foreground">
-                                  {recipe.cook_time ? `${recipe.cook_time} min` : "Quick prep"}
-                                </p>
+                          <div className="flex items-center justify-between gap-3 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-sm font-semibold capitalize">{type}</h3>
+                                {recipe.cook_time && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {recipe.cook_time}m
+                                  </span>
+                                )}
+                                {isCompleted && (
+                                  <Badge variant="secondary" className="text-xs py-0 h-5">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Done
+                                  </Badge>
+                                )}
                               </div>
+                              <h4 className="text-sm font-medium truncate">{recipe.title}</h4>
                             </div>
-                            {isCompleted && (
-                              <Badge variant="secondary" className="text-xs">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Done
-                              </Badge>
-                            )}
-                          </div>
-
-                          <h4 className="text-sm font-medium mb-1">{recipe.title}</h4>
-
-                          <div className="grid grid-cols-4 gap-2 mb-3">
-                            <div className="text-center p-2 rounded bg-background/50">
-                              <div className="text-sm font-bold text-primary">{recipe.calories}</div>
-                              <div className="text-[10px] text-muted-foreground">Cal</div>
-                            </div>
-                            <div className="text-center p-2 rounded bg-background/50">
-                              <div className="text-sm font-bold text-primary">{recipe.protein}g</div>
-                              <div className="text-[10px] text-muted-foreground">Protein</div>
-                            </div>
-                            <div className="text-center p-2 rounded bg-background/50">
-                              <div className="text-sm font-bold text-primary">{recipe.carbs}g</div>
-                              <div className="text-[10px] text-muted-foreground">Carbs</div>
-                            </div>
-                            <div className="text-center p-2 rounded bg-background/50">
-                              <div className="text-sm font-bold text-primary">{recipe.fats}g</div>
-                              <div className="text-[10px] text-muted-foreground">Fats</div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
+                              <span className="font-semibold text-primary">{recipe.calories} cal</span>
+                              <span>•</span>
+                              <span>P: {recipe.protein}g</span>
+                              <span>•</span>
+                              <span>C: {recipe.carbs}g</span>
+                              <span>•</span>
+                              <span>F: {recipe.fats}g</span>
                             </div>
                           </div>
 
                           <div className="flex gap-2">
                             <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full gap-1 text-xs h-8">
+                              <Button variant="outline" size="sm" className="w-full gap-1 text-xs h-7">
                                 <Eye className="h-3 w-3" />
                                 View
                               </Button>
@@ -535,7 +526,7 @@ const PlannerNew = () => {
                                 setSwapData({ recipe, mealType: type, day });
                                 setSwapDialogOpen(true);
                               }}
-                              className="gap-1 text-xs h-8"
+                              className="gap-1 text-xs h-7"
                             >
                               <RefreshCw className="h-3 w-3" />
                               Swap
@@ -547,7 +538,7 @@ const PlannerNew = () => {
                                 setMilestoneDialogOpen(true);
                               }}
                               disabled={isCompleted}
-                              className="flex-1 gap-1 text-xs h-8"
+                              className="flex-1 gap-1 text-xs h-7"
                             >
                               <CheckCircle2 className="h-3 w-3" />
                               {isCompleted ? "Done" : "Complete"}
