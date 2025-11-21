@@ -33,11 +33,11 @@ const Planner = () => {
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: string; mealName?: string }>();
+  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; mealName?: string }>();
   
   // Logic for Swapping
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
-  const [swapData, setSwapData] = useState<{ recipe: any; mealType: string; day: string } | null>(null);
+  const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; day: string } | null>(null);
 
   // Logic for Filters (kept from Planner.tsx)
   const [dayFilters, setDayFilters] = useState<{ [key: string]: { veg: boolean; nonVeg: boolean } }>({
@@ -73,7 +73,7 @@ const Planner = () => {
         const dietPreference = profile?.diet_preference || "both";
 
         let recipesQuery = supabase.from("recipes").select("*");
-        if (dietPreference !== "both") recipesQuery = recipesQuery.eq("diet_type", dietPreference);
+        if (dietPreference !== "both") recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
 
         const { data: recipes } = await recipesQuery;
         if (!recipes || recipes.length === 0) { setInitialLoading(false); return; }
@@ -421,7 +421,7 @@ const Planner = () => {
         onConfirm={async (notes) => {
           if (selectedMilestone && user) {
             // Add Visual Milestone
-            addMilestone(selectedMilestone.date, selectedMilestone.mealType, notes);
+            addMilestone(selectedMilestone.date, selectedMilestone.mealType!, notes);
             
             // Log to Database
             const entry = mealPlan.find(m => m.day_of_week === day && m.meal_type === selectedMilestone.mealType);
@@ -459,4 +459,4 @@ const Planner = () => {
   );
 };
 
-export default Planner;dd
+export default Planner;
