@@ -6,7 +6,7 @@ import type { Recipe } from "./useRecipes";
 export type MealPlanEntry = {
   id: string;
   day_of_week: string;
-  meal_type: "breakfast" | "lunch" | "dinner" | "snack";
+  meal_type: "breakfast" | "lunch" | "dinner" | "snack" | "snack2";
   recipe: Recipe;
   servings: number;
 };

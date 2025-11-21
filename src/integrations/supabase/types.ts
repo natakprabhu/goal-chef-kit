@@ -507,7 +507,7 @@ export type Database = {
     Enums: {
       access_level: "guest" | "logged_in" | "subscribed"
       diet_type: "veg" | "non_veg"
-      meal_type: "breakfast" | "lunch" | "dinner" | "snack"
+      meal_type: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -637,7 +637,7 @@ export const Constants = {
     Enums: {
       access_level: ["guest", "logged_in", "subscribed"],
       diet_type: ["veg", "non_veg"],
-      meal_type: ["breakfast", "lunch", "dinner", "snack"],
+      meal_type: ["breakfast", "lunch", "dinner", "snack", "snack2"],
     },
   },
 } as const
