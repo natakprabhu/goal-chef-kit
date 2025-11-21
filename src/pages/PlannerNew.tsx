@@ -55,7 +55,7 @@ const Planner = () => {
   
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
   const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
-  const { addMilestone, hasMilestone } = useMilestones();
+  const { addMilestone, hasMilestone, refetch: refetchMilestones } = useMilestones();
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   
   const day = daysOfWeek[currentDayIndex];
@@ -421,7 +421,7 @@ const Planner = () => {
         onConfirm={async (notes) => {
           if (selectedMilestone && user) {
             // Add Visual Milestone
-            addMilestone(selectedMilestone.date, selectedMilestone.mealType!, notes);
+            await addMilestone(selectedMilestone.date, selectedMilestone.mealType!, notes);
             
             // Log to Database
             const entry = mealPlan.find(m => m.day_of_week === day && m.meal_type === selectedMilestone.mealType);
@@ -438,23 +438,23 @@ const Planner = () => {
                });
                toast.success("Meal Logged Successfully");
             }
+            // Refetch milestones to update UI
+            await refetchMilestones();
             setMilestoneDialogOpen(false);
           }
         }} 
       />
 
       {/* SWAP DIALOG */}
-      {swapData && (
-        <RecipeSwapDialog
-          open={swapDialogOpen}
-          onOpenChange={setSwapDialogOpen}
-          currentRecipe={swapData.recipe}
-          mealType={swapData.mealType}
-          day={swapData.day}
-          weekStartDate={weekStartDate}
-          onSwapComplete={refetch}
-        />
-      )}
+      <RecipeSwapDialog
+        open={swapDialogOpen}
+        onOpenChange={setSwapDialogOpen}
+        currentRecipe={swapData?.recipe || { id: '', title: '', calories: 0, protein: 0, carbs: 0, fats: 0, diet_type: 'veg' } as any}
+        mealType={swapData?.mealType || 'breakfast'}
+        day={swapData?.day || ''}
+        weekStartDate={weekStartDate}
+        onSwapComplete={refetch}
+      />
     </div>
   );
 };
