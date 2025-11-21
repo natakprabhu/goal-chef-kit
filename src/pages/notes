@@ -6,98 +6,100 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-// Importing CalendarDays to avoid conflict, and other icons
-import { CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw, Download } from "lucide-react";
+import { 
+  Sparkles, 
+  CalendarDays, // Changed to avoid crash
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle2, 
+  Eye,
+  RefreshCw,
+  Download
+} from "lucide-react";
 import { useMilestones } from "@/hooks/useMilestones";
-import { useMealPlan } from "@/hooks/useMealPlan";
 import { MilestoneDialog } from "@/components/MilestoneDialog";
+import { format, addDays, startOfWeek } from "date-fns";
+import { useMealPlan } from "@/hooks/useMealPlan";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import RecipeSwapDialog from "@/components/RecipeSwapDialog";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "sonner";
-import RecipeSwapDialog from "@/components/RecipeSwapDialog";
-import { format, addDays, startOfWeek } from "date-fns";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 
-const PlannerNew = () => {
+const Planner = () => {
+  // --- 1. LOGIC FROM PlannerNew ---
   const { user } = useAuth();
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState();
-  const [userDietPreference, setUserDietPreference] = useState("both");
+  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: string; mealName?: string }>();
+  
+  // Logic for Swapping
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
-  const [swapData, setSwapData] = useState(null);
+  const [swapData, setSwapData] = useState<{ recipe: any; mealType: string; day: string } | null>(null);
+
+  // Logic for Filters (kept from Planner.tsx)
+  const [dayFilters, setDayFilters] = useState<{ [key: string]: { veg: boolean; nonVeg: boolean } }>({
+    Monday: { veg: true, nonVeg: true },
+    Tuesday: { veg: true, nonVeg: true },
+    Wednesday: { veg: true, nonVeg: true },
+    Thursday: { veg: true, nonVeg: true },
+    Friday: { veg: true, nonVeg: true },
+    Saturday: { veg: true, nonVeg: true },
+    Sunday: { veg: true, nonVeg: true },
+  });
+
+  const [userDietPreference, setUserDietPreference] = useState("both");
   const [initialLoading, setInitialLoading] = useState(true);
   
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
   const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
   const { addMilestone, hasMilestone } = useMilestones();
-
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  
   const day = daysOfWeek[currentDayIndex];
   const dayDate = format(addDays(currentWeek, currentDayIndex), "yyyy-MM-dd");
 
-  // --- AUTO GENERATE MEAL PLAN LOGIC ---
+  // --- AUTO GENERATE LOGIC ---
   useEffect(() => {
     const autoGenerateMealPlan = async () => {
-      if (!user) {
-        setInitialLoading(false);
-        return;
-      }
+      if (!user) { setInitialLoading(false); return; }
       if (loading) return;
       
       try {
-        const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("diet_preference")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
+        const { data: profile } = await supabase.from("user_profiles").select("diet_preference").eq("user_id", user.id).maybeSingle();
         setUserDietPreference(profile?.diet_preference || "both");
         const dietPreference = profile?.diet_preference || "both";
 
         let recipesQuery = supabase.from("recipes").select("*");
-        if (dietPreference !== "both") {
-          recipesQuery = recipesQuery.eq("diet_type", dietPreference);
-        }
+        if (dietPreference !== "both") recipesQuery = recipesQuery.eq("diet_type", dietPreference);
 
         const { data: recipes } = await recipesQuery;
-        if (!recipes || recipes.length === 0) {
-          setInitialLoading(false);
-          return;
-        }
+        if (!recipes || recipes.length === 0) { setInitialLoading(false); return; }
 
+        // Group & Shuffle logic...
         const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
         const lunches = recipes.filter(r => r.meal_type === "lunch");
         const dinners = recipes.filter(r => r.meal_type === "dinner");
         const snackBase = recipes.filter(r => r.meal_type === "snack");
         const snacks = snackBase.length > 0 ? snackBase : recipes;
 
-        const shuffle = (array) => {
-          const shuffled = [...array];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
-        };
+        const shuffle = (arr: any[]) => arr.sort(() => Math.random() - 0.5);
 
-        const shuffledBreakfasts = shuffle(breakfasts);
-        const shuffledLunches = shuffle(lunches);
-        const shuffledDinners = shuffle(dinners);
-        const shuffledSnacks = shuffle(snacks);
+        const shuffledBreakfasts = shuffle([...breakfasts]);
+        const shuffledLunches = shuffle([...lunches]);
+        const shuffledDinners = shuffle([...dinners]);
+        const shuffledSnacks = shuffle([...snacks]);
 
         const existingPlans = mealPlan;
         const mealPlansToInsert = daysOfWeek.flatMap((dayLabel, index) => {
-          const entries = [];
+          const entries: any[] = [];
           const dayEntries = existingPlans.filter(m => m.day_of_week === dayLabel);
 
-          const ensureEntry = (mealType, pool, offset = 0) => {
+          const ensureEntry = (mealType: string, pool: any[], offset = 0) => {
             if (pool.length === 0) return;
-            const alreadyExists = dayEntries.some(m => m.meal_type === mealType);
-            if (alreadyExists) return;
-
+            if (dayEntries.some(m => m.meal_type === mealType)) return;
             const recipe = pool[(index + offset) % pool.length];
             entries.push({
               user_id: user.id,
@@ -114,7 +116,6 @@ const PlannerNew = () => {
           ensureEntry("dinner", shuffledDinners);
           ensureEntry("snack", shuffledSnacks);
           ensureEntry("snack2", shuffledSnacks, 1);
-
           return entries;
         });
 
@@ -123,89 +124,78 @@ const PlannerNew = () => {
           refetch();
         }
       } catch (error) {
-        console.error("Error auto-generating meal plan:", error);
+        console.error("Error auto-generating:", error);
       } finally {
         setInitialLoading(false);
       }
     };
     autoGenerateMealPlan();
-  }, [user, loading, mealPlan, weekStartDate, refetch, daysOfWeek]);
+  }, [user, loading, mealPlan, weekStartDate, refetch]);
 
-  // --- PDF GENERATION LOGIC ---
+  // --- PDF GENERATION ---
   const generateWeeklyPDF = async () => {
     if (!user) return;
     try {
-      const { data: weekMealPlans } = await supabase
-        .from("meal_plans")
-        .select(`id, day_of_week, meal_type, servings, recipe:recipes(*)`)
-        .eq("user_id", user.id)
-        .eq("week_start_date", weekStartDate);
-
-      if (!weekMealPlans || weekMealPlans.length === 0) {
-        toast.error("No meal plan available for this week");
-        return;
-      }
-
-      const { data: profile } = await supabase.from("user_profiles").select("full_name, diet_preference").eq("user_id", user.id).maybeSingle();
-      const { data: nutritionSummary } = await supabase.from("user_nutrition_summary").select("*").eq("user_id", user.id).maybeSingle();
+      const { data: weekMealPlans } = await supabase.from("meal_plans").select(`*, recipe:recipes(*)`).eq("user_id", user.id).eq("week_start_date", weekStartDate);
+      if (!weekMealPlans?.length) { toast.error("No meal plan available"); return; }
 
       const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.width;
+      doc.text("Weekly Meal Plan", 105, 20, { align: "center" });
+      let yPos = 40;
 
-      doc.setFontSize(20);
-      doc.setFont("helvetica", "bold");
-      doc.text("Weekly Meal Plan", pageWidth / 2, 20, { align: "center" });
-      
-      let yPos = 52;
-      
-      // (Simplified PDF logic for brevity, uses existing logic)
-      for (const day of daysOfWeek) {
-        const dayMeals = weekMealPlans.filter((m) => m.day_of_week === day);
-        if (dayMeals.length === 0) continue;
+      for (const d of daysOfWeek) {
+        const dayMeals = weekMealPlans.filter((m: any) => m.day_of_week === d);
+        if (!dayMeals.length) continue;
         if (yPos > 250) { doc.addPage(); yPos = 20; }
-        doc.setFontSize(14);
-        doc.text(day, 14, yPos);
-        yPos += 8;
         
-        const tableData = dayMeals.map((meal) => [
-          meal.meal_type.toUpperCase(),
-          meal.recipe?.title || "N/A",
-          meal.recipe?.calories || "N/A",
-          `${meal.recipe?.protein || 0}g`,
-        ]);
-        
+        doc.setFontSize(14); doc.text(d, 14, yPos); yPos += 8;
         autoTable(doc, {
           startY: yPos,
-          head: [["Meal", "Recipe", "Cal", "Protein"]],
-          body: tableData,
-          theme: "grid",
+          head: [["Type", "Recipe", "Calories", "Protein"]],
+          body: dayMeals.map((m: any) => [m.meal_type, m.recipe?.title, m.recipe?.calories, m.recipe?.protein + "g"]),
+          theme: "grid"
         });
-        yPos = doc.lastAutoTable.finalY + 10;
+        yPos = (doc as any).lastAutoTable.finalY + 10;
       }
-      doc.save(`meal-plan-${format(currentWeek, "yyyy-MM-dd")}.pdf`);
-      toast.success("PDF downloaded!");
-    } catch (error) {
-      toast.error("Failed to generate PDF");
-    }
+      doc.save(`meal-plan-${weekStartDate}.pdf`);
+      toast.success("PDF Downloaded");
+    } catch (e) { toast.error("PDF Error"); }
   };
 
-  // --- DATA PREP ---
-  const dayMeals = mealPlan.filter((entry) => entry.day_of_week === day);
-  const breakfastMeal = dayMeals.find((m) => m.meal_type === "breakfast");
-  const lunchMeal = dayMeals.find((m) => m.meal_type === "lunch");
-  const dinnerMeal = dayMeals.find((m) => m.meal_type === "dinner");
-  const snackMeal = dayMeals.find((m) => m.meal_type === "snack");
-  const snack2Meal = dayMeals.find((m) => m.meal_type === "snack2");
+  // --- DATA PROCESSING ---
+  // 1. Filter by Day
+  const rawDayMeals = mealPlan.filter(m => m.day_of_week === day);
 
-  const meals = [
-    { type: "breakfast", data: breakfastMeal, emoji: "🌅" },
-    { type: "lunch", data: lunchMeal, emoji: "☀️" },
-    { type: "dinner", data: dinnerMeal, emoji: "🌙" },
-    { type: "snack", data: snackMeal, emoji: "🍿" },
-    { type: "snack2", data: snack2Meal, emoji: "🥤" },
-  ];
+  // 2. Sort Order (Breakfast -> Snack -> Lunch -> Snack2 -> Dinner)
+  const mealOrder = ["breakfast", "snack", "lunch", "snack2", "dinner"];
+  const sortedDayMeals = rawDayMeals.sort((a, b) => mealOrder.indexOf(a.meal_type) - mealOrder.indexOf(b.meal_type));
 
-  const totalCalories = dayMeals.reduce((sum, m) => sum + (m.recipe?.calories || 0), 0);
+  // 3. Apply UI Filters (Veg/NonVeg)
+  const filteredMeals = sortedDayMeals.filter(meal => {
+    const type = meal.recipe?.diet_type || "veg"; // Default to veg if unknown
+    const filters = dayFilters[day];
+    
+    if (type === "veg" && !filters.veg) return false;
+    // Assuming 'non_veg' or anything else falls under nonVeg filter
+    if (type !== "veg" && !filters.nonVeg) return false;
+    
+    return true;
+  });
+
+  // 4. Calculate Totals
+  const dailyTotals = filteredMeals.reduce((acc, meal) => ({
+    calories: acc.calories + (meal.recipe?.calories || 0),
+    protein: acc.protein + (meal.recipe?.protein || 0),
+    carbs: acc.carbs + (meal.recipe?.carbs || 0),
+    fats: acc.fats + (meal.recipe?.fats || 0),
+  }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
+
+  const toggleDayFilter = (day: string, filterType: 'veg' | 'nonVeg') => {
+    setDayFilters(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [filterType]: !prev[day][filterType] }
+    }));
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
@@ -218,166 +208,242 @@ const PlannerNew = () => {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Weekly Meal Planner
               </h1>
-              <p className="text-muted-foreground mt-1">
-                Your personalized meal plan
-              </p>
+              <p className="text-muted-foreground mt-2">5 meals per day for optimal nutrition</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="text-sm">
-                <CalendarDays className="h-3 w-3 mr-1" />
-                {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
-              </Badge>
-              <Button onClick={generateWeeklyPDF} className="gap-2">
-                <Download className="h-4 w-4" />
-                Generate PDF
-              </Button>
+            <div className="flex flex-col items-end gap-2">
+               <div className="flex gap-2">
+                 <Badge variant="outline" className="text-sm h-9 px-3">
+                    <CalendarDays className="h-3 w-3 mr-1" />
+                    {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
+                 </Badge>
+                 <Button onClick={generateWeeklyPDF} size="sm" variant="outline" className="h-9 gap-2">
+                    <Download className="h-3 w-3" /> PDF
+                 </Button>
+               </div>
+              <div className="text-sm text-muted-foreground">
+                Daily Total: <span className="font-bold text-primary">{dailyTotals.calories} cal</span>
+              </div>
             </div>
           </div>
-
-          {/* DATE NAVIGATION */}
+          
+          {/* CAROUSEL NAVIGATION (From Planner.tsx) */}
           <div className="relative mb-8 overflow-hidden">
             <div className="flex items-center justify-center gap-4">
               <Button variant="ghost" size="icon" onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))} disabled={currentDayIndex === 0} className="z-10">
                 <ChevronLeft className="h-6 w-6" />
               </Button>
+              
               <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
                 {daysOfWeek.map((d, i) => {
                   const isActive = i === currentDayIndex;
+                  const isPast = i < currentDayIndex;
+                  
                   return (
                     <button
                       key={d}
                       onClick={() => setCurrentDayIndex(i)}
-                      className={`min-w-[120px] px-6 py-3 rounded-xl font-medium transition-all duration-300 ${isActive ? "bg-primary text-primary-foreground shadow-lg scale-110" : "bg-card border border-border hover:scale-100"}`}
+                      className={`
+                        min-w-[120px] px-6 py-3 rounded-xl font-medium transition-all duration-300
+                        ${isActive 
+                          ? "bg-primary text-primary-foreground shadow-lg scale-110" 
+                          : isPast
+                          ? "bg-muted/50 text-muted-foreground scale-95 opacity-60"
+                          : "bg-card border border-border hover:border-primary/50 scale-95 opacity-80"
+                        }
+                      `}
                     >
-                      <div className="text-sm font-medium">{d}</div>
-                      <div className="text-xs mt-1">{format(addDays(currentWeek, i), "MMM d")}</div>
+                      <div className="text-sm">{d}</div>
+                      <div className="text-xs mt-1 opacity-75">{format(addDays(currentWeek, i), "MMM d")}</div>
                     </button>
                   );
                 })}
               </div>
+
               <Button variant="ghost" size="icon" onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))} disabled={currentDayIndex === 6} className="z-10">
                 <ChevronRight className="h-6 w-6" />
               </Button>
             </div>
           </div>
 
-          {/* MEAL CARDS */}
-          <Card className="border-2 shadow-xl bg-gradient-to-br from-card to-card/50">
-            <CardHeader className="border-b bg-muted/30">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-2xl mb-2">{day}'s Meal Plan</CardTitle>
-                  <CardDescription className="text-base">{dayDate}</CardDescription>
+          {/* MAIN CARD */}
+          <Card className="shadow-xl border-2">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                  {day}'s Meals
+                </CardTitle>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => toggleDayFilter(day, 'veg')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${dayFilters[day].veg ? "bg-green-500/20 border-green-500 text-green-700 dark:text-green-300" : "bg-muted border-border opacity-50"}`}
+                  >
+                    <span className="text-xl">🥗</span> <span className="font-medium">Veg</span>
+                  </button>
+                  <button
+                    onClick={() => toggleDayFilter(day, 'nonVeg')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${dayFilters[day].nonVeg ? "bg-orange-500/20 border-orange-500 text-orange-700 dark:text-orange-300" : "bg-muted border-border opacity-50"}`}
+                  >
+                    <span className="text-xl">🍗</span> <span className="font-medium">Non-Veg</span>
+                  </button>
                 </div>
-                <Badge className="text-lg px-4 py-2"><Flame className="h-4 w-4 mr-1" />{totalCalories} cal</Badge>
               </div>
+              <CardDescription className="text-base mt-2">
+                Nutritionally balanced plan
+              </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-6">
+            <CardContent className="p-6 space-y-4">
               {initialLoading ? (
-                 <div className="space-y-4"><Skeleton className="h-24 w-full" /></div>
-              ) : dayMeals.length === 0 ? (
-                <div className="text-center py-12 space-y-4">
-                  <CalendarDays className="h-16 w-16 mx-auto text-muted-foreground" />
-                  <p>No meal plan for this day yet.</p>
+                <div className="space-y-4">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                </div>
+              ) : filteredMeals.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No meals match your current filters or no plan generated.</p>
+                  <p className="text-sm mt-2">Try enabling veg or non-veg options, or check your connection.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {meals.map(({ type, data }) => {
-                    if (!data) return null;
-                    const recipe = data.recipe;
-                    const isCompleted = hasMilestone(dayDate, type);
+                filteredMeals.map((mealEntry: any) => {
+                  const recipe = mealEntry.recipe;
+                  if (!recipe) return null;
 
-                    return (
-                      <div key={type} className="relative">
-                        <div className={`p-3 rounded-lg border transition-all ${isCompleted ? "bg-primary/5 border-primary/30" : "bg-card hover:bg-muted/20 border-border"}`}>
-                          
-                          <div className="flex items-center justify-between gap-3 mb-2">
-                            <div className="flex-1 min-w-0">
+                  const isCompleted = hasMilestone(dayDate, mealEntry.meal_type);
+                  const isVeg = recipe.diet_type === 'veg';
+                  
+                  return (
+                    <Card key={mealEntry.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="flex">
+                        {/* Color Strip */}
+                        <div className={`w-2 ${isVeg ? 'bg-green-500' : 'bg-orange-500'}`} />
+                        
+                        <div className="flex-1 p-5">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              {/* Badges Row */}
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-sm font-semibold capitalize">{type}</h3>
-                                {recipe.cook_time && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{recipe.cook_time}m</span>}
-                                {isCompleted && <Badge variant="secondary" className="text-xs py-0 h-5">Done</Badge>}
+                                <Badge variant="outline" className="capitalize">
+                                  {mealEntry.meal_type === 'snack2' ? 'Snack 2' : mealEntry.meal_type}
+                                </Badge>
+                                <Badge variant={isVeg ? 'secondary' : 'default'}>
+                                  {isVeg ? '🥗 Vegetarian' : '🍗 Non-Veg'}
+                                </Badge>
+                                {isCompleted && (
+                                  <Badge className="bg-green-500">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
+                                  </Badge>
+                                )}
                               </div>
-                              <h4 className="text-sm font-medium truncate">{recipe.title}</h4>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
-                              <span className="font-semibold text-primary">{recipe.calories} cal</span>
-                              <span>P: {recipe.protein}g</span>
+                              
+                              <h3 className="text-xl font-bold mb-1">{recipe.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-1">{recipe.description}</p>
+                              
+                              {/* Macros Grid */}
+                              <div className="flex flex-wrap gap-4 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold text-primary">{recipe.calories}</span>
+                                  <span className="text-muted-foreground">cal</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.protein}g</span>
+                                  <span className="text-muted-foreground">protein</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.carbs}g</span>
+                                  <span className="text-muted-foreground">carbs</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.fats}g</span>
+                                  <span className="text-muted-foreground">fats</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <span>⏱️ {recipe.cook_time} min</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-
-                          {/* BUTTON GROUP */}
-                          <div className="flex gap-2">
-                            {/* 1. VIEW Button */}
+                          
+                          {/* ACTION BUTTONS */}
+                          <div className="flex gap-2 mt-4">
+                            {/* 1. VIEW */}
                             <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full gap-1 text-xs h-7">
-                                <Eye className="h-3 w-3" /> View
+                              <Button size="sm" variant="default" className="w-full">
+                                <Eye className="h-4 w-4 mr-2" /> View Recipe
                               </Button>
                             </Link>
 
-                            {/* 2. SWAP Button (Styled for visibility) */}
+                            {/* 2. SWAP (New) */}
                             <Button
-                              variant="outline"
                               size="sm"
+                              variant="outline"
+                              className="group border-orange-200 text-orange-700 hover:bg-orange-50 hover:text-orange-800 hover:border-orange-300"
                               onClick={() => {
-                                setSwapData({ recipe, mealType: type, day });
+                                setSwapData({ recipe: recipe, mealType: mealEntry.meal_type, day: day });
                                 setSwapDialogOpen(true);
                               }}
-                              className="group gap-1 text-xs h-7 border-orange-200 text-orange-700 hover:bg-orange-50 hover:text-orange-800 hover:border-orange-300"
                             >
-                              <RefreshCw className="h-3 w-3 transition-transform group-hover:rotate-180" />
+                              <RefreshCw className="h-4 w-4 mr-2 transition-transform group-hover:rotate-180" />
                               Swap
                             </Button>
 
-                            {/* 3. COMPLETE Button */}
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setSelectedMilestone({ date: dayDate, mealType: type, mealName: recipe.title });
-                                setMilestoneDialogOpen(true);
-                              }}
-                              disabled={isCompleted}
-                              className="flex-1 gap-1 text-xs h-7"
-                            >
-                              <CheckCircle2 className="h-3 w-3" />
-                              {isCompleted ? "Done" : "Complete"}
-                            </Button>
+                            {/* 3. COMPLETE */}
+                            {!isCompleted && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedMilestone({ date: dayDate, mealType: mealEntry.meal_type, mealName: recipe.title });
+                                  setMilestoneDialogOpen(true);
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" /> Mark Complete
+                              </Button>
+                            )}
                           </div>
-
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </Card>
+                  );
+                })
               )}
             </CardContent>
           </Card>
         </div>
       </main>
       <Footer />
-
-      {/* DIALOGS */}
-      <MilestoneDialog
-        open={milestoneDialogOpen}
-        onOpenChange={setMilestoneDialogOpen}
+      
+      {/* MILESTONE DIALOG */}
+      <MilestoneDialog 
+        open={milestoneDialogOpen} 
+        onOpenChange={setMilestoneDialogOpen} 
         onConfirm={async (notes) => {
-           if (selectedMilestone && user) {
-             addMilestone(selectedMilestone.date, selectedMilestone.mealType, notes);
-             // (Log logic here)
-             const { error } = await supabase.from("meal_logs").insert({
-               user_id: user.id,
-               log_date: format(new Date(selectedMilestone.date), "yyyy-MM-dd"),
-               meal_type: selectedMilestone.mealType,
-               recipe_id: meals.find(m => m.type === selectedMilestone.mealType)?.data?.recipe?.id,
-               calories: meals.find(m => m.type === selectedMilestone.mealType)?.data?.recipe?.calories,
-             });
-             if (!error) toast.success("Meal Logged!");
-           }
-        }}
-        mealName={selectedMilestone?.mealName}
+          if (selectedMilestone && user) {
+            // Add Visual Milestone
+            addMilestone(selectedMilestone.date, selectedMilestone.mealType, notes);
+            
+            // Log to Database
+            const entry = mealPlan.find(m => m.day_of_week === day && m.meal_type === selectedMilestone.mealType);
+            if(entry?.recipe) {
+               await supabase.from("meal_logs").insert({
+                 user_id: user.id,
+                 log_date: format(new Date(selectedMilestone.date), "yyyy-MM-dd"),
+                 meal_type: selectedMilestone.mealType,
+                 recipe_id: entry.recipe.id,
+                 calories: entry.recipe.calories,
+                 protein: entry.recipe.protein,
+                 carbs: entry.recipe.carbs,
+                 fats: entry.recipe.fats,
+               });
+               toast.success("Meal Logged Successfully");
+            }
+            setMilestoneDialogOpen(false);
+          }
+        }} 
       />
 
+      {/* SWAP DIALOG */}
       {swapData && (
         <RecipeSwapDialog
           open={swapDialogOpen}
@@ -393,4 +459,4 @@ const PlannerNew = () => {
   );
 };
 
-export default PlannerNew;
+export default Planner;
