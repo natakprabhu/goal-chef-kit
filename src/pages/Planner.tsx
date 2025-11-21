@@ -246,12 +246,12 @@ const Planner = () => {
   };
 
   // Calculate daily totals
-  const dailyTotals = Object.values(filteredMeals).reduce((acc: { calories: number; protein: number; carbs: number; fats: number }, meal: any) => ({
+  const dailyTotals = (Object.values(filteredMeals).reduce((acc: { calories: number; protein: number; carbs: number; fats: number }, meal: any) => ({
     calories: acc.calories + (meal?.calories || 0),
     protein: acc.protein + (meal?.protein || 0),
     carbs: acc.carbs + (meal?.carbs || 0),
     fats: acc.fats + (meal?.fats || 0),
-  }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
+  }), { calories: 0, protein: 0, carbs: 0, fats: 0 }) as { calories: number; protein: number; carbs: number; fats: number });
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
@@ -271,7 +271,7 @@ const Planner = () => {
                 {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
               </Badge>
               <div className="text-sm text-muted-foreground">
-                Daily Total: <span className="font-bold text-primary">{dailyTotals?.calories || 0} cal</span>
+                Daily Total: <span className="font-bold text-primary">{dailyTotals.calories} cal</span>
               </div>
             </div>
           </div>
@@ -368,7 +368,7 @@ const Planner = () => {
                 </div>
               </div>
               <CardDescription className="text-base mt-2">
-                Nutritionally balanced 5-meal plan for {dailyTotals?.calories || 0} calories daily
+                Nutritionally balanced 5-meal plan for {dailyTotals.calories} calories daily
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
