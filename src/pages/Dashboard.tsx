@@ -6,7 +6,7 @@ import HealthNews from "@/components/HealthNews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Calendar as CalendarIcon, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2, Scale, Info } from "lucide-react";
+import { Calendar as CalendarIcon, TrendingUp, Heart, ChefHat, Plus, Trash2, Clock, CheckCircle2, Scale, Info,NotebookPen } from "lucide-react";
 import { useMealLogs } from "@/hooks/useMealLogs";
 import { LogMealDialog } from "@/components/LogMealDialog";
 import { LogWeightDialog } from "@/components/LogWeightDialog";
@@ -231,7 +231,7 @@ const Dashboard = () => {
                 </Button>
                 <Link to="/planner" className="block">
                   <Button className="w-full justify-start gap-2 bg-gradient-to-r from-primary to-primary-light hover:opacity-90">
-                    <Calendar className="h-4 w-4" />
+                    <NotebookPen className="h-4 w-4" />
                     View Meal Plan
                   </Button>
                 </Link>
