@@ -223,10 +223,15 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
-                  className="w-full justify-start gap-2 bg-gradient-to-r from-destructive to-red-600 hover:opacity-90 animate-pulse"
+                  className="w-full justify-start gap-2 bg-gradient-to-r from-destructive to-red-600 hover:opacity-90 shadow-md"
                   onClick={() => setWeightDialogOpen(true)}
                 >
-                  <Plus className="h-5 w-5" />                  
+                  <div className="relative flex h-3 w-3 items-center justify-center">
+                    {/* The pulsing outer ring */}
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    {/* The stable inner dot */}
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                  </div>
                   Log Today's Weight
                 </Button>
                 <Link to="/planner" className="block">
