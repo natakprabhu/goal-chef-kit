@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { CheckCircle2 } from "lucide-react";
-import worksGif from "@/assets/works.gif";
+import worksGif from "@/src/assets/works.gif";
 
 // Define the single permanent image/GIF here
 const STATIC_GIF_SRC = worksGif;
