@@ -1,36 +1,34 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { CheckCircle2 } from "lucide-react";
+import worksGif from "@/assets/works.gif";
 
-// Placeholder images used for demonstration. 
-// Replace 'src' with your local GIF paths (e.g., "/gifs/step1.gif")
+// Define the single permanent image/GIF here
+const STATIC_GIF_SRC = worksGif;
+
 const steps = [
   {
     number: "01",
-    title: "Set Your Goal",
+    title: "AI-Tailored Nutrition",
     description:
-      "Tell us whether you want to cut, maintain, or bulk. We calculate your precise calorie needs based on your metrics.",
-    src: "https://placehold.co/600x400/orange/white?text=GoalChef+Demo", 
+      "Our AI analyzes your unique body metrics to craft the perfect diet roadmap. Whether cutting, bulking, or maintaining, get a plan tailored just for you.",
   },
   {
     number: "02",
-    title: "Get Your Plan",
+    title: "Smart AI Swaps",
     description:
-      "Our AI generates a weekly meal plan with recipes that hit your exact targets. Every meal is calculated to the calorie.",
-    src: "https://placehold.co/600x400/green/white?text=Step+2:+Plan",
+      "Don't like a suggestion? Our AI instantly recommends delicious alternatives that fit your macros perfectly. Your diet, your rules.",
   },
   {
     number: "03",
-    title: "Cook & Track",
+    title: "Intelligent Tracking",
     description:
-      "Follow the recipes, adjust portions as needed, and watch your progress. Our smart substitutions keep you on track.",
-    src: "https://placehold.co/600x400/blue/white?text=Step+3:+Track",
+      "Log meals and weight while our smart system tracks your progress toward specific milestones, helping you celebrate every victory on your journey.",
   },
   {
     number: "04",
-    title: "Achieve Results",
+    title: "Monthly AI Booklets",
     description:
-      "Hit your nutrition goals consistently. See real progress with precision nutrition that actually works.",
-    src: "https://placehold.co/600x400/purple/white?text=Step+4:+Results",
+      "Download comprehensive, AI-curated monthly diet planner booklets. Keep your personalized nutrition organized and accessible anywhere you go.",
   },
 ];
 
@@ -124,7 +122,7 @@ export default function HowItWorksCarousel() {
             <div className="relative w-full max-w-lg mx-auto aspect-video rounded-2xl overflow-hidden shadow-xl border border-border/50 bg-muted/30">
                {/* The Static GIF/Image */}
                <img
-                src={steps[0].src} 
+                src={STATIC_GIF_SRC} 
                 alt="GoalChef App Demo"
                 className="w-full h-full object-cover"
               />
