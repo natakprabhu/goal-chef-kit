@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      health_news: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          published_at: string | null
+          read_time: string | null
+          source: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          published_at?: string | null
+          read_time?: string | null
+          source?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          published_at?: string | null
+          read_time?: string | null
+          source?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       meal_logs: {
         Row: {
           calories: number

@@ -1,38 +1,35 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface NewsArticle {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string;
+  category: string | null;
+  read_time: string | null;
+  source: string | null;
+}
 
 const HealthNews = () => {
-  const articles = [
-    {
-      title: "The Science Behind Protein Timing",
-      description: "New research reveals the optimal times to consume protein for maximum muscle growth and recovery.",
-      category: "Nutrition",
-      readTime: "5 min read",
-      source: "Health Journal"
-    },
-    {
-      title: "Understanding Micronutrients",
-      description: "Why vitamins and minerals are just as important as macros for your overall health and fitness goals.",
-      category: "Wellness",
-      readTime: "4 min read",
-      source: "Nutrition Today"
-    },
-    {
-      title: "Meal Prep Tips for Busy Professionals",
-      description: "Expert strategies to prepare healthy meals in advance and stay on track with your nutrition goals.",
-      category: "Lifestyle",
-      readTime: "6 min read",
-      source: "Fitness Magazine"
-    },
-    {
-      title: "The Role of Fiber in Weight Management",
-      description: "Learn how dietary fiber can help with satiety, digestion, and achieving your weight loss goals.",
-      category: "Nutrition",
-      readTime: "5 min read",
-      source: "Diet Science"
-    }
-  ];
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      const { data } = await supabase
+        .from("health_news")
+        .select("*")
+        .order("published_at", { ascending: false })
+        .limit(4);
+      
+      if (data) setArticles(data);
+    };
+    
+    fetchNews();
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -42,30 +39,32 @@ const HealthNews = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {articles.map((article, index) => (
-          <Card key={index} className="border-primary/20 hover:shadow-lg transition-all duration-300 hover:border-primary/40 cursor-pointer group">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <Badge variant="outline" className="text-xs">
-                  {article.category}
-                </Badge>
-                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                {article.title}
-              </CardTitle>
-              <CardDescription className="text-sm">
-                {article.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span>{article.readTime}</span>
-                <span>•</span>
-                <span>{article.source}</span>
-              </div>
-            </CardContent>
-          </Card>
+        {articles.map((article) => (
+          <a key={article.id} href={article.url} target="_blank" rel="noopener noreferrer" className="block">
+            <Card className="border-primary/20 hover:shadow-lg transition-all duration-300 hover:border-primary/40 cursor-pointer group h-full">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs">
+                    {article.category}
+                  </Badge>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                  {article.title}
+                </CardTitle>
+                <CardDescription className="text-sm">
+                  {article.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{article.read_time}</span>
+                  <span>•</span>
+                  <span>{article.source}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </a>
         ))}
       </div>
     </div>
