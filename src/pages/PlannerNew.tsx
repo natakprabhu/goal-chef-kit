@@ -37,7 +37,7 @@ const PlannerNew = () => {
   const day = daysOfWeek[currentDayIndex];
   const dayDate = format(addDays(currentWeek, currentDayIndex), "yyyy-MM-dd");
 
-  // Auto-generate meal plan if none exists for this week (Pro Feature)
+  // Auto-generate / backfill meal plan for this week (Pro Feature)
   useEffect(() => {
     const autoGenerateMealPlan = async () => {
       if (!user) {
@@ -47,117 +47,102 @@ const PlannerNew = () => {
       
       if (loading) return;
       
-      // If no meal plan exists for this week, generate one automatically
-      if (mealPlan.length === 0) {
-        try {
-          // Fetch user profile
-          const { data: profile } = await supabase
-            .from("user_profiles")
-            .select("diet_preference")
-            .eq("user_id", user.id)
-            .maybeSingle();
+      try {
+        // Fetch user profile
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("diet_preference")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-          setUserDietPreference(profile?.diet_preference || "both");
+        setUserDietPreference(profile?.diet_preference || "both");
 
-          const dietPreference = profile?.diet_preference || "both";
+        const dietPreference = profile?.diet_preference || "both";
 
-          // Fetch recipes
-          let recipesQuery = supabase.from("recipes").select("*");
-          if (dietPreference !== "both") {
-            recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
+        // Fetch recipes
+        let recipesQuery = supabase.from("recipes").select("*");
+        if (dietPreference !== "both") {
+          recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
+        }
+
+        const { data: recipes } = await recipesQuery;
+        if (!recipes || recipes.length === 0) {
+          setInitialLoading(false);
+          return;
+        }
+
+        // Group recipes by meal type
+        const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
+        const lunches = recipes.filter(r => r.meal_type === "lunch");
+        const dinners = recipes.filter(r => r.meal_type === "dinner");
+        const snacks = recipes.filter(r => r.meal_type === "snack");
+
+        // Shuffle for variety
+        const shuffle = <T,>(array: T[]): T[] => {
+          const shuffled = [...array];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
           }
+          return shuffled;
+        };
 
-          const { data: recipes } = await recipesQuery;
-          if (!recipes || recipes.length === 0) return;
+        const shuffledBreakfasts = shuffle(breakfasts);
+        const shuffledLunches = shuffle(lunches);
+        const shuffledDinners = shuffle(dinners);
+        const shuffledSnacks = shuffle(snacks);
 
-          // Group recipes by meal type
-          const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
-          const lunches = recipes.filter(r => r.meal_type === "lunch");
-          const dinners = recipes.filter(r => r.meal_type === "dinner");
-          const snacks = recipes.filter(r => r.meal_type === "snack");
+        // Backfill missing meals (including snacks) for each day of this week
+        const existingPlans = mealPlan;
+        const mealPlansToInsert = daysOfWeek.flatMap((dayLabel, index) => {
+          const entries: any[] = [];
 
-          // Shuffle for variety
-          const shuffle = <T,>(array: T[]): T[] => {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
+          const dayEntries = existingPlans.filter(m => m.day_of_week === dayLabel);
+
+          const ensureEntry = (
+            mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2",
+            pool: any[],
+            offset: number = 0
+          ) => {
+            if (pool.length === 0) return;
+            const alreadyExists = dayEntries.some(m => m.meal_type === mealType);
+            if (alreadyExists) return;
+
+            const recipe = pool[(index + offset) % pool.length];
+            entries.push({
+              user_id: user.id,
+              week_start_date: weekStartDate,
+              day_of_week: dayLabel,
+              meal_type: mealType,
+              recipe_id: recipe.id,
+              servings: 1,
+            });
           };
 
-          const shuffledBreakfasts = shuffle(breakfasts);
-          const shuffledLunches = shuffle(lunches);
-          const shuffledDinners = shuffle(dinners);
-          const shuffledSnacks = shuffle(snacks);
+          ensureEntry("breakfast", shuffledBreakfasts);
+          ensureEntry("lunch", shuffledLunches);
+          ensureEntry("dinner", shuffledDinners);
+          // snack1
+          ensureEntry("snack", shuffledSnacks);
+          // snack2 uses same pool but different offset
+          ensureEntry("snack2", shuffledSnacks, 1);
 
-          // Create meal plan entries
-          const mealPlansToInsert = daysOfWeek.flatMap((day, index) => {
-            const entries = [];
-            if (shuffledBreakfasts.length > 0) {
-              entries.push({
-                user_id: user.id,
-                week_start_date: weekStartDate,
-                day_of_week: day,
-                meal_type: "breakfast" as const,
-                recipe_id: shuffledBreakfasts[index % shuffledBreakfasts.length].id,
-                servings: 1,
-              });
-            }
-            if (shuffledLunches.length > 0) {
-              entries.push({
-                user_id: user.id,
-                week_start_date: weekStartDate,
-                day_of_week: day,
-                meal_type: "lunch" as const,
-                recipe_id: shuffledLunches[index % shuffledLunches.length].id,
-                servings: 1,
-              });
-            }
-            if (shuffledDinners.length > 0) {
-              entries.push({
-                user_id: user.id,
-                week_start_date: weekStartDate,
-                day_of_week: day,
-                meal_type: "dinner" as const,
-                recipe_id: shuffledDinners[index % shuffledDinners.length].id,
-                servings: 1,
-              });
-            }
-            if (shuffledSnacks.length > 0) {
-              entries.push({
-                user_id: user.id,
-                week_start_date: weekStartDate,
-                day_of_week: day,
-                meal_type: "snack" as const,
-                recipe_id: shuffledSnacks[index % shuffledSnacks.length].id,
-                servings: 1,
-              });
-            }
-            if (shuffledSnacks.length > 1) {
-              entries.push({
-                user_id: user.id,
-                week_start_date: weekStartDate,
-                day_of_week: day,
-                meal_type: "snack2" as const,
-                recipe_id: shuffledSnacks[(index + 1) % shuffledSnacks.length].id,
-                servings: 1,
-              });
-            }
-            return entries;
-          });
+          return entries;
+        });
 
-          // Insert meal plans
+        if (mealPlansToInsert.length > 0) {
           await supabase.from("meal_plans").insert(mealPlansToInsert);
           refetch();
-        } catch (error) {
-          console.error("Error auto-generating meal plan:", error);
         }
+      } catch (error) {
+        console.error("Error auto-generating meal plan:", error);
+      } finally {
+        setInitialLoading(false);
       }
     };
 
     autoGenerateMealPlan();
-  }, [user, loading, mealPlan.length, weekStartDate, refetch]);
+  }, [user, loading, mealPlan, weekStartDate, refetch, daysOfWeek]);
 
   // Fetch user preference separately
   useEffect(() => {
