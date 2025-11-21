@@ -217,39 +217,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-secondary/20">
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full justify-start gap-2 bg-gradient-to-r from-destructive to-red-600 hover:opacity-90 animate-pulse"
-                  onClick={() => setWeightDialogOpen(true)}
-                >
-                  <Plus className="h-5 w-5" />
-                  <Scale className="h-5 w-5" />
-                  Log Today's Weight
-                </Button>
-                <Link to="/planner" className="block">
-                  <Button className="w-full justify-start gap-2 bg-gradient-to-r from-primary to-primary-light hover:opacity-90">
-                    <Calendar className="h-4 w-4" />
-                    View Meal Plan
-                  </Button>
-                </Link>
-                <Link to="/recipes" className="block">
-                  <Button className="w-full justify-start gap-2 bg-gradient-to-r from-secondary to-accent hover:opacity-90">
-                    <ChefHat className="h-4 w-4" />
-                    Browse Recipes
-                  </Button>
-                </Link>
-                <Link to="/favorites" className="block">
-                  <Button className="w-full justify-start gap-2 bg-gradient-to-r from-accent to-secondary hover:opacity-90">
-                    <Heart className="h-4 w-4" />
-                    My Favorites
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+
           </div>
 
           {/* Macro Breakdown */}
