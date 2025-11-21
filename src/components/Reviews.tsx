@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Star, User } from "lucide-react";
-// Mock data mode: Supabase import commented out to prevent build errors in preview
+// Mock data mode: Supabase import commented out
 // import { supabase } from "@/integrations/supabase/client";
 
 // --- TYPES ---
@@ -13,7 +13,13 @@ type Review = {
   date: string;
 };
 
-// --- HELPER: Google Logo Component ---
+type FloatingReview = Review & {
+  uniqueId: number; // For React keys
+  zone: number;     // Which screen area it occupies
+  duration: number; // How long it stays
+};
+
+// --- HELPER: Google Logo ---
 const GoogleLogo = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -23,7 +29,7 @@ const GoogleLogo = () => (
   </svg>
 );
 
-// --- MOCK DATA ---
+// --- MOCK DATA (50 Indian Reviews) ---
 const MOCK_REVIEWS: Review[] = [
   { id: "1", name: "Aarav Patel", rating: 5, comment: "Finally a diet plan that includes my mom's dal chawal! Lost 3 kgs in 2 weeks.", date: "2 days ago" },
   { id: "2", name: "Diya Sharma", rating: 5, comment: "The paneer recipes are amazing. Didn't feel like I was dieting at all.", date: "1 week ago" },
@@ -77,11 +83,13 @@ const MOCK_REVIEWS: Review[] = [
   { id: "50", name: "Navya Wadhwa", rating: 5, comment: "GoalChef is now part of my daily morning routine. Can't imagine my day without it.", date: "3 days ago" },
 ];
 
-// --- INTERNAL COMPONENT (Not Exported) ---
-// This is a helper component just for this file.
-const ReviewCard = ({ review }: { review: Review }) => (
-  <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all duration-300 w-full mb-4 break-inside-avoid relative">
-    {/* Google G Logo (Absolute Positioned) */}
+// --- HELPER: Single Review Card ---
+const ReviewCard = ({ review, style }: { review: Review; style?: React.CSSProperties }) => (
+  <div 
+    className="absolute w-[300px] sm:w-[340px] bg-white border border-gray-100 p-5 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-500 animate-float-review hover:z-50 hover:scale-[1.02]"
+    style={style}
+  >
+    {/* Google G Logo */}
     <div className="absolute top-4 right-4">
       <GoogleLogo />
     </div>
@@ -95,7 +103,7 @@ const ReviewCard = ({ review }: { review: Review }) => (
         )}
       </div>
       <div>
-        <h4 className="font-bold text-sm text-gray-900">{review.name}</h4>
+        <h4 className="font-bold text-sm text-gray-900 line-clamp-1">{review.name}</h4>
         <div className="flex items-center gap-1 mt-0.5">
           <div className="flex">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -106,135 +114,127 @@ const ReviewCard = ({ review }: { review: Review }) => (
               />
             ))}
           </div>
-          <span className="text-xs text-gray-500 ml-1">• {review.date}</span>
+          <span className="text-xs text-gray-500 ml-1 truncate">• {review.date}</span>
         </div>
       </div>
     </div>
-    <p className="text-sm text-gray-700 leading-relaxed font-normal">{review.comment}</p>
+    <p className="text-sm text-gray-700 leading-relaxed font-normal line-clamp-3">{review.comment}</p>
   </div>
 );
 
-const MarqueeColumn = ({ 
-  reviews, 
-  duration = "40s", 
-  reverse = false 
-}: { 
-  reviews: Review[]; 
-  duration?: string; 
-  reverse?: boolean 
-}) => (
-  <div className="relative flex flex-col overflow-hidden h-[600px] group">
-    {/* Inner moving container */}
-    <div 
-      className={`flex flex-col gap-4 ${reverse ? "animate-marquee-reverse" : "animate-marquee"} group-hover:[animation-play-state:paused]`}
-      style={{ animationDuration: duration }}
-    >
-      {/* Duplicate the list to create seamless loop */}
-      {[...reviews, ...reviews].map((review, i) => (
-        <ReviewCard key={`${review.id}-${i}`} review={review} />
-      ))}
-    </div>
-    {/* Gradient masks for smooth fade in/out */}
-    <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none"></div>
-    <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
-  </div>
-);
-
-// Utility to randomize reviews so every page load feels fresh
-const shuffleArray = (array: Review[]) => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
+// --- ZONE CONFIGURATION ---
+// 7 Possible Zones configured to avoid the "Top Center" area where the title resides.
+// This creates a U-shape or "Wings" around the title.
+const ZONES = [
+  { top: '0%', left: '5%' },    // Top Left
+  { top: '0%', left: '70%' },   // Top Right
+  { top: '35%', left: '2%' },   // Middle Left
+  { top: '30%', left: '75%' },  // Middle Right
+  { top: '65%', left: '10%' },  // Bottom Left
+  { top: '70%', left: '40%' },  // Bottom Center
+  { top: '60%', left: '70%' }   // Bottom Right
+];
 
 // --- MAIN COMPONENT ---
-// This is the component you import as "Reviews" in your other files
 const Reviews = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [activeReviews, setActiveReviews] = useState<FloatingReview[]>([]);
+  const reviewIndexRef = useRef(0);
+  // Track available zones to prevent overlapping
+  const availableZonesRef = useRef<number[]>([0, 1, 2, 3, 4, 5, 6]); 
 
-  // Fetch from Supabase + Randomize on Load
+  // Animation Loop
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        // 1. Randomize Mock Data First (Instant Load)
-        setReviews(shuffleArray(MOCK_REVIEWS));
+    const addReview = () => {
+      // Max 6 reviews at a time (High density but clean)
+      if (activeReviews.length >= 6) return;
+      
+      // Check if we have available zones
+      if (availableZonesRef.current.length === 0) return;
 
-        // 2. Try Fetching Real Data (Supabase code commented out for safety)
-        /*
-        const { data, error } = await supabase
-          .from('reviews')
-          .select('*')
-          .limit(50)
-          .order('created_at', { ascending: false });
+      // 1. Pick a random available zone
+      const randomZoneIndex = Math.floor(Math.random() * availableZonesRef.current.length);
+      const zoneId = availableZonesRef.current[randomZoneIndex];
+      
+      // Remove this zone from available list immediately
+      availableZonesRef.current.splice(randomZoneIndex, 1);
 
-        if (!error && data && data.length > 0) {
-          const mappedReviews: Review[] = data.map((item: any) => ({
-            id: item.id,
-            name: item.user_name || "Anonymous",
-            rating: item.rating || 5,
-            comment: item.comment || item.content || "",
-            date: new Date(item.created_at).toLocaleDateString(),
-            avatar_url: item.avatar_url
-          }));
-          setReviews(shuffleArray(mappedReviews));
-        }
-        */
-      } catch (e) {
-        console.log("Using mock data due to connection issue:", e);
-      }
+      // 2. Pick next review from data (cycle through)
+      const reviewData = MOCK_REVIEWS[reviewIndexRef.current];
+      reviewIndexRef.current = (reviewIndexRef.current + 1) % MOCK_REVIEWS.length;
+
+      // 3. Create new floating review
+      const duration = 7000 + Math.random() * 3000; // Random duration 7s - 10s
+      const newReview: FloatingReview = {
+        ...reviewData,
+        uniqueId: Date.now() + Math.random(),
+        zone: zoneId,
+        duration: duration
+      };
+
+      // 4. Add to state
+      setActiveReviews(prev => [...prev, newReview]);
+
+      // 5. Schedule removal and free up zone
+      setTimeout(() => {
+        setActiveReviews(prev => prev.filter(r => r.uniqueId !== newReview.uniqueId));
+        // Add zone back to available list
+        availableZonesRef.current.push(zoneId);
+      }, duration); 
     };
 
-    fetchReviews();
-  }, []);
+    // Try to add a new review faster (every 1.5s) to fill the screen quickly
+    const intervalId = setInterval(addReview, 1500); 
 
-  // Split reviews into 3 columns for the masonry effect
-  const chunk1 = reviews.slice(0, Math.ceil(reviews.length / 3));
-  const chunk2 = reviews.slice(Math.ceil(reviews.length / 3), Math.ceil(2 * reviews.length / 3));
-  const chunk3 = reviews.slice(Math.ceil(2 * reviews.length / 3));
+    return () => clearInterval(intervalId);
+  }, [activeReviews.length]);
 
   return (
-    <section className="py-20 bg-background overflow-hidden">
+    <section className="py-24 bg-background overflow-hidden relative min-h-[800px]">
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-50%); }
+        @keyframes float-review {
+          0% { opacity: 0; transform: translateY(40px) scale(0.9); }
+          10% { opacity: 1; transform: translateY(0) scale(1); }
+          85% { opacity: 1; transform: translateY(-10px) scale(1); }
+          100% { opacity: 0; transform: translateY(-40px) scale(0.95); }
         }
-        @keyframes marquee-reverse {
-          0% { transform: translateY(-50%); }
-          100% { transform: translateY(0); }
-        }
-        .animate-marquee {
-          animation: marquee linear infinite;
-        }
-        .animate-marquee-reverse {
-          animation: marquee-reverse linear infinite;
+        .animate-float-review {
+          animation-name: float-review;
+          animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          animation-fill-mode: forwards;
         }
       `}</style>
 
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+      <div className="container mx-auto px-4 h-[600px] relative">
+        {/* Title Section - Centered at top with Opaque Background */}
+        <div className="text-center mb-12 relative z-10 max-w-2xl mx-auto pointer-events-none bg-background/95 backdrop-blur-sm py-8 rounded-3xl border border-border/50 shadow-sm">
+          <h2 className="text-3xl lg:text-5xl font-bold mb-6 pointer-events-auto">
             Loved by{" "}
             <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               Healthy Eaters
             </span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            See what the community is saying about their GoalChef journey.
+          <p className="text-lg text-muted-foreground pointer-events-auto">
+            See what the community is saying about their GoalChef journey. 
+            Real people, real results.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
-          <MarqueeColumn reviews={chunk1} duration="120s" />
-          {/* Middle column moves slower and in reverse direction for visual interest */}
-          <MarqueeColumn reviews={chunk2} duration="140s" reverse={true} />
-          {/* Third column hidden on mobile for better space management */}
-          <div className="hidden lg:block">
-            <MarqueeColumn reviews={chunk3} duration="130s" />
-          </div>
+        {/* Floating Container Layer */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          {activeReviews.map((review) => (
+            <ReviewCard 
+              key={review.uniqueId} 
+              review={review} 
+              style={{
+                top: ZONES[review.zone].top,
+                left: ZONES[review.zone].left,
+                animationDuration: `${review.duration}ms`,
+                // Add randomness to position so it doesn't look like a perfect grid
+                marginLeft: `${Math.random() * 40 - 20}px`, 
+                marginTop: `${Math.random() * 40 - 20}px`,
+              }}
+            />
+          ))}
         </div>
       </div>
     </section>
