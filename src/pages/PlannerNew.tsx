@@ -24,10 +24,10 @@ const PlannerNew = () => {
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: "breakfast" | "lunch" | "dinner" | "snack"; mealName?: string }>();
+  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; mealName?: string }>();
   const [userDietPreference, setUserDietPreference] = useState<string>("both");
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
-  const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack"; day: string } | null>(null);
+  const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; day: string } | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
   const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
@@ -134,6 +134,16 @@ const PlannerNew = () => {
                 servings: 1,
               });
             }
+            if (shuffledSnacks.length > 1) {
+              entries.push({
+                user_id: user.id,
+                week_start_date: weekStartDate,
+                day_of_week: day,
+                meal_type: "snack2" as const,
+                recipe_id: shuffledSnacks[(index + 1) % shuffledSnacks.length].id,
+                servings: 1,
+              });
+            }
             return entries;
           });
 
@@ -174,12 +184,14 @@ const PlannerNew = () => {
   const lunchMeal = dayMeals.find((m) => m.meal_type === "lunch");
   const dinnerMeal = dayMeals.find((m) => m.meal_type === "dinner");
   const snackMeal = dayMeals.find((m) => m.meal_type === "snack");
+  const snack2Meal = dayMeals.find((m) => m.meal_type === "snack2");
 
-  const meals: Array<{ type: "breakfast" | "lunch" | "dinner" | "snack"; data: typeof breakfastMeal; emoji: string }> = [
+  const meals: Array<{ type: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; data: typeof breakfastMeal; emoji: string }> = [
     { type: "breakfast", data: breakfastMeal, emoji: "🌅" },
     { type: "lunch", data: lunchMeal, emoji: "☀️" },
     { type: "dinner", data: dinnerMeal, emoji: "🌙" },
     { type: "snack", data: snackMeal, emoji: "🍿" },
+    { type: "snack2", data: snack2Meal, emoji: "🥤" },
   ];
 
   const totalCalories = dayMeals.reduce((sum, m) => sum + (m.recipe?.calories || 0), 0);
