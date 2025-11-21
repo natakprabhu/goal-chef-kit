@@ -402,11 +402,11 @@ const Dashboard = () => {
                           {mealsForType.length > 0 && (
                             <div className="space-y-2 pt-3 border-t border-gray-200/50">
                               {mealsForType.map((meal) => (
-                                <div key={meal.id} className="space-y-1">
-                                  <div className="flex items-center justify-between text-sm">
-                                    <span className="font-medium text-foreground">
-                                      {meal.custom_meal_name || meal.recipe?.title || 'Logged Meal'}
-                                    </span>
+                                  <div key={meal.id} className="space-y-1">
+                                    <div className="flex items-center justify-between text-sm">
+                                      <span className="font-medium text-foreground">
+                                        {meal.custom_meal_name || 'Logged Meal'}
+                                      </span>
                                     <div className="flex items-center gap-2">
                                       <span className="font-semibold">{meal.calories} cal</span>
                                       <Button
