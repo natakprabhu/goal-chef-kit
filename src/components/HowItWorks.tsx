@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { CheckCircle2 } from "lucide-react";
-import worksGif from "../assets/works.gif";
+import worksGif from "../assets/how-it-works.gif";
 
 // Define the single permanent image/GIF here
 const STATIC_GIF_SRC = worksGif;
@@ -8,27 +8,27 @@ const STATIC_GIF_SRC = worksGif;
 const steps = [
   {
     number: "01",
-    title: "AI-Tailored Nutrition",
+    title: "AI-Tailored Diet",
     description:
-      "Our AI analyzes your unique body metrics to craft the perfect diet roadmap. Whether cutting, bulking, or maintaining, get a plan tailored just for you.",
+      "Experience a fully AI-tailored diet plan designed around your specific body metrics. Whether cutting, bulking, or maintaining, our AI builds the precise roadmap for your goals.",
   },
   {
     number: "02",
-    title: "Smart AI Swaps",
+    title: "Smart AI Diet Swaps",
     description:
-      "Don't like a suggestion? Our AI instantly recommends delicious alternatives that fit your macros perfectly. Your diet, your rules.",
+      "Need a change? Use our AI swap feature to instantly replace any meal with delicious alternatives that perfectly match your macros. Enjoy flexibility without breaking your diet.",
   },
   {
     number: "03",
-    title: "Intelligent Tracking",
+    title: "Add & Track Milestones",
     description:
-      "Log meals and weight while our smart system tracks your progress toward specific milestones, helping you celebrate every victory on your journey.",
+      "Set and add personal milestones to your journey. Our AI-powered system tracks your meals and weight progress, ensuring you celebrate every achievement along the way.",
   },
   {
     number: "04",
-    title: "Monthly AI Booklets",
+    title: "Monthly AI Planner Booklets",
     description:
-      "Download comprehensive, AI-curated monthly diet planner booklets. Keep your personalized nutrition organized and accessible anywhere you go.",
+      "Generate and download comprehensive monthly diet planner booklets. Our AI curates your entire month's nutrition into an organized, easy-to-follow guide you can take anywhere.",
   },
 ];
 
