@@ -6,111 +6,100 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, ChevronLeft, ChevronRight, CheckCircle2, Eye, Clock, Flame, RefreshCw } from "lucide-react";
+import { 
+  Sparkles, 
+  CalendarDays, // Changed to avoid crash
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle2, 
+  Eye,
+  RefreshCw,
+  Download
+} from "lucide-react";
 import { useMilestones } from "@/hooks/useMilestones";
-import { useMealPlan } from "@/hooks/useMealPlan";
 import { MilestoneDialog } from "@/components/MilestoneDialog";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
-import RecipeSwapDialog from "@/components/RecipeSwapDialog";
 import { format, addDays, startOfWeek } from "date-fns";
+import { useMealPlan } from "@/hooks/useMealPlan";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import RecipeSwapDialog from "@/components/RecipeSwapDialog";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { toast } from "sonner";
 
-const PlannerNew = () => {
+const Planner = () => {
+  // --- 1. LOGIC FROM PlannerNew ---
   const { user } = useAuth();
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; mealName?: string }>();
-  const [userDietPreference, setUserDietPreference] = useState<string>("both");
+  const [selectedMilestone, setSelectedMilestone] = useState<{ date: string; mealType?: string; mealName?: string }>();
+  
+  // Logic for Swapping
   const [swapDialogOpen, setSwapDialogOpen] = useState(false);
-  const [swapData, setSwapData] = useState<{ recipe: any; mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; day: string } | null>(null);
+  const [swapData, setSwapData] = useState<{ recipe: any; mealType: string; day: string } | null>(null);
+
+  // Logic for Filters (kept from Planner.tsx)
+  const [dayFilters, setDayFilters] = useState<{ [key: string]: { veg: boolean; nonVeg: boolean } }>({
+    Monday: { veg: true, nonVeg: true },
+    Tuesday: { veg: true, nonVeg: true },
+    Wednesday: { veg: true, nonVeg: true },
+    Thursday: { veg: true, nonVeg: true },
+    Friday: { veg: true, nonVeg: true },
+    Saturday: { veg: true, nonVeg: true },
+    Sunday: { veg: true, nonVeg: true },
+  });
+
+  const [userDietPreference, setUserDietPreference] = useState("both");
   const [initialLoading, setInitialLoading] = useState(true);
+  
   const weekStartDate = format(currentWeek, "yyyy-MM-dd");
   const { mealPlan, loading, refetch } = useMealPlan(weekStartDate);
   const { addMilestone, hasMilestone } = useMilestones();
-
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  
   const day = daysOfWeek[currentDayIndex];
   const dayDate = format(addDays(currentWeek, currentDayIndex), "yyyy-MM-dd");
 
-  // Auto-generate / backfill meal plan for this week (Pro Feature)
+  // --- AUTO GENERATE LOGIC ---
   useEffect(() => {
     const autoGenerateMealPlan = async () => {
-      if (!user) {
-        setInitialLoading(false);
-        return;
-      }
-      
+      if (!user) { setInitialLoading(false); return; }
       if (loading) return;
       
       try {
-        // Fetch user profile
-        const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("diet_preference")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
+        const { data: profile } = await supabase.from("user_profiles").select("diet_preference").eq("user_id", user.id).maybeSingle();
         setUserDietPreference(profile?.diet_preference || "both");
-
         const dietPreference = profile?.diet_preference || "both";
 
-        // Fetch recipes
         let recipesQuery = supabase.from("recipes").select("*");
-        if (dietPreference !== "both") {
-          recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");
-        }
+        if (dietPreference !== "both") recipesQuery = recipesQuery.eq("diet_type", dietPreference);
 
         const { data: recipes } = await recipesQuery;
-        if (!recipes || recipes.length === 0) {
-          setInitialLoading(false);
-          return;
-        }
+        if (!recipes || recipes.length === 0) { setInitialLoading(false); return; }
 
-        // Group recipes by meal type
+        // Group & Shuffle logic...
         const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
         const lunches = recipes.filter(r => r.meal_type === "lunch");
         const dinners = recipes.filter(r => r.meal_type === "dinner");
         const snackBase = recipes.filter(r => r.meal_type === "snack");
-
-        // If there are no dedicated snack recipes yet, fall back to using all recipes
         const snacks = snackBase.length > 0 ? snackBase : recipes;
 
-        // Shuffle for variety
-        const shuffle = <T,>(array: T[]): T[] => {
-          const shuffled = [...array];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
-        };
+        const shuffle = (arr: any[]) => arr.sort(() => Math.random() - 0.5);
 
-        const shuffledBreakfasts = shuffle(breakfasts);
-        const shuffledLunches = shuffle(lunches);
-        const shuffledDinners = shuffle(dinners);
-        const shuffledSnacks = shuffle(snacks);
+        const shuffledBreakfasts = shuffle([...breakfasts]);
+        const shuffledLunches = shuffle([...lunches]);
+        const shuffledDinners = shuffle([...dinners]);
+        const shuffledSnacks = shuffle([...snacks]);
 
-        // Backfill missing meals (including snacks) for each day of this week
         const existingPlans = mealPlan;
         const mealPlansToInsert = daysOfWeek.flatMap((dayLabel, index) => {
           const entries: any[] = [];
-
           const dayEntries = existingPlans.filter(m => m.day_of_week === dayLabel);
 
-          const ensureEntry = (
-            mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2",
-            pool: any[],
-            offset: number = 0
-          ) => {
+          const ensureEntry = (mealType: string, pool: any[], offset = 0) => {
             if (pool.length === 0) return;
-            const alreadyExists = dayEntries.some(m => m.meal_type === mealType);
-            if (alreadyExists) return;
-
+            if (dayEntries.some(m => m.meal_type === mealType)) return;
             const recipe = pool[(index + offset) % pool.length];
             entries.push({
               user_id: user.id,
@@ -125,11 +114,8 @@ const PlannerNew = () => {
           ensureEntry("breakfast", shuffledBreakfasts);
           ensureEntry("lunch", shuffledLunches);
           ensureEntry("dinner", shuffledDinners);
-          // snack1
           ensureEntry("snack", shuffledSnacks);
-          // snack2 uses same pool but different offset
           ensureEntry("snack2", shuffledSnacks, 1);
-
           return entries;
         });
 
@@ -138,202 +124,77 @@ const PlannerNew = () => {
           refetch();
         }
       } catch (error) {
-        console.error("Error auto-generating meal plan:", error);
+        console.error("Error auto-generating:", error);
       } finally {
         setInitialLoading(false);
       }
     };
-
     autoGenerateMealPlan();
-  }, [user, loading, mealPlan, weekStartDate, refetch, daysOfWeek]);
+  }, [user, loading, mealPlan, weekStartDate, refetch]);
 
-  // Fetch user preference separately
-  useEffect(() => {
-    const fetchUserPreference = async () => {
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("user_profiles")
-        .select("diet_preference")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      setUserDietPreference(data?.diet_preference || "both");
-    };
-
-    fetchUserPreference();
-  }, [user]);
-
-  // Filter meals for current day
-  const dayMeals = mealPlan.filter((entry) => entry.day_of_week === day);
-
-  // Group by meal type
-  const breakfastMeal = dayMeals.find((m) => m.meal_type === "breakfast");
-  const lunchMeal = dayMeals.find((m) => m.meal_type === "lunch");
-  const dinnerMeal = dayMeals.find((m) => m.meal_type === "dinner");
-  const snackMeal = dayMeals.find((m) => m.meal_type === "snack");
-  const snack2Meal = dayMeals.find((m) => m.meal_type === "snack2");
-
-  const meals: Array<{ type: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"; data: typeof breakfastMeal; emoji: string }> = [
-    { type: "breakfast", data: breakfastMeal, emoji: "🌅" },
-    { type: "lunch", data: lunchMeal, emoji: "☀️" },
-    { type: "dinner", data: dinnerMeal, emoji: "🌙" },
-    { type: "snack", data: snackMeal, emoji: "🍿" },
-    { type: "snack2", data: snack2Meal, emoji: "🥤" },
-  ];
-
-  const totalCalories = dayMeals.reduce((sum, m) => sum + (m.recipe?.calories || 0), 0);
-
+  // --- PDF GENERATION ---
   const generateWeeklyPDF = async () => {
     if (!user) return;
-    
     try {
-      // Fetch all meal plans for the current week
-      const { data: weekMealPlans } = await supabase
-        .from("meal_plans")
-        .select(`
-          id,
-          day_of_week,
-          meal_type,
-          servings,
-          recipe:recipes(*)
-        `)
-        .eq("user_id", user.id)
-        .eq("week_start_date", weekStartDate);
-
-      if (!weekMealPlans || weekMealPlans.length === 0) {
-        toast.error("No meal plan available for this week");
-        return;
-      }
-
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("full_name, diet_preference")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      const { data: nutritionSummary } = await supabase
-        .from("user_nutrition_summary")
-        .select("daily_calories, daily_protein, daily_carbs, daily_fats")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: weekMealPlans } = await supabase.from("meal_plans").select(`*, recipe:recipes(*)`).eq("user_id", user.id).eq("week_start_date", weekStartDate);
+      if (!weekMealPlans?.length) { toast.error("No meal plan available"); return; }
 
       const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.width;
+      doc.text("Weekly Meal Plan", 105, 20, { align: "center" });
+      let yPos = 40;
 
-      // Title
-      doc.setFontSize(20);
-      doc.setFont("helvetica", "bold");
-      doc.text("Weekly Meal Plan", pageWidth / 2, 20, { align: "center" });
-
-      // User info
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      const weekStart = format(currentWeek, "MMM d, yyyy");
-      const weekEnd = format(addDays(currentWeek, 6), "MMM d, yyyy");
-      doc.text(`${weekStart} - ${weekEnd}`, pageWidth / 2, 28, { align: "center" });
-      
-      if (profile?.full_name) {
-        doc.text(`Prepared for: ${profile.full_name}`, 14, 38);
-      }
-      if (profile?.diet_preference) {
-        doc.text(`Diet: ${profile.diet_preference === "veg" ? "Vegetarian" : profile.diet_preference === "non_veg" ? "Non-Vegetarian" : "All"}`, 14, 44);
-      }
-
-      let yPos = 52;
-
-      // Daily targets
-      if (nutritionSummary) {
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("Daily Targets:", 14, yPos);
-        yPos += 6;
+      for (const d of daysOfWeek) {
+        const dayMeals = weekMealPlans.filter((m: any) => m.day_of_week === d);
+        if (!dayMeals.length) continue;
+        if (yPos > 250) { doc.addPage(); yPos = 20; }
         
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Calories: ${nutritionSummary.daily_calories || "N/A"} | Protein: ${nutritionSummary.daily_protein || "N/A"}g | Carbs: ${nutritionSummary.daily_carbs || "N/A"}g | Fats: ${nutritionSummary.daily_fats || "N/A"}g`, 14, yPos);
-        yPos += 10;
-      }
-
-      // Group meals by day
-      const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-      
-      for (const day of daysOfWeek) {
-        const dayMeals = weekMealPlans.filter((m: any) => m.day_of_week === day);
-        
-        if (dayMeals.length === 0) continue;
-
-        // Check if we need a new page
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 20;
-        }
-
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text(day, 14, yPos);
-        yPos += 8;
-
-        const tableData = dayMeals.map((meal: any) => [
-          meal.meal_type.charAt(0).toUpperCase() + meal.meal_type.slice(1),
-          meal.recipe?.title || "N/A",
-          meal.recipe?.calories || "N/A",
-          `${meal.recipe?.protein || 0}g`,
-          `${meal.recipe?.carbs || 0}g`,
-          `${meal.recipe?.fats || 0}g`,
-        ]);
-
+        doc.setFontSize(14); doc.text(d, 14, yPos); yPos += 8;
         autoTable(doc, {
           startY: yPos,
-          head: [["Meal", "Recipe", "Cal", "Protein", "Carbs", "Fats"]],
-          body: tableData,
-          theme: "grid",
-          headStyles: { fillColor: [79, 70, 229] },
-          margin: { left: 14, right: 14 },
-          styles: { fontSize: 9 },
+          head: [["Type", "Recipe", "Calories", "Protein"]],
+          body: dayMeals.map((m: any) => [m.meal_type, m.recipe?.title, m.recipe?.calories, m.recipe?.protein + "g"]),
+          theme: "grid"
         });
-
         yPos = (doc as any).lastAutoTable.finalY + 10;
       }
+      doc.save(`meal-plan-${weekStartDate}.pdf`);
+      toast.success("PDF Downloaded");
+    } catch (e) { toast.error("PDF Error"); }
+  };
 
-      // Weekly summary
-      const totalWeeklyCalories = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.calories || 0), 0);
-      const totalWeeklyProtein = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.protein || 0), 0);
-      const totalWeeklyCarbs = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.carbs || 0), 0);
-      const totalWeeklyFats = weekMealPlans.reduce((sum: number, m: any) => sum + (m.recipe?.fats || 0), 0);
+  // --- DATA PROCESSING ---
+  // 1. Filter by Day
+  const rawDayMeals = mealPlan.filter(m => m.day_of_week === day);
 
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
+  // 2. Sort Order (Breakfast -> Snack -> Lunch -> Snack2 -> Dinner)
+  const mealOrder = ["breakfast", "snack", "lunch", "snack2", "dinner"];
+  const sortedDayMeals = rawDayMeals.sort((a, b) => mealOrder.indexOf(a.meal_type) - mealOrder.indexOf(b.meal_type));
 
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("Weekly Summary", 14, yPos);
-      yPos += 8;
+  // 3. Apply UI Filters (Veg/NonVeg)
+  const filteredMeals = sortedDayMeals.filter(meal => {
+    const type = meal.recipe?.diet_type || "veg"; // Default to veg if unknown
+    const filters = dayFilters[day];
+    
+    if (type === "veg" && !filters.veg) return false;
+    // Assuming 'non_veg' or anything else falls under nonVeg filter
+    if (type !== "veg" && !filters.nonVeg) return false;
+    
+    return true;
+  });
 
-      autoTable(doc, {
-        startY: yPos,
-        head: [["Nutrient", "Total", "Daily Avg"]],
-        body: [
-          ["Calories", totalWeeklyCalories.toString(), Math.round(totalWeeklyCalories / 7).toString()],
-          ["Protein", `${totalWeeklyProtein}g`, `${Math.round(totalWeeklyProtein / 7)}g`],
-          ["Carbs", `${totalWeeklyCarbs}g`, `${Math.round(totalWeeklyCarbs / 7)}g`],
-          ["Fats", `${totalWeeklyFats}g`, `${Math.round(totalWeeklyFats / 7)}g`],
-        ],
-        theme: "grid",
-        headStyles: { fillColor: [79, 70, 229] },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 10 },
-      });
+  // 4. Calculate Totals
+  const dailyTotals = filteredMeals.reduce((acc, meal) => ({
+    calories: acc.calories + (meal.recipe?.calories || 0),
+    protein: acc.protein + (meal.recipe?.protein || 0),
+    carbs: acc.carbs + (meal.recipe?.carbs || 0),
+    fats: acc.fats + (meal.recipe?.fats || 0),
+  }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
-      doc.save(`meal-plan-${format(currentWeek, "yyyy-MM-dd")}.pdf`);
-      toast.success("PDF downloaded successfully!");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF");
-    }
+  const toggleDayFilter = (day: string, filterType: 'veg' | 'nonVeg') => {
+    setDayFilters(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [filterType]: !prev[day][filterType] }
+    }));
   };
 
   return (
@@ -341,273 +202,248 @@ const PlannerNew = () => {
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
+          {/* HEADER */}
           <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Weekly Meal Planner
               </h1>
-              <p className="text-muted-foreground mt-1">
-                Your personalized meal plan based on {userDietPreference === "veg" ? "vegetarian" : userDietPreference === "non_veg" ? "non-vegetarian" : "all"} preferences
-              </p>
+              <p className="text-muted-foreground mt-2">5 meals per day for optimal nutrition</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="text-sm">
-                <Calendar className="h-3 w-3 mr-1" />
-                {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
-              </Badge>
-              <Button onClick={generateWeeklyPDF} className="gap-2">
-                <Download className="h-4 w-4" />
-                Generate PDF
-              </Button>
+            <div className="flex flex-col items-end gap-2">
+               <div className="flex gap-2">
+                 <Badge variant="outline" className="text-sm h-9 px-3">
+                    <CalendarDays className="h-3 w-3 mr-1" />
+                    {format(addDays(currentWeek, currentDayIndex), "MMM d, yyyy")}
+                 </Badge>
+                 <Button onClick={generateWeeklyPDF} size="sm" variant="outline" className="h-9 gap-2">
+                    <Download className="h-3 w-3" /> PDF
+                 </Button>
+               </div>
+              <div className="text-sm text-muted-foreground">
+                Daily Total: <span className="font-bold text-primary">{dailyTotals.calories} cal</span>
+              </div>
             </div>
           </div>
-
-          {/* Carousel Navigation */}
+          
+          {/* CAROUSEL NAVIGATION (From Planner.tsx) */}
           <div className="relative mb-8 overflow-hidden">
             <div className="flex items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
-                disabled={currentDayIndex === 0}
-                className="z-10"
-              >
+              <Button variant="ghost" size="icon" onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))} disabled={currentDayIndex === 0} className="z-10">
                 <ChevronLeft className="h-6 w-6" />
               </Button>
-
+              
               <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
                 {daysOfWeek.map((d, i) => {
                   const isActive = i === currentDayIndex;
                   const isPast = i < currentDayIndex;
-
+                  
                   return (
-                  <button
+                    <button
                       key={d}
                       onClick={() => setCurrentDayIndex(i)}
                       className={`
                         min-w-[120px] px-6 py-3 rounded-xl font-medium transition-all duration-300
-                        ${
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-lg scale-110"
-                            : isPast
-                            ? "bg-muted/50 text-muted-foreground scale-95 hover:bg-muted hover:scale-100"
-                            : "bg-card border border-border hover:border-primary hover:bg-accent hover:scale-100 text-foreground"
+                        ${isActive 
+                          ? "bg-primary text-primary-foreground shadow-lg scale-110" 
+                          : isPast
+                          ? "bg-muted/50 text-muted-foreground scale-95 opacity-60"
+                          : "bg-card border border-border hover:border-primary/50 scale-95 opacity-80"
                         }
                       `}
                     >
-                      <div className="text-sm font-medium">{d}</div>
-                      <div className="text-xs mt-1">{format(addDays(currentWeek, i), "MMM d")}</div>
+                      <div className="text-sm">{d}</div>
+                      <div className="text-xs mt-1 opacity-75">{format(addDays(currentWeek, i), "MMM d")}</div>
                     </button>
                   );
                 })}
               </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
-                disabled={currentDayIndex === 6}
-                className="z-10"
-              >
+              <Button variant="ghost" size="icon" onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))} disabled={currentDayIndex === 6} className="z-10">
                 <ChevronRight className="h-6 w-6" />
               </Button>
             </div>
           </div>
 
-          {/* Day Card */}
-          <Card className="border-2 shadow-xl bg-gradient-to-br from-card to-card/50">
-            <CardHeader className="border-b bg-muted/30">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-2xl mb-2">{day}'s Meal Plan</CardTitle>
-                  <CardDescription className="text-base">
-                    {format(addDays(currentWeek, currentDayIndex), "MMMM d, yyyy")}
-                  </CardDescription>
+          {/* MAIN CARD */}
+          <Card className="shadow-xl border-2">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                  {day}'s Meals
+                </CardTitle>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => toggleDayFilter(day, 'veg')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${dayFilters[day].veg ? "bg-green-500/20 border-green-500 text-green-700 dark:text-green-300" : "bg-muted border-border opacity-50"}`}
+                  >
+                    <span className="text-xl">🥗</span> <span className="font-medium">Veg</span>
+                  </button>
+                  <button
+                    onClick={() => toggleDayFilter(day, 'nonVeg')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${dayFilters[day].nonVeg ? "bg-orange-500/20 border-orange-500 text-orange-700 dark:text-orange-300" : "bg-muted border-border opacity-50"}`}
+                  >
+                    <span className="text-xl">🍗</span> <span className="font-medium">Non-Veg</span>
+                  </button>
                 </div>
-                <Badge className="text-lg px-4 py-2">
-                  <Flame className="h-4 w-4 mr-1" />
-                  {totalCalories} cal
-                </Badge>
               </div>
+              <CardDescription className="text-base mt-2">
+                Nutritionally balanced plan
+              </CardDescription>
             </CardHeader>
 
-            <CardContent className="p-6">
+            <CardContent className="p-6 space-y-4">
               {initialLoading ? (
                 <div className="space-y-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="p-3 rounded-lg border">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <div className="flex-1">
-                          <Skeleton className="h-4 w-24 mb-1" />
-                          <Skeleton className="h-3 w-16" />
-                        </div>
-                      </div>
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <div className="grid grid-cols-4 gap-2 mb-3">
-                        {[1, 2, 3, 4].map((j) => (
-                          <Skeleton key={j} className="h-12 w-full" />
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Skeleton className="h-8 flex-1" />
-                        <Skeleton className="h-8 w-16" />
-                        <Skeleton className="h-8 flex-1" />
-                      </div>
-                    </div>
-                  ))}
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
                 </div>
-              ) : dayMeals.length === 0 ? (
-                <div className="text-center py-12 space-y-4">
-                  <Calendar className="h-16 w-16 mx-auto text-muted-foreground" />
-                  <p className="text-muted-foreground">No meal plan for this day yet.</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use the "Generate Meal Plan" button to create your personalized weekly plan
-                  </p>
+              ) : filteredMeals.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No meals match your current filters or no plan generated.</p>
+                  <p className="text-sm mt-2">Try enabling veg or non-veg options, or check your connection.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {meals.map(({ type, data, emoji }) => {
-                    if (!data) return null;
+                filteredMeals.map((mealEntry: any) => {
+                  const recipe = mealEntry.recipe;
+                  if (!recipe) return null;
 
-                    const recipe = data.recipe;
-                    const isCompleted = hasMilestone(dayDate, type);
-
-                    return (
-                      <div key={type} className="relative">
-                        <div
-                          className={`p-3 rounded-lg border transition-all ${
-                            isCompleted
-                              ? "bg-primary/5 border-primary/30"
-                              : "bg-card hover:bg-muted/20 border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-3 mb-2">
-                            <div className="flex-1 min-w-0">
+                  const isCompleted = hasMilestone(dayDate, mealEntry.meal_type);
+                  const isVeg = recipe.diet_type === 'veg';
+                  
+                  return (
+                    <Card key={mealEntry.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="flex">
+                        {/* Color Strip */}
+                        <div className={`w-2 ${isVeg ? 'bg-green-500' : 'bg-orange-500'}`} />
+                        
+                        <div className="flex-1 p-5">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              {/* Badges Row */}
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-sm font-semibold capitalize">{type}</h3>
-                                {recipe.cook_time && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {recipe.cook_time}m
-                                  </span>
-                                )}
+                                <Badge variant="outline" className="capitalize">
+                                  {mealEntry.meal_type === 'snack2' ? 'Snack 2' : mealEntry.meal_type}
+                                </Badge>
+                                <Badge variant={isVeg ? 'secondary' : 'default'}>
+                                  {isVeg ? '🥗 Vegetarian' : '🍗 Non-Veg'}
+                                </Badge>
                                 {isCompleted && (
-                                  <Badge variant="secondary" className="text-xs py-0 h-5">
-                                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                                    Done
+                                  <Badge className="bg-green-500">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" /> Completed
                                   </Badge>
                                 )}
                               </div>
-                              <h4 className="text-sm font-medium truncate">{recipe.title}</h4>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
-                              <span className="font-semibold text-primary">{recipe.calories} cal</span>
-                              <span>•</span>
-                              <span>P: {recipe.protein}g</span>
-                              <span>•</span>
-                              <span>C: {recipe.carbs}g</span>
-                              <span>•</span>
-                              <span>F: {recipe.fats}g</span>
+                              
+                              <h3 className="text-xl font-bold mb-1">{recipe.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-1">{recipe.description}</p>
+                              
+                              {/* Macros Grid */}
+                              <div className="flex flex-wrap gap-4 text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold text-primary">{recipe.calories}</span>
+                                  <span className="text-muted-foreground">cal</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.protein}g</span>
+                                  <span className="text-muted-foreground">protein</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.carbs}g</span>
+                                  <span className="text-muted-foreground">carbs</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-semibold">{recipe.fats}g</span>
+                                  <span className="text-muted-foreground">fats</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <span>⏱️ {recipe.cook_time} min</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-
-                          <div className="flex gap-2">
+                          
+                          {/* ACTION BUTTONS */}
+                          <div className="flex gap-2 mt-4">
+                            {/* 1. VIEW */}
                             <Link to={`/recipe/${recipe.id}`} className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full gap-1 text-xs h-7">
-                                <Eye className="h-3 w-3" />
-                                View
+                              <Button size="sm" variant="default" className="w-full">
+                                <Eye className="h-4 w-4 mr-2" /> View Recipe
                               </Button>
                             </Link>
+
+                            {/* 2. SWAP (New) */}
                             <Button
-                              variant="outline"
                               size="sm"
+                              variant="outline"
+                              className="group border-orange-200 text-orange-700 hover:bg-orange-50 hover:text-orange-800 hover:border-orange-300"
                               onClick={() => {
-                                setSwapData({ recipe, mealType: type, day });
+                                setSwapData({ recipe: recipe, mealType: mealEntry.meal_type, day: day });
                                 setSwapDialogOpen(true);
                               }}
-                              className="gap-1 text-xs h-7"
                             >
-                              <RefreshCw className="h-3 w-3" />
+                              <RefreshCw className="h-4 w-4 mr-2 transition-transform group-hover:rotate-180" />
                               Swap
                             </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setSelectedMilestone({ date: dayDate, mealType: type, mealName: recipe.title });
-                                setMilestoneDialogOpen(true);
-                              }}
-                              disabled={isCompleted}
-                              className="flex-1 gap-1 text-xs h-7"
-                            >
-                              <CheckCircle2 className="h-3 w-3" />
-                              {isCompleted ? "Done" : "Complete"}
-                            </Button>
+
+                            {/* 3. COMPLETE */}
+                            {!isCompleted && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedMilestone({ date: dayDate, mealType: mealEntry.meal_type, mealName: recipe.title });
+                                  setMilestoneDialogOpen(true);
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" /> Mark Complete
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </Card>
+                  );
+                })
               )}
             </CardContent>
           </Card>
         </div>
       </main>
       <Footer />
-
-      <MilestoneDialog
-        open={milestoneDialogOpen}
-        onOpenChange={setMilestoneDialogOpen}
+      
+      {/* MILESTONE DIALOG */}
+      <MilestoneDialog 
+        open={milestoneDialogOpen} 
+        onOpenChange={setMilestoneDialogOpen} 
         onConfirm={async (notes) => {
           if (selectedMilestone && user) {
-            // Add milestone
-            addMilestone(selectedMilestone.date, selectedMilestone.mealType || undefined, notes);
+            // Add Visual Milestone
+            addMilestone(selectedMilestone.date, selectedMilestone.mealType, notes);
             
-            // Also create a meal log entry if meal type is specified
-            if (selectedMilestone.mealType) {
-              // Find the meal plan entry for this day and meal type
-              const dayMeals = mealPlan.filter((entry) => entry.day_of_week === daysOfWeek[currentDayIndex]);
-              const mealEntry = dayMeals.find((m) => m.meal_type === selectedMilestone.mealType);
-              
-              if (mealEntry?.recipe) {
-                try {
-                  // Create a meal log entry with the selected date
-                  const { error } = await supabase.from("meal_logs").insert({
-                    user_id: user.id,
-                    // Store date as YYYY-MM-DD string so Dashboard can match it correctly
-                    log_date: format(selectedMilestone.date, "yyyy-MM-dd"),
-                    meal_type: selectedMilestone.mealType,
-                    recipe_id: mealEntry.recipe.id,
-                    custom_meal_name: mealEntry.recipe.title,
-                    calories: mealEntry.recipe.calories,
-                    protein: mealEntry.recipe.protein,
-                    carbs: mealEntry.recipe.carbs,
-                    fats: mealEntry.recipe.fats,
-                  });
-                  
-                  if (error) throw error;
-                  
-                  // Show appropriate message based on whether the logged date is today
-                  const loggedDate = format(new Date(selectedMilestone.date), "yyyy-MM-dd");
-                  const todayDate = format(new Date(), "yyyy-MM-dd");
-                  
-                  if (loggedDate === todayDate) {
-                    toast.success("Meal logged and will appear in your Dashboard!");
-                  } else {
-                    toast.success(`Meal logged for ${format(new Date(selectedMilestone.date), "EEEE, MMM d")}. It will appear in your Dashboard on that day.`);
-                  }
-                } catch (error) {
-                  console.error("Error logging meal:", error);
-                  toast.error("Failed to log meal");
-                }
-              }
+            // Log to Database
+            const entry = mealPlan.find(m => m.day_of_week === day && m.meal_type === selectedMilestone.mealType);
+            if(entry?.recipe) {
+               await supabase.from("meal_logs").insert({
+                 user_id: user.id,
+                 log_date: format(new Date(selectedMilestone.date), "yyyy-MM-dd"),
+                 meal_type: selectedMilestone.mealType,
+                 recipe_id: entry.recipe.id,
+                 calories: entry.recipe.calories,
+                 protein: entry.recipe.protein,
+                 carbs: entry.recipe.carbs,
+                 fats: entry.recipe.fats,
+               });
+               toast.success("Meal Logged Successfully");
             }
+            setMilestoneDialogOpen(false);
           }
-        }}
-        mealName={selectedMilestone?.mealName}
+        }} 
       />
 
+      {/* SWAP DIALOG */}
       {swapData && (
         <RecipeSwapDialog
           open={swapDialogOpen}
@@ -623,4 +459,4 @@ const PlannerNew = () => {
   );
 };
 
-export default PlannerNew;
+export default Planner;dd
