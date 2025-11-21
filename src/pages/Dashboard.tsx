@@ -25,7 +25,7 @@ const Dashboard = () => {
   const { mealLogs, loading: logsLoading, deleteMealLog, refetch } = useMealLogs(formattedDate);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
+  const [selectedMealType, setSelectedMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack" | "snack2">("breakfast");
 
   // Refetch meal logs when dashboard loads or becomes visible
   useEffect(() => {
@@ -87,7 +87,7 @@ const Dashboard = () => {
     };
   }, [mealLogs]);
 
-  const handleLogMeal = (mealType: "breakfast" | "lunch" | "dinner" | "snack") => {
+  const handleLogMeal = (mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2") => {
     setSelectedMealType(mealType);
     setLogDialogOpen(true);
   };
@@ -98,8 +98,20 @@ const Dashboard = () => {
       lunch: "bg-green-500/10 text-green-600 border-green-500/20",
       dinner: "bg-blue-500/10 text-blue-600 border-blue-500/20",
       snack: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+      snack2: "bg-pink-500/10 text-pink-600 border-pink-500/20",
     };
     return colors[type as keyof typeof colors] || "bg-gray-500/10";
+  };
+
+  const getMealIcon = (type: string) => {
+    const icons: Record<string, string> = {
+      breakfast: '🍳',
+      lunch: '🍱', 
+      dinner: '🍽️',
+      snack: '🍎',
+      snack2: '🥤'
+    };
+    return icons[type] || '🍴';
   };
 
   return (
@@ -211,10 +223,11 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
-                  className="w-full justify-start gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:opacity-90"
+                  className="w-full justify-start gap-2 bg-gradient-to-r from-destructive to-red-600 hover:opacity-90 animate-pulse"
                   onClick={() => setWeightDialogOpen(true)}
                 >
-                  <Scale className="h-4 w-4" />
+                  <Plus className="h-5 w-5" />
+                  <Scale className="h-5 w-5" />
                   Log Today's Weight
                 </Button>
                 <Link to="/planner" className="block">
@@ -247,7 +260,11 @@ const Dashboard = () => {
                 <CardDescription>{macros.protein.consumed}g / {macros.protein.target}g</CardDescription>
               </CardHeader>
               <CardContent>
-                <Progress value={(macros.protein.consumed / macros.protein.target) * 100} className="h-3" />
+                <Progress 
+                  value={(macros.protein.consumed / macros.protein.target) * 100} 
+                  className="h-3 border-primary/30" 
+                  indicatorClassName="bg-primary"
+                />
               </CardContent>
             </Card>
 
@@ -257,7 +274,11 @@ const Dashboard = () => {
                 <CardDescription>{macros.carbs.consumed}g / {macros.carbs.target}g</CardDescription>
               </CardHeader>
               <CardContent>
-                <Progress value={(macros.carbs.consumed / macros.carbs.target) * 100} className="h-3" />
+                <Progress 
+                  value={(macros.carbs.consumed / macros.carbs.target) * 100} 
+                  className="h-3 border-secondary/30" 
+                  indicatorClassName="bg-secondary"
+                />
               </CardContent>
             </Card>
 
@@ -267,7 +288,11 @@ const Dashboard = () => {
                 <CardDescription>{macros.fats.consumed}g / {macros.fats.target}g</CardDescription>
               </CardHeader>
               <CardContent>
-                <Progress value={(macros.fats.consumed / macros.fats.target) * 100} className="h-3" />
+                <Progress 
+                  value={(macros.fats.consumed / macros.fats.target) * 100} 
+                  className="h-3 border-accent/30" 
+                  indicatorClassName="bg-accent"
+                />
               </CardContent>
             </Card>
           </div>
@@ -284,7 +309,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <div className="grid gap-4">
-                  {(["breakfast", "lunch", "dinner", "snack"] as const).map((mealType) => {
+                  {(["breakfast", "lunch", "dinner", "snack", "snack2"] as const).map((mealType) => {
                     const mealsForType = mealLogs.filter(m => m.meal_type === mealType);
                     const totalCalories = mealsForType.reduce((sum, m) => sum + m.calories, 0);
                     const hasLogged = mealsForType.length > 0;
@@ -301,12 +326,14 @@ const Dashboard = () => {
                                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                                 ) : (
                                   <span className="text-xl">
-                                    {mealType === 'breakfast' ? '🍳' : mealType === 'lunch' ? '🍱' : mealType === 'dinner' ? '🍽️' : '🍎'}
+                                    {getMealIcon(mealType)}
                                   </span>
                                 )}
                               </div>
-                              <div>
-                                <h4 className="font-semibold capitalize text-base">{mealType}</h4>
+                               <div>
+                                <h4 className="font-semibold capitalize text-base">
+                                  {mealType === 'snack2' ? 'Snack 2' : mealType}
+                                </h4>
                                 {hasLogged ? (
                                   <p className="text-sm text-green-600 font-medium">{totalCalories} cal logged</p>
                                 ) : (

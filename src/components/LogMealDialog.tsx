@@ -16,7 +16,7 @@ import { Card } from "@/components/ui/card";
 type LogMealDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2";
   date: string;
   onMealLogged?: () => void;
 };
@@ -34,7 +34,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date, onMealLogged
 
     await addMealLog({
       log_date: date,
-      meal_type: mealType,
+      meal_type: (mealType === 'snack2' ? 'snack' : mealType) as "breakfast" | "lunch" | "dinner" | "snack",
       recipe_id: recipe.id,
       calories: recipe.calories,
       protein: Number(recipe.protein),
@@ -63,7 +63,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date, onMealLogged
 
       await addMealLog({
         log_date: date,
-        meal_type: mealType,
+        meal_type: (mealType === 'snack2' ? 'snack' : mealType) as "breakfast" | "lunch" | "dinner" | "snack",
         custom_meal_name: data.mealName,
         custom_meal_ingredients: customIngredients,
         calories: Math.round(data.calories),
@@ -87,7 +87,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date, onMealLogged
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Log {mealType.charAt(0).toUpperCase() + mealType.slice(1)}</DialogTitle>
+          <DialogTitle>Log {mealType === 'snack2' ? 'Snack 2' : mealType.charAt(0).toUpperCase() + mealType.slice(1)}</DialogTitle>
           <DialogDescription>
             Choose from your recipe collection or use AI to calculate calories
           </DialogDescription>
@@ -114,7 +114,7 @@ export const LogMealDialog = ({ open, onOpenChange, mealType, date, onMealLogged
                     </SelectTrigger>
                     <SelectContent>
                       {recipes
-                        .filter((r) => r.meal_type === mealType)
+                        .filter((r) => r.meal_type === (mealType === 'snack2' ? 'snack' : mealType))
                         .map((recipe) => (
                           <SelectItem key={recipe.id} value={recipe.id}>
                             {recipe.title} ({recipe.calories} kcal)
