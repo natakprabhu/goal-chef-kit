@@ -34,7 +34,7 @@ const steps = [
 
 const AUTO_PLAY_MS = 3000;
 
-export default function HowItWorksCarousel() {
+export function HowItWorks() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
