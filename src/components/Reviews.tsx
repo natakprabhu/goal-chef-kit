@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Star, User } from "lucide-react";
-// Mock data mode: Supabase import commented out
+// Mock data mode: Supabase import commented out to prevent build errors
 // import { supabase } from "@/integrations/supabase/client";
 
 // --- TYPES ---
@@ -123,8 +123,6 @@ const ReviewCard = ({ review, style }: { review: Review; style?: React.CSSProper
 );
 
 // --- ZONE CONFIGURATION ---
-// 7 Possible Zones configured to avoid the "Top Center" area where the title resides.
-// This creates a U-shape or "Wings" around the title.
 const ZONES = [
   { top: '0%', left: '5%' },    // Top Left
   { top: '0%', left: '70%' },   // Top Right
@@ -139,31 +137,21 @@ const ZONES = [
 const Reviews = () => {
   const [activeReviews, setActiveReviews] = useState<FloatingReview[]>([]);
   const reviewIndexRef = useRef(0);
-  // Track available zones to prevent overlapping
   const availableZonesRef = useRef<number[]>([0, 1, 2, 3, 4, 5, 6]); 
 
-  // Animation Loop
   useEffect(() => {
     const addReview = () => {
-      // Max 6 reviews at a time (High density but clean)
       if (activeReviews.length >= 6) return;
-      
-      // Check if we have available zones
       if (availableZonesRef.current.length === 0) return;
 
-      // 1. Pick a random available zone
       const randomZoneIndex = Math.floor(Math.random() * availableZonesRef.current.length);
       const zoneId = availableZonesRef.current[randomZoneIndex];
-      
-      // Remove this zone from available list immediately
       availableZonesRef.current.splice(randomZoneIndex, 1);
 
-      // 2. Pick next review from data (cycle through)
       const reviewData = MOCK_REVIEWS[reviewIndexRef.current];
       reviewIndexRef.current = (reviewIndexRef.current + 1) % MOCK_REVIEWS.length;
 
-      // 3. Create new floating review
-      const duration = 7000 + Math.random() * 3000; // Random duration 7s - 10s
+      const duration = 7000 + Math.random() * 3000;
       const newReview: FloatingReview = {
         ...reviewData,
         uniqueId: Date.now() + Math.random(),
@@ -171,25 +159,20 @@ const Reviews = () => {
         duration: duration
       };
 
-      // 4. Add to state
       setActiveReviews(prev => [...prev, newReview]);
 
-      // 5. Schedule removal and free up zone
       setTimeout(() => {
         setActiveReviews(prev => prev.filter(r => r.uniqueId !== newReview.uniqueId));
-        // Add zone back to available list
         availableZonesRef.current.push(zoneId);
       }, duration); 
     };
 
-    // Try to add a new review faster (every 1.5s) to fill the screen quickly
     const intervalId = setInterval(addReview, 1500); 
-
     return () => clearInterval(intervalId);
   }, [activeReviews.length]);
 
   return (
-    <section className="py-24 bg-background overflow-hidden relative min-h-[800px]">
+    <section className="py-24 bg-[#F2FCE2] overflow-hidden relative min-h-[800px]">
       <style>{`
         @keyframes float-review {
           0% { opacity: 0; transform: translateY(40px) scale(0.9); }
@@ -205,8 +188,8 @@ const Reviews = () => {
       `}</style>
 
       <div className="container mx-auto px-4 h-[600px] relative">
-        {/* Title Section - Centered at top with Opaque Background */}
-        <div className="text-center mb-12 relative z-10 max-w-2xl mx-auto pointer-events-none bg-background/95 backdrop-blur-sm py-8 rounded-3xl border border-border/50 shadow-sm">
+        {/* Title Section - Opaque White Background for Contrast */}
+        <div className="text-center mb-12 relative z-10 max-w-2xl mx-auto pointer-events-none bg-white/80 backdrop-blur-md py-8 rounded-3xl border border-white/50 shadow-sm">
           <h2 className="text-3xl lg:text-5xl font-bold mb-6 pointer-events-auto">
             Loved by{" "}
             <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
@@ -229,7 +212,6 @@ const Reviews = () => {
                 top: ZONES[review.zone].top,
                 left: ZONES[review.zone].left,
                 animationDuration: `${review.duration}ms`,
-                // Add randomness to position so it doesn't look like a perfect grid
                 marginLeft: `${Math.random() * 40 - 20}px`, 
                 marginTop: `${Math.random() * 40 - 20}px`,
               }}
