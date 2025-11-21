@@ -65,11 +65,12 @@ export const useMilestones = (date?: string) => {
       meal_type: mealType,
       notes,
     });
-
+ 
     if (error) {
-      console.error("Error adding milestone:", error);
+      console.error("Error adding milestone:", error, { date, mealType, notes });
       toast.error("Failed to add milestone");
     } else {
+      console.log("Milestone added successfully", { date, mealType, notes });
       toast.success("Milestone tracked! Keep it up! 💪");
       fetchMilestones();
     }
