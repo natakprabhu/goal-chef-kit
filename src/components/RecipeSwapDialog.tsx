@@ -13,7 +13,7 @@ interface RecipeSwapDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentRecipe: Recipe;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType: "breakfast" | "lunch" | "dinner" | "snack" | "snack2";
   day: string;
   weekStartDate: string;
   onSwapComplete: () => void;
@@ -29,7 +29,9 @@ const RecipeSwapDialog = ({
   onSwapComplete
 }: RecipeSwapDialogProps) => {
   const { user } = useAuth();
-  const { recipes, loading } = useRecipes(undefined, mealType, true);
+  // For snack2, we use "snack" meal type to fetch recipes since they share the same pool
+  const queryMealType = mealType === "snack2" ? "snack" : mealType;
+  const { recipes, loading } = useRecipes(undefined, queryMealType, true);
   const [generating, setGenerating] = useState(false);
 
   // Filter out the current recipe
@@ -53,7 +55,7 @@ const RecipeSwapDialog = ({
       let recipesQuery = supabase
         .from("recipes")
         .select("*")
-        .eq("meal_type", mealType);
+        .eq("meal_type", mealType === "snack2" ? "snack" : mealType);
 
       if (dietPreference !== "both") {
         recipesQuery = recipesQuery.eq("diet_type", dietPreference as "veg" | "non_veg");

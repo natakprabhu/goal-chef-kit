@@ -8,7 +8,7 @@ export type Recipe = Database["public"]["Tables"]["recipes"]["Row"] & {
   instructions: any[];
 };
 
-export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" | "lunch" | "dinner" | "snack", respectUserPreference: boolean = false) => {
+export const useRecipes = (dietType?: "veg" | "non_veg", mealType?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2", respectUserPreference: boolean = false) => {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);

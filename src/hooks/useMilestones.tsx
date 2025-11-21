@@ -7,7 +7,7 @@ export type Milestone = {
   id: string;
   user_id: string;
   milestone_date: string;
-  meal_type?: "breakfast" | "lunch" | "dinner" | "snack";
+  meal_type?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2";
   completed_at: string;
   notes?: string;
 };
@@ -51,7 +51,7 @@ export const useMilestones = (date?: string) => {
 
   const addMilestone = async (
     date: string,
-    mealType?: "breakfast" | "lunch" | "dinner" | "snack",
+    mealType?: "breakfast" | "lunch" | "dinner" | "snack" | "snack2",
     notes?: string
   ) => {
     if (!user) {
