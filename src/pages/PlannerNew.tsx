@@ -75,7 +75,10 @@ const PlannerNew = () => {
         const breakfasts = recipes.filter(r => r.meal_type === "breakfast");
         const lunches = recipes.filter(r => r.meal_type === "lunch");
         const dinners = recipes.filter(r => r.meal_type === "dinner");
-        const snacks = recipes.filter(r => r.meal_type === "snack");
+        const snackBase = recipes.filter(r => r.meal_type === "snack");
+
+        // If there are no dedicated snack recipes yet, fall back to using all recipes
+        const snacks = snackBase.length > 0 ? snackBase : recipes;
 
         // Shuffle for variety
         const shuffle = <T,>(array: T[]): T[] => {
