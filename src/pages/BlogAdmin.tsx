@@ -13,6 +13,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { sampleAuthors, getSamplePosts } from "@/data/sampleBlogData";
 
 interface Author {
   id: string;
@@ -92,26 +93,7 @@ const BlogAdmin = () => {
       // Insert sample authors
       const { data: authorsData, error: authorsError } = await supabase
         .from("blog_authors" as any)
-        .insert([
-          {
-            name: "Dr. Priya Sharma",
-            credentials: "PhD Nutrition Science, Registered Dietitian",
-            bio: "Dr. Priya Sharma is a renowned nutritionist with over 15 years of experience helping individuals achieve their health goals through evidence-based dietary approaches. She specializes in sports nutrition and weight management.",
-            image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80"
-          },
-          {
-            name: "Rahul Mehta",
-            credentials: "MSc Clinical Nutrition, Certified Diabetes Educator",
-            bio: "Rahul Mehta is a clinical nutritionist who focuses on managing chronic diseases through nutrition. He has published numerous research papers on diabetes management and metabolic health.",
-            image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80"
-          },
-          {
-            name: "Anjali Patel",
-            credentials: "BSc Nutrition, Certified Fitness Nutritionist",
-            bio: "Anjali Patel combines her expertise in nutrition and fitness to help clients build sustainable healthy habits. She specializes in meal planning for active individuals and athletes.",
-            image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80"
-          }
-        ])
+        .insert(sampleAuthors)
         .select();
 
       if (authorsError) throw authorsError;
@@ -121,50 +103,20 @@ const BlogAdmin = () => {
       // Insert sample blog posts
       const { error: postsError } = await supabase
         .from("blog_posts" as any)
-        .insert([
-          {
-            title: "Understanding Macronutrients: Your Complete Guide",
-            slug: "understanding-macronutrients-complete-guide",
-            excerpt: "Learn how to balance proteins, carbs, and fats for optimal health and fitness results.",
-            content: "<h2>What Are Macronutrients?</h2><p>Macronutrients are nutrients your body needs in large amounts: proteins, carbohydrates, and fats. Each plays a crucial role in your health.</p><h2>Protein: The Building Blocks</h2><p>Protein is essential for muscle growth and repair. Aim for 0.8-1.2g per kg of body weight daily.</p><h2>Carbohydrates: Your Energy Source</h2><p>Carbs fuel your brain and muscles. Focus on complex carbs from whole grains and vegetables.</p><h2>Fats: Essential for Health</h2><p>Healthy fats support hormone production and nutrient absorption. Include sources like avocados, nuts, and olive oil.</p>",
-            category: "Nutrition Basics",
-            read_time: "8 min read",
-            image_url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&q=80",
-            author_id: authorIds[0],
-            published: true
-          },
-          {
-            title: "10 High-Protein Breakfast Ideas",
-            slug: "high-protein-breakfast-ideas",
-            excerpt: "Start your day right with these delicious protein-packed breakfast recipes.",
-            content: "<h2>Why Protein at Breakfast?</h2><p>A high-protein breakfast stabilizes blood sugar and keeps you full until lunch.</p><h2>Our Top 10 Ideas</h2><ol><li><strong>Greek Yogurt Bowl:</strong> 30g protein with berries and nuts</li><li><strong>Egg Scramble:</strong> 25g protein with veggies</li><li><strong>Protein Pancakes:</strong> 35g protein, fluffy and delicious</li><li><strong>Smoked Salmon Toast:</strong> 28g protein on whole grain</li><li><strong>Protein Smoothie:</strong> 30g protein, ready in 5 minutes</li></ol>",
-            category: "Recipes",
-            read_time: "5 min read",
-            image_url: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=1200&q=80",
-            author_id: authorIds[2],
-            published: true
-          },
-          {
-            title: "Meal Prep Like a Pro: 5 Time-Saving Strategies",
-            slug: "meal-prep-strategies",
-            excerpt: "Master meal prepping with these proven strategies for busy professionals.",
-            content: "<h2>Why Meal Prep?</h2><p>Meal prepping saves time, money, and helps you stick to your nutrition goals.</p><h2>5 Key Strategies</h2><ol><li><strong>Plan Your Week:</strong> Spend 20 minutes planning meals</li><li><strong>Batch Cook:</strong> Prepare proteins and grains in bulk</li><li><strong>Use Quality Containers:</strong> Invest in good storage</li><li><strong>Prep Components:</strong> Not full meals, but versatile ingredients</li><li><strong>Start Small:</strong> Begin with 3-4 days, then expand</li></ol>",
-            category: "Meal Planning",
-            read_time: "6 min read",
-            image_url: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1200&q=80",
-            author_id: authorIds[1],
-            published: true
-          }
-        ]);
+        .insert(getSamplePosts(authorIds));
 
       if (postsError) throw postsError;
 
-      toast.success("Sample data added successfully!");
+      toast.success("✅ Sample data added successfully! Check the Blog page to see your content.");
       fetchAuthors();
       fetchPosts();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error seeding data:", error);
-      toast.error("Failed to seed sample data");
+      if (error.message?.includes("duplicate key")) {
+        toast.error("Sample data already exists! Delete existing posts first.");
+      } else {
+        toast.error("Failed to seed sample data. Check console for details.");
+      }
     }
   };
 
