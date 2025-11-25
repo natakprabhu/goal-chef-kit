@@ -15,6 +15,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { sampleAuthors, getSamplePosts } from "@/data/sampleBlogData";
 import { sampleRecipes } from "@/data/sampleRecipes";
+import type { Recipe } from "@/hooks/useRecipes";
 
 interface Author {
   id: string;
@@ -41,8 +42,10 @@ const BlogAdmin = () => {
   const navigate = useNavigate();
   const [authors, setAuthors] = useState<Author[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Author form state
   const [authorForm, setAuthorForm] = useState({
@@ -73,6 +76,7 @@ const BlogAdmin = () => {
     checkAuth();
     fetchAuthors();
     fetchPosts();
+    fetchRecipes();
   }, []);
 
   const quillModules = useMemo(() => ({
@@ -138,6 +142,7 @@ const BlogAdmin = () => {
       const { error } = await supabase.from("recipes" as any).insert(recipesWithGoal);
       if (error) throw error;
       toast.success("✅ 100+ recipes added successfully!");
+      fetchRecipes();
     } catch (error: any) {
       toast.error("Failed to seed recipes: " + error.message);
     }
@@ -167,6 +172,33 @@ const BlogAdmin = () => {
       return;
     }
     setPosts(data as any || []);
+  };
+
+  const fetchRecipes = async () => {
+    const { data, error } = await supabase
+      .from("recipes")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      toast.error("Failed to fetch recipes");
+      return;
+    }
+    setRecipes(data as Recipe[] || []);
+  };
+
+  const deleteRecipe = async (id: string) => {
+    const { error } = await supabase
+      .from("recipes")
+      .delete()
+      .eq("id", id);
+    
+    if (error) {
+      toast.error("Failed to delete recipe");
+      return;
+    }
+    toast.success("Recipe deleted successfully");
+    fetchRecipes();
   };
 
   const handleAuthorSubmit = async (e: React.FormEvent) => {
@@ -307,7 +339,7 @@ const BlogAdmin = () => {
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8 mt-16">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold">Blog Management</h1>
+          <h1 className="text-4xl font-bold">Content Management</h1>
           <div className="flex gap-2">
             <Button onClick={seedSampleData} variant="outline">
               <Database className="h-4 w-4 mr-2" />
@@ -321,9 +353,10 @@ const BlogAdmin = () => {
         </div>
         
         <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="authors">Authors</TabsTrigger>
+            <TabsTrigger value="recipes">Recipes</TabsTrigger>
           </TabsList>
           
           <TabsContent value="posts" className="space-y-6">
@@ -593,6 +626,62 @@ const BlogAdmin = () => {
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => deleteAuthor(author.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="recipes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recipe Management</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  View and manage all recipes in the database. Click on a recipe to view details on the recipes page.
+                </p>
+              </CardHeader>
+            </Card>
+
+            <div className="space-y-4">
+              {recipes.map((recipe) => (
+                <Card key={recipe.id}>
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{recipe.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-muted-foreground">
+                          {recipe.diet_type === "veg" ? "🥗 Veg" : "🍗 Non-Veg"}
+                        </span>
+                        <span className="text-sm text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground capitalize">
+                          {recipe.meal_type}
+                        </span>
+                        <span className="text-sm text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground">
+                          {recipe.calories} kcal
+                        </span>
+                        {(recipe as any).goal_category && (
+                          <>
+                            <span className="text-sm text-muted-foreground">•</span>
+                            <span className="text-sm text-muted-foreground capitalize">
+                              {(recipe as any).goal_category.replace('_', ' ')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => window.open(`/recipe/${recipe.id}`, '_blank')}
+                      >
+                        View
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => deleteRecipe(recipe.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
