@@ -9,26 +9,33 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, Clock, Flame, Heart, Lock, TrendingUp } from "lucide-react";
+import { Search, Filter, Clock, Flame, Heart, Lock, TrendingUp, Target, Sparkles } from "lucide-react";
 import { useRecipes } from "@/hooks/useRecipes";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useRecommendations } from "@/hooks/useRecommendations";
 
 const Recipes = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dietType, setDietType] = useState<"veg" | "non_veg" | undefined>(undefined);
   const [mealType, setMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack" | undefined>(undefined);
+  const [goalCategory, setGoalCategory] = useState<"weight_gain" | "weight_loss" | "maintenance" | undefined>(undefined);
   const { recipes, loading } = useRecipes(dietType, mealType);
+  const { recommendations, loading: recLoading, userGoalCategory } = useRecommendations();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { user } = useAuth();
   const { isSubscribed } = useSubscription();
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesGoal = !goalCategory || (recipe as any).goal_category === goalCategory;
+    
+    return matchesSearch && matchesGoal;
+  });
 
   // Sort by most liked (using a mock likes count for now)
   const sortedRecipes = [...filteredRecipes].sort(() => Math.random() - 0.5);
@@ -57,10 +64,64 @@ const Recipes = () => {
             {sortedRecipes.length > 0 && (
               <div className="flex items-center gap-2 mt-3">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">Showing {sortedRecipes.length} popular recipes</span>
+                <span className="text-sm text-muted-foreground">Showing {sortedRecipes.length} recipes</span>
               </div>
             )}
           </div>
+
+          {/* Personalized Recommendations */}
+          {user && recommendations.length > 0 && !goalCategory && (
+            <div className="mb-12">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h2 className="text-2xl font-bold">
+                  Recommended For Your Goal
+                </h2>
+                <Badge variant="secondary" className="ml-2">
+                  {userGoalCategory?.replace('_', ' ').toUpperCase()}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {recommendations.slice(0, 4).map((recipe) => (
+                  <Link key={recipe.id} to={`/recipe/${recipe.id}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-primary/30 h-full group">
+                      <div className="relative aspect-video overflow-hidden">
+                        <img 
+                          src={recipe.image_url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop"} 
+                          alt={recipe.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="absolute top-2 right-2 bg-background/80 hover:bg-background/90"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleFavorite(recipe.id);
+                          }}
+                        >
+                          <Heart className={`h-4 w-4 ${isFavorite(recipe.id) ? 'fill-primary text-primary' : ''}`} />
+                        </Button>
+                      </div>
+                      <CardHeader className="p-4">
+                        <CardTitle className="line-clamp-1 text-base">{recipe.title}</CardTitle>
+                        <CardDescription className="flex items-center gap-3 text-xs">
+                          <span className="flex items-center gap-1">
+                            <Flame className="h-3 w-3 text-primary" />
+                            {recipe.calories} kcal
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-secondary" />
+                            {recipe.cook_time} min
+                          </span>
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Search & Filters */}
           <div className="mb-8 space-y-4">
@@ -78,6 +139,41 @@ const Recipes = () => {
             </div>
             
             <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                  <Target className="h-4 w-4" />
+                  Goal:
+                </Label>
+                <Button
+                  variant={goalCategory === undefined ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setGoalCategory(undefined)}
+                >
+                  All
+                </Button>
+                <Button
+                  variant={goalCategory === "weight_gain" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setGoalCategory("weight_gain")}
+                >
+                  💪 Gain
+                </Button>
+                <Button
+                  variant={goalCategory === "weight_loss" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setGoalCategory("weight_loss")}
+                >
+                  🔥 Loss
+                </Button>
+                <Button
+                  variant={goalCategory === "maintenance" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setGoalCategory("maintenance")}
+                >
+                  ⚖️ Maintain
+                </Button>
+              </div>
+
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium text-muted-foreground">Diet:</Label>
                 <Button

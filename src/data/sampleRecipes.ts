@@ -18,6 +18,7 @@ export const sampleRecipes = [
     fats: 18,
     fiber: 8,
     access_level: "guest",
+    goal_category: "weight_gain",
     tags: ["weight gain", "high protein", "quick", "muscle building"],
     ingredients: [
       "2 ripe bananas",
