@@ -275,6 +275,7 @@ export type Database = {
           difficulty: string | null
           fats: number
           fiber: number | null
+          goal_category: string | null
           id: string
           image_url: string | null
           ingredients: Json
@@ -297,6 +298,7 @@ export type Database = {
           difficulty?: string | null
           fats: number
           fiber?: number | null
+          goal_category?: string | null
           id?: string
           image_url?: string | null
           ingredients?: Json
@@ -319,6 +321,7 @@ export type Database = {
           difficulty?: string | null
           fats?: number
           fiber?: number | null
+          goal_category?: string | null
           id?: string
           image_url?: string | null
           ingredients?: Json

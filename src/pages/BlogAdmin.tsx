@@ -118,7 +118,20 @@ const BlogAdmin = () => {
 
   const seedRecipes = async () => {
     try {
-      const { error } = await supabase.from("recipes" as any).insert(sampleRecipes);
+      // Add goal_category to each recipe based on tags
+      const recipesWithGoal = sampleRecipes.map(recipe => {
+        let goal_category = 'maintenance'; // default
+        
+        if (recipe.tags.some(tag => tag.toLowerCase().includes('weight gain'))) {
+          goal_category = 'weight_gain';
+        } else if (recipe.tags.some(tag => tag.toLowerCase().includes('weight loss'))) {
+          goal_category = 'weight_loss';
+        }
+        
+        return { ...recipe, goal_category };
+      });
+
+      const { error } = await supabase.from("recipes" as any).insert(recipesWithGoal);
       if (error) throw error;
       toast.success("✅ 100+ recipes added successfully!");
     } catch (error: any) {
