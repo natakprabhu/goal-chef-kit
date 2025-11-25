@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -9,70 +10,41 @@ import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Blog = () => {
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     document.title = "Nutrition & Fitness Blog | GoalChef - Expert Tips & Recipes";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute("content", "Discover expert nutrition tips, healthy recipes, and fitness advice. Learn about meal planning, macros, weight loss, and building healthy eating habits with GoalChef.");
     }
+
+    fetchBlogPosts();
   }, []);
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Understanding Macronutrients: Your Complete Guide to Protein, Carbs, and Fats",
-      excerpt: "Learn how to balance macronutrients for optimal health, energy, and fitness goals. Discover the role of protein, carbohydrates, and fats in your diet.",
-      category: "Nutrition Basics",
-      readTime: "8 min read",
-      date: "November 20, 2025",
-      image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
-    },
-    {
-      id: 2,
-      title: "Meal Prep Like a Pro: 5 Time-Saving Strategies for Busy Professionals",
-      excerpt: "Master the art of meal prepping with these proven strategies. Save time, money, and stay on track with your nutrition goals throughout the week.",
-      category: "Meal Planning",
-      readTime: "6 min read",
-      date: "November 18, 2025",
-      image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&q=80",
-    },
-    {
-      id: 3,
-      title: "High-Protein Breakfast Ideas for Muscle Building and Weight Loss",
-      excerpt: "Start your day right with these delicious, protein-packed breakfast recipes. Perfect for muscle building, weight loss, and sustained energy levels.",
-      category: "Recipes",
-      readTime: "5 min read",
-      date: "November 15, 2025",
-      image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&q=80",
-    },
-    {
-      id: 4,
-      title: "The Science of Calorie Deficit: How to Lose Weight Sustainably",
-      excerpt: "Understand the science behind weight loss and learn how to create a sustainable calorie deficit without sacrificing nutrition or energy.",
-      category: "Weight Loss",
-      readTime: "10 min read",
-      date: "November 12, 2025",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
-    },
-    {
-      id: 5,
-      title: "Post-Workout Nutrition: What to Eat for Optimal Recovery",
-      excerpt: "Maximize your fitness results with proper post-workout nutrition. Learn what nutrients your body needs for muscle recovery and growth.",
-      category: "Fitness Nutrition",
-      readTime: "7 min read",
-      date: "November 10, 2025",
-      image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&q=80",
-    },
-    {
-      id: 6,
-      title: "Vegetarian Protein Sources: Complete Guide for Plant-Based Athletes",
-      excerpt: "Discover the best vegetarian protein sources to fuel your fitness goals. Learn how to meet your protein needs on a plant-based diet.",
-      category: "Vegetarian Nutrition",
-      readTime: "9 min read",
-      date: "November 8, 2025",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
-    },
-  ];
+  const fetchBlogPosts = async () => {
+    const { data, error } = await supabase
+      .from("blog_posts" as any)
+      .select(`
+        *,
+        blog_authors:author_id (
+          name,
+          credentials
+        )
+      `)
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching blog posts:", error);
+      setLoading(false);
+      return;
+    }
+
+    setBlogPosts(data || []);
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,49 +69,57 @@ const Blog = () => {
         {/* Blog Posts Grid */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogPosts.map((post) => (
-                <article key={post.id} className="group">
-                  <Link to={`/blog/${post.id}`}>
-                    <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                      <div className="overflow-hidden rounded-t-lg">
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      </div>
-                      <CardHeader>
-                        <div className="flex items-center gap-4 mb-3">
-                          <Badge variant="secondary">{post.category}</Badge>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            <span>{post.readTime}</span>
+            {loading ? (
+              <div className="text-center py-12">Loading blog posts...</div>
+            ) : blogPosts.length === 0 ? (
+              <div className="text-center py-12">No blog posts available yet.</div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {blogPosts.map((post) => (
+                  <article key={post.id} className="group">
+                    <Link to={`/blog/${post.slug}`}>
+                      <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                        <div className="overflow-hidden rounded-t-lg">
+                          <img
+                            src={post.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"}
+                            alt={post.title}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                        <CardHeader>
+                          <div className="flex items-center gap-4 mb-3">
+                            <Badge variant="secondary">{post.category}</Badge>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{post.read_time}</span>
+                            </div>
                           </div>
-                        </div>
-                        <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
-                          {post.title}
-                        </CardTitle>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <time dateTime={post.date}>{post.date}</time>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <CardDescription className="line-clamp-3 mb-4">
-                          {post.excerpt}
-                        </CardDescription>
-                        <Button variant="ghost" className="group/btn p-0 h-auto font-semibold">
-                          Read More
-                          <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </article>
-              ))}
-            </div>
+                          <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
+                            {post.title}
+                          </CardTitle>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            <time dateTime={new Date(post.created_at).toISOString()}>
+                              {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </time>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <CardDescription className="line-clamp-3 mb-4">
+                            {post.excerpt}
+                          </CardDescription>
+                          <Button variant="ghost" className="group/btn p-0 h-auto font-semibold">
+                            Read More
+                            <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
