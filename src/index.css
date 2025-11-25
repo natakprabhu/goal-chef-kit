@@ -131,3 +131,23 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* ReactQuill Editor Styles */
+.ql-container {
+  font-family: inherit;
+}
+
+.ql-editor {
+  min-height: 300px;
+  font-size: 16px;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
