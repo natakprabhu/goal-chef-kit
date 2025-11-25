@@ -62,7 +62,11 @@ const BlogAdmin = () => {
     read_time: "",
     image_url: "",
     author_id: "",
-    published: false
+    published: false,
+    meta_title: "",
+    meta_description: "",
+    og_image: "",
+    schema_markup: {}
   });
 
   useEffect(() => {
@@ -231,7 +235,11 @@ const BlogAdmin = () => {
       read_time: "",
       image_url: "",
       author_id: "",
-      published: false
+      published: false,
+      meta_title: "",
+      meta_description: "",
+      og_image: "",
+      schema_markup: {}
     });
     setSelectedPost(null);
     fetchPosts();
@@ -286,7 +294,11 @@ const BlogAdmin = () => {
       read_time: post.read_time,
       image_url: post.image_url || "",
       author_id: post.author_id,
-      published: post.published
+      published: post.published,
+      meta_title: (post as any).meta_title || "",
+      meta_description: (post as any).meta_description || "",
+      og_image: (post as any).og_image || "",
+      schema_markup: (post as any).schema_markup || {}
     });
   };
 
@@ -348,7 +360,7 @@ const BlogAdmin = () => {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="mb-16">
                     <Label htmlFor="content">Content</Label>
                     <ReactQuill
                       theme="snow"
@@ -356,7 +368,7 @@ const BlogAdmin = () => {
                       onChange={(value) => setPostForm({ ...postForm, content: value })}
                       modules={quillModules}
                       className="bg-background"
-                      style={{ height: "300px", marginBottom: "50px" }}
+                      style={{ height: "400px" }}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -405,6 +417,42 @@ const BlogAdmin = () => {
                       ))}
                     </select>
                   </div>
+                  
+                  {/* SEO Fields Section */}
+                  <div className="border-t pt-6 mt-6">
+                    <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="meta_title">Meta Title</Label>
+                        <Input
+                          id="meta_title"
+                          value={postForm.meta_title}
+                          onChange={(e) => setPostForm({ ...postForm, meta_title: e.target.value })}
+                          placeholder="Leave empty to use post title"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="meta_description">Meta Description</Label>
+                        <Textarea
+                          id="meta_description"
+                          value={postForm.meta_description}
+                          onChange={(e) => setPostForm({ ...postForm, meta_description: e.target.value })}
+                          placeholder="Leave empty to use excerpt"
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="og_image">OG Image URL</Label>
+                        <Input
+                          id="og_image"
+                          value={postForm.og_image}
+                          onChange={(e) => setPostForm({ ...postForm, og_image: e.target.value })}
+                          placeholder="Leave empty to use post image"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -431,7 +479,11 @@ const BlogAdmin = () => {
                             read_time: "",
                             image_url: "",
                             author_id: "",
-                            published: false
+                            published: false,
+                            meta_title: "",
+                            meta_description: "",
+                            og_image: "",
+                            schema_markup: {}
                           });
                         }}
                       >

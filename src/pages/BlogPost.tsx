@@ -23,6 +23,75 @@ const BlogPost = () => {
     }
   }, [postId]);
 
+  // Add SEO meta tags dynamically
+  const addMetaTags = (post: any) => {
+    const metaTitle = post.meta_title || post.title;
+    const metaDescription = post.meta_description || post.excerpt;
+    const ogImage = post.og_image || post.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&q=80";
+    const url = window.location.href;
+
+    // Update title
+    document.title = `${metaTitle} | GoalChef Blog`;
+
+    // Update or create meta tags
+    const setMetaTag = (property: string, content: string, isProperty = false) => {
+      const attr = isProperty ? 'property' : 'name';
+      let meta = document.querySelector(`meta[${attr}="${property}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute(attr, property);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    setMetaTag('description', metaDescription);
+    setMetaTag('og:title', metaTitle, true);
+    setMetaTag('og:description', metaDescription, true);
+    setMetaTag('og:image', ogImage, true);
+    setMetaTag('og:url', url, true);
+    setMetaTag('og:type', 'article', true);
+    setMetaTag('twitter:card', 'summary_large_image');
+    setMetaTag('twitter:title', metaTitle);
+    setMetaTag('twitter:description', metaDescription);
+    setMetaTag('twitter:image', ogImage);
+
+    // Add JSON-LD schema markup
+    const existingScript = document.getElementById('blog-post-schema');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    const schemaMarkup = post.schema_markup || {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": metaTitle,
+      "description": metaDescription,
+      "image": ogImage,
+      "datePublished": post.created_at,
+      "dateModified": post.updated_at || post.created_at,
+      "author": {
+        "@type": "Person",
+        "name": post.blog_authors?.name || "GoalChef Team",
+        "jobTitle": post.blog_authors?.credentials
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "GoalChef",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://goalchef.app/logo.png"
+        }
+      }
+    };
+
+    const script = document.createElement('script');
+    script.id = 'blog-post-schema';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schemaMarkup);
+    document.head.appendChild(script);
+  };
+
   const fetchBlogPost = async () => {
     const { data: postData, error } = await supabase
       .from("blog_posts" as any)
@@ -48,12 +117,8 @@ const BlogPost = () => {
     const blogPost = postData as any;
     setPost(blogPost);
     
-    // Update page title and meta description
-    document.title = `${blogPost.title} | GoalChef Blog`;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", blogPost.excerpt);
-    }
+    // Add SEO meta tags and schema markup
+    addMetaTags(blogPost);
 
     // Fetch related posts
     const { data: related } = await supabase
