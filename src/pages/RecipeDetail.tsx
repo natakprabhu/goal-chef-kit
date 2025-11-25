@@ -41,10 +41,21 @@ const RecipeDetail = () => {
   }
 
   const baseServings = 1;
-  const adjustedIngredients = (recipe.ingredients as any[]).map((ing: any) => ({
-    ...ing,
-    amount: (ing.amount * servings) / baseServings
-  }));
+  
+  // Check if ingredients are strings or objects
+  const isStringIngredients = typeof recipe.ingredients[0] === 'string';
+  
+  const adjustedIngredients = (recipe.ingredients as any[]).map((ing: any) => {
+    if (isStringIngredients) {
+      // For string ingredients, return as-is (can't adjust amounts easily)
+      return ing;
+    }
+    // For object ingredients, adjust amounts
+    return {
+      ...ing,
+      amount: (ing.amount * servings) / baseServings
+    };
+  });
 
   const adjustedNutrition = {
     calories: Math.round((recipe.calories * servings) / baseServings),
@@ -186,7 +197,10 @@ const RecipeDetail = () => {
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground text-center mt-4">
-                  Ingredients adjust automatically
+                  {isStringIngredients 
+                    ? "Nutrition adjusts for servings" 
+                    : "Ingredients adjust automatically"
+                  }
                 </p>
               </CardContent>
             </Card>
@@ -205,9 +219,12 @@ const RecipeDetail = () => {
                   {adjustedIngredients.map((ingredient, index) => (
                     <li key={index} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                       <span className="flex-1">
-                        {ingredient.amount} {ingredient.unit} {ingredient.name}
+                        {isStringIngredients 
+                          ? ingredient 
+                          : `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`
+                        }
                       </span>
-                      {ingredient.substitutable && (
+                      {!isStringIngredients && ingredient.substitutable && (
                         <Button variant="ghost" size="sm" className="text-primary">
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Swap
