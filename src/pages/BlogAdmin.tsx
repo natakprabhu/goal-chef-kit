@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { sampleAuthors, getSamplePosts } from "@/data/sampleBlogData";
+import { sampleRecipes } from "@/data/sampleRecipes";
 
 interface Author {
   id: string;
@@ -90,33 +91,38 @@ const BlogAdmin = () => {
 
   const seedSampleData = async () => {
     try {
-      // Delete all existing blog posts and authors
       await supabase.from("blog_posts" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
       await supabase.from("blog_authors" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Insert sample authors
       const { data: authorsData, error: authorsError } = await supabase
         .from("blog_authors" as any)
         .insert(sampleAuthors)
         .select();
 
       if (authorsError) throw authorsError;
-
       const authorIds = (authorsData as any[]).map(a => a.id);
 
-      // Insert sample blog posts
       const { error: postsError } = await supabase
         .from("blog_posts" as any)
         .insert(getSamplePosts(authorIds));
 
       if (postsError) throw postsError;
 
-      toast.success("✅ Sample data added successfully! Check the Blog page to see your content.");
+      toast.success("✅ Blog data added successfully!");
       fetchAuthors();
       fetchPosts();
     } catch (error: any) {
-      console.error("Error seeding data:", error);
-      toast.error("Failed to seed sample data. Check console for details.");
+      toast.error("Failed to seed blog data.");
+    }
+  };
+
+  const seedRecipes = async () => {
+    try {
+      const { error } = await supabase.from("recipes" as any).insert(sampleRecipes);
+      if (error) throw error;
+      toast.success("✅ 100+ recipes added successfully!");
+    } catch (error: any) {
+      toast.error("Failed to seed recipes: " + error.message);
     }
   };
 
@@ -277,10 +283,16 @@ const BlogAdmin = () => {
       <main className="flex-1 container mx-auto px-4 py-8 mt-16">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">Blog Management</h1>
-          <Button onClick={seedSampleData} variant="outline">
-            <Database className="h-4 w-4 mr-2" />
-            Seed Sample Data
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={seedSampleData} variant="outline">
+              <Database className="h-4 w-4 mr-2" />
+              Seed Blog Data
+            </Button>
+            <Button onClick={seedRecipes} variant="outline">
+              <Database className="h-4 w-4 mr-2" />
+              Seed 100+ Recipes
+            </Button>
+          </div>
         </div>
         
         <Tabs defaultValue="posts" className="w-full">
