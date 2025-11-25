@@ -12,3 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /planner
+Disallow: /favorites
+Disallow: /my-progress
+Disallow: /progress
+
+# Sitemap location
+Sitemap: https://goalchef.vercel.app/sitemap.xml
