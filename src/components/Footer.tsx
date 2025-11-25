@@ -2,7 +2,7 @@ import { ChefHat } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-muted/30 border-t border-border py-12">
+    <footer className="bg-muted/30 border-t border-border py-12" role="contentinfo">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
@@ -21,32 +21,33 @@ const Footer = () => {
           </div>
 
           {/* Product */}
-          <div>
+          <nav aria-label="Product">
             <h4 className="font-semibold mb-4 text-foreground">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="#features" className="hover:text-primary transition-[var(--transition-smooth)]">Features</a></li>
               <li><a href="#pricing" className="hover:text-primary transition-[var(--transition-smooth)]">Pricing</a></li>
               <li><a href="#how-it-works" className="hover:text-primary transition-[var(--transition-smooth)]">How It Works</a></li>
             </ul>
-          </div>
+          </nav>
 
           {/* Company */}
-          <div>
+          <nav aria-label="Company">
             <h4 className="font-semibold mb-4 text-foreground">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/about" className="hover:text-primary transition-[var(--transition-smooth)]">About</a></li>
-              <li><a href="/blog" className="hover:text-primary transition-[var(--transition-smooth)]">Blog</a></li>
+              <li><a href="/about" className="hover:text-primary transition-[var(--transition-smooth)]">About Us</a></li>
+              <li><a href="/blog" className="hover:text-primary transition-[var(--transition-smooth)]">Nutrition Blog</a></li>
+              <li><a href="/contact" className="hover:text-primary transition-[var(--transition-smooth)]">Contact</a></li>
             </ul>
-          </div>
+          </nav>
 
           {/* Legal */}
-          <div>
+          <nav aria-label="Legal">
             <h4 className="font-semibold mb-4 text-foreground">Legal</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="/privacy-policy" className="hover:text-primary transition-[var(--transition-smooth)]">Privacy Policy</a></li>
               <li><a href="/terms-of-service" className="hover:text-primary transition-[var(--transition-smooth)]">Terms of Service</a></li>
             </ul>
-          </div>
+          </nav>
         </div>
 
         <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
