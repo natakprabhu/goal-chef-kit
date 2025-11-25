@@ -6,12 +6,15 @@ import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     document.title = "Nutrition & Fitness Blog | GoalChef - Expert Tips & Recipes";
@@ -22,6 +25,22 @@ const Blog = () => {
 
     fetchBlogPosts();
   }, []);
+
+  useEffect(() => {
+    // Filter posts based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredPosts(blogPosts);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = blogPosts.filter(
+        (post) =>
+          post.title.toLowerCase().includes(query) ||
+          post.excerpt.toLowerCase().includes(query) ||
+          post.category.toLowerCase().includes(query)
+      );
+      setFilteredPosts(filtered);
+    }
+  }, [searchQuery, blogPosts]);
 
   const fetchBlogPosts = async () => {
     const { data, error } = await supabase
@@ -43,6 +62,7 @@ const Blog = () => {
     }
 
     setBlogPosts(data || []);
+    setFilteredPosts(data || []);
     setLoading(false);
   };
 
@@ -62,6 +82,18 @@ const Blog = () => {
               <p className="text-xl text-muted-foreground mb-8">
                 Expert advice on nutrition, meal planning, and fitness to help you achieve your health goals
               </p>
+              
+              {/* Search Bar */}
+              <div className="relative max-w-xl mx-auto">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search articles by title, category, or keywords..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 py-6 text-lg"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -71,11 +103,13 @@ const Blog = () => {
           <div className="container mx-auto px-4">
             {loading ? (
               <div className="text-center py-12">Loading blog posts...</div>
-            ) : blogPosts.length === 0 ? (
-              <div className="text-center py-12">No blog posts available yet.</div>
+            ) : filteredPosts.length === 0 ? (
+              <div className="text-center py-12">
+                {searchQuery ? "No blog posts found matching your search." : "No blog posts available yet."}
+              </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {blogPosts.map((post) => (
+                {filteredPosts.map((post) => (
                   <article key={post.id} className="group">
                     <Link to={`/blog/${post.slug}`}>
                       <Card className="h-full hover:shadow-lg transition-shadow duration-300">

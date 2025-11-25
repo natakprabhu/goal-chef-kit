@@ -68,16 +68,9 @@ const BlogPost = () => {
     setLoading(false);
   };
 
-  // Simple markdown to HTML conversion
-  const renderMarkdown = (markdown: string) => {
-    return markdown
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br />');
+  // Simple markdown/HTML to plain text rendering for BlogPost
+  const renderContent = (htmlContent: string) => {
+    return htmlContent;
   };
 
   const handleShare = (platform: string) => {
@@ -227,7 +220,7 @@ const BlogPost = () => {
           {/* Article Content */}
           <div
             className="prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-foreground prose-p:mb-6 prose-ul:my-6 prose-li:text-foreground"
-            dangerouslySetInnerHTML={{ __html: `<p>${renderMarkdown(post.content)}</p>` }}
+            dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
           />
 
           {/* Call to Action */}
