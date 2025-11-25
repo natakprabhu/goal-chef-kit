@@ -12,7 +12,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
-  const [servings, setServings] = useState(2);
+  const [servings, setServings] = useState(1);
   const { recipe, loading } = useRecipe(recipeId);
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -40,7 +40,7 @@ const RecipeDetail = () => {
     );
   }
 
-  const baseServings = 2;
+  const baseServings = 1;
   const adjustedIngredients = (recipe.ingredients as any[]).map((ing: any) => ({
     ...ing,
     amount: (ing.amount * servings) / baseServings
