@@ -69,7 +69,8 @@ export const Hero = ({ onSeeHowItWorks }: HeroProps) => {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl blur-3xl" />
             <img 
               src={heroImage}
-              alt="Healthy meal with precise nutrition data"
+              alt="Nutritious balanced meal plate with vegetables, lean protein, and whole grains showing precise calorie tracking and macro nutrients for fitness goals"
+              loading="eager"
               className="relative rounded-3xl shadow-[var(--shadow-card)] border border-border"
             />
             

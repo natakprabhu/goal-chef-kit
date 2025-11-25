@@ -10,6 +10,7 @@ const features = [
     title: "AI Meal Planner",
     description: "Let AI build your perfect week. Our smart planner creates meal plans that hit your exact calorie and macro targets, automatically adapting to your goals.",
     image: aiPlannerImage,
+    alt: "AI-powered meal planner interface showing weekly meal schedule with calorie and macro tracking for personalized nutrition planning",
     color: "from-secondary to-secondary-light"
   },
   {
@@ -17,6 +18,7 @@ const features = [
     title: "Precision Nutrition",
     description: "Every recipe includes exact calorie breakdowns and macro ratios. Adjust portions dynamically and watch the numbers update in real-time.",
     image: precisionImage,
+    alt: "Detailed recipe nutrition calculator displaying real-time calorie, protein, carbs, and fats breakdown with portion adjustment controls",
     color: "from-primary to-primary-light"
   },
   {
@@ -24,6 +26,7 @@ const features = [
     title: "Smart Substitutions",
     description: "Swap ingredients while maintaining your nutrition targets. Our AI suggests alternatives that keep you on track with your goals.",
     image: substitutionImage,
+    alt: "Smart ingredient substitution feature showing alternative meal options while maintaining target calories and macronutrients",
     color: "from-accent to-primary-light"
   }
 ];
@@ -60,7 +63,8 @@ export const Features = () => {
               <div className="rounded-xl overflow-hidden border border-border">
                 <img 
                   src={feature.image} 
-                  alt={feature.title}
+                  alt={feature.alt}
+                  loading="lazy"
                   className="w-full h-48 object-cover group-hover:scale-105 transition-[var(--transition-smooth)]"
                 />
               </div>

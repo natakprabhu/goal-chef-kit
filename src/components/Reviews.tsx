@@ -97,9 +97,9 @@ const ReviewCard = ({ review, style }: { review: Review; style?: React.CSSProper
     <div className="flex items-center gap-3 mb-3">
       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
         {review.avatar_url ? (
-          <img src={review.avatar_url} alt={review.name} className="w-full h-full object-cover" />
+          <img src={review.avatar_url} alt={`${review.name} profile picture`} loading="lazy" className="w-full h-full object-cover" />
         ) : (
-          <span className="font-bold text-gray-600 text-sm">{review.name.charAt(0)}</span>
+          <span className="font-bold text-gray-600 text-sm" aria-label={`${review.name} initial`}>{review.name.charAt(0)}</span>
         )}
       </div>
       <div>
@@ -172,7 +172,7 @@ const Reviews = () => {
   }, [activeReviews.length]);
 
   return (
-    <section className="py-24 bg-[#F2FCE2] overflow-hidden relative min-h-[800px]">
+    <section className="py-24 bg-[#F2FCE2] overflow-hidden relative min-h-[800px]" aria-label="Customer reviews">
       <style>{`
         @keyframes float-review {
           0% { opacity: 0; transform: translateY(40px) scale(0.9); }
@@ -193,12 +193,12 @@ const Reviews = () => {
           <h2 className="text-3xl lg:text-5xl font-bold mb-6 pointer-events-auto">
             Loved by{" "}
             <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              Healthy Eaters
+              50,000+ Users
             </span>
           </h2>
           <p className="text-lg text-muted-foreground pointer-events-auto">
-            See what the community is saying about their GoalChef journey. 
-            Real people, real results.
+            See what our community is saying about their nutrition transformation. 
+            Real people achieving real fitness goals with precision meal planning.
           </p>
         </div>
 

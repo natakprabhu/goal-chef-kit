@@ -14,11 +14,13 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <Hero onSeeHowItWorks={() => setVideoOpen(true)} />
-      <Features />
-      <HowItWorks />
-      <Reviews />
-      <CTA />
+      <main>
+        <Hero onSeeHowItWorks={() => setVideoOpen(true)} />
+        <Features />
+        <HowItWorks />
+        <Reviews />
+        <CTA />
+      </main>
       <Footer />
       <YouTubeModal open={videoOpen} onOpenChange={setVideoOpen} />
     </div>

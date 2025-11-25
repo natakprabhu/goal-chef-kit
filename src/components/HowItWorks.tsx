@@ -123,7 +123,8 @@ export function HowItWorks() {
                {/* The Static GIF/Image */}
                <img
                 src={STATIC_GIF_SRC} 
-                alt="GoalChef App Demo"
+                alt="GoalChef mobile app demonstration showing AI meal planning, recipe swaps, milestone tracking, and monthly diet planner features in action"
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>
