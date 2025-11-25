@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
@@ -80,6 +82,7 @@ const Blog = () => {
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-primary/5 to-background py-16 md:py-24">
           <div className="container mx-auto px-4">
+            <Breadcrumb items={[{ label: "Blog" }]} />
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Nutrition & Fitness Blog
@@ -97,41 +100,43 @@ const Blog = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogPosts.map((post) => (
                 <article key={post.id} className="group">
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                    <div className="overflow-hidden rounded-t-lg">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardHeader>
-                      <div className="flex items-center gap-4 mb-3">
-                        <Badge variant="secondary">{post.category}</Badge>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>{post.readTime}</span>
+                  <Link to={`/blog/${post.id}`}>
+                    <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+                      <div className="overflow-hidden rounded-t-lg">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      </div>
+                      <CardHeader>
+                        <div className="flex items-center gap-4 mb-3">
+                          <Badge variant="secondary">{post.category}</Badge>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{post.readTime}</span>
+                          </div>
                         </div>
-                      </div>
-                      <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
-                        {post.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        <time dateTime={post.date}>{post.date}</time>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="line-clamp-3 mb-4">
-                        {post.excerpt}
-                      </CardDescription>
-                      <Button variant="ghost" className="group/btn p-0 h-auto font-semibold">
-                        Read More
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
-                    </CardContent>
-                  </Card>
+                        <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
+                          {post.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          <time dateTime={post.date}>{post.date}</time>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="line-clamp-3 mb-4">
+                          {post.excerpt}
+                        </CardDescription>
+                        <Button variant="ghost" className="group/btn p-0 h-auto font-semibold">
+                          Read More
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </article>
               ))}
             </div>

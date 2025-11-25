@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,8 @@ const Recipes = () => {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
+          <Breadcrumb items={[{ label: "Recipes" }]} />
+          
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-primary-light to-secondary bg-clip-text text-transparent">
