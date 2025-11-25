@@ -90,6 +90,10 @@ const BlogAdmin = () => {
 
   const seedSampleData = async () => {
     try {
+      // Delete all existing blog posts and authors
+      await supabase.from("blog_posts" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from("blog_authors" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
       // Insert sample authors
       const { data: authorsData, error: authorsError } = await supabase
         .from("blog_authors" as any)
@@ -112,11 +116,7 @@ const BlogAdmin = () => {
       fetchPosts();
     } catch (error: any) {
       console.error("Error seeding data:", error);
-      if (error.message?.includes("duplicate key")) {
-        toast.error("Sample data already exists! Delete existing posts first.");
-      } else {
-        toast.error("Failed to seed sample data. Check console for details.");
-      }
+      toast.error("Failed to seed sample data. Check console for details.");
     }
   };
 
