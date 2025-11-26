@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
+import { SEO, generateArticleSchema } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,75 +23,6 @@ const BlogPost = () => {
       fetchBlogPost();
     }
   }, [postId]);
-
-  // Add SEO meta tags dynamically
-  const addMetaTags = (post: any) => {
-    const metaTitle = post.meta_title || post.title;
-    const metaDescription = post.meta_description || post.excerpt;
-    const ogImage = post.og_image || post.image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&q=80";
-    const url = window.location.href;
-
-    // Update title
-    document.title = `${metaTitle} | GoalChef Blog`;
-
-    // Update or create meta tags
-    const setMetaTag = (property: string, content: string, isProperty = false) => {
-      const attr = isProperty ? 'property' : 'name';
-      let meta = document.querySelector(`meta[${attr}="${property}"]`);
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute(attr, property);
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', content);
-    };
-
-    setMetaTag('description', metaDescription);
-    setMetaTag('og:title', metaTitle, true);
-    setMetaTag('og:description', metaDescription, true);
-    setMetaTag('og:image', ogImage, true);
-    setMetaTag('og:url', url, true);
-    setMetaTag('og:type', 'article', true);
-    setMetaTag('twitter:card', 'summary_large_image');
-    setMetaTag('twitter:title', metaTitle);
-    setMetaTag('twitter:description', metaDescription);
-    setMetaTag('twitter:image', ogImage);
-
-    // Add JSON-LD schema markup
-    const existingScript = document.getElementById('blog-post-schema');
-    if (existingScript) {
-      existingScript.remove();
-    }
-
-    const schemaMarkup = post.schema_markup || {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": metaTitle,
-      "description": metaDescription,
-      "image": ogImage,
-      "datePublished": post.created_at,
-      "dateModified": post.updated_at || post.created_at,
-      "author": {
-        "@type": "Person",
-        "name": post.blog_authors?.name || "GoalChef Team",
-        "jobTitle": post.blog_authors?.credentials
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "GoalChef",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://goalchef.app/logo.png"
-        }
-      }
-    };
-
-    const script = document.createElement('script');
-    script.id = 'blog-post-schema';
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(schemaMarkup);
-    document.head.appendChild(script);
-  };
 
   const fetchBlogPost = async () => {
     const { data: postData, error } = await supabase
@@ -116,9 +48,6 @@ const BlogPost = () => {
 
     const blogPost = postData as any;
     setPost(blogPost);
-    
-    // Add SEO meta tags and schema markup
-    addMetaTags(blogPost);
 
     // Fetch related posts
     const { data: related } = await supabase
@@ -185,6 +114,28 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {post && (
+        <SEO
+          title={post.meta_title || post.title}
+          description={post.meta_description || post.excerpt}
+          image={post.og_image || post.image_url || "https://goalchef.vercel.app/og-image.jpg"}
+          url={`https://goalchef.vercel.app/blog/${post.slug}`}
+          type="article"
+          author={post.blog_authors?.name}
+          publishedTime={post.created_at}
+          modifiedTime={post.updated_at}
+          keywords={[post.category, 'nutrition', 'health', 'fitness']}
+          schema={generateArticleSchema({
+            title: post.title,
+            description: post.excerpt,
+            image: post.image_url || "https://goalchef.vercel.app/og-image.jpg",
+            datePublished: post.created_at,
+            dateModified: post.updated_at,
+            authorName: post.blog_authors?.name || "Goal Chef Team",
+            url: `https://goalchef.vercel.app/blog/${post.slug}`,
+          })}
+        />
+      )}
       <Navigation />
 
       <main>

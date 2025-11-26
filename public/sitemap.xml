@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  STATIC SITEMAP - For reference only
+  
+  Dynamic sitemap with all blog posts and recipes is available at:
+  https://goalchef.vercel.app/functions/v1/generate-sitemap
+  
+  This file is maintained for backwards compatibility.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   

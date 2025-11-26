@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
@@ -17,12 +18,6 @@ const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    document.title = "Nutrition & Fitness Blog | GoalChef - Expert Tips & Recipes";
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", "Discover expert nutrition tips, healthy recipes, and fitness advice. Learn about meal planning, macros, weight loss, and building healthy eating habits with GoalChef.");
-    }
-
     fetchBlogPosts();
   }, []);
 
@@ -68,6 +63,13 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Nutrition & Fitness Blog | Goal Chef"
+        description="Discover expert nutrition tips, healthy recipes, and fitness advice from certified Indian nutritionists and dietitians."
+        keywords={['nutrition', 'fitness', 'healthy recipes', 'diet tips', 'weight management', 'Indian nutrition']}
+        type="website"
+        url="https://goalchef.vercel.app/blog"
+      />
       <Navigation />
       
       <main>
