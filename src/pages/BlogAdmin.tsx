@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Trash2, Edit, Database } from "lucide-react";
+import { Trash2, Edit, Database, Upload, Download } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ReactQuill from "react-quill";
@@ -16,6 +16,8 @@ import "react-quill/dist/quill.snow.css";
 import { sampleAuthors, getSamplePosts } from "@/data/sampleBlogData";
 import { sampleRecipes } from "@/data/sampleRecipes";
 import type { Recipe } from "@/hooks/useRecipes";
+import Papa from "papaparse";
+import { z } from "zod";
 
 interface Author {
   id: string;
@@ -43,6 +45,7 @@ const BlogAdmin = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [importing, setImporting] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -161,6 +164,271 @@ const BlogAdmin = () => {
     } catch (error: any) {
       toast.error("Failed to seed recipes: " + error.message);
     }
+  };
+
+  // Recipe validation schema
+  const recipeSchema = z.object({
+    title: z.string().trim().min(1, "Title is required").max(200, "Title too long"),
+    description: z.string().trim().min(1, "Description is required").max(500, "Description too long"),
+    meal_type: z.enum(["breakfast", "lunch", "dinner", "snack", "snack2"]),
+    diet_type: z.enum(["veg", "non_veg"]),
+    difficulty: z.string().optional(),
+    prep_time: z.number().min(0).optional().nullable(),
+    cook_time: z.number().min(0).optional().nullable(),
+    calories: z.number().min(0, "Calories must be positive"),
+    protein: z.number().min(0, "Protein must be positive"),
+    carbs: z.number().min(0, "Carbs must be positive"),
+    fats: z.number().min(0, "Fats must be positive"),
+    fiber: z.number().min(0).optional().nullable(),
+    access_level: z.enum(["guest", "logged_in", "subscribed"]).default("guest"),
+    goal_category: z.enum(["weight_gain", "weight_loss", "maintenance"]).optional().nullable(),
+    tags: z.array(z.string()).optional().default([]),
+    ingredients: z.union([
+      z.array(z.string()),
+      z.array(z.object({ item: z.string() }))
+    ]),
+    instructions: z.union([
+      z.array(z.string()),
+      z.array(z.object({ step: z.string() }))
+    ]),
+    image_url: z.string().url().optional().nullable()
+  });
+
+  const normalizeRecipeData = (data: any) => {
+    // Convert string numbers to actual numbers
+    const normalized = { ...data };
+    
+    if (typeof normalized.calories === 'string') normalized.calories = parseFloat(normalized.calories);
+    if (typeof normalized.protein === 'string') normalized.protein = parseFloat(normalized.protein);
+    if (typeof normalized.carbs === 'string') normalized.carbs = parseFloat(normalized.carbs);
+    if (typeof normalized.fats === 'string') normalized.fats = parseFloat(normalized.fats);
+    if (typeof normalized.fiber === 'string') normalized.fiber = parseFloat(normalized.fiber);
+    if (typeof normalized.prep_time === 'string') normalized.prep_time = parseInt(normalized.prep_time);
+    if (typeof normalized.cook_time === 'string') normalized.cook_time = parseInt(normalized.cook_time);
+    
+    // Parse JSON strings for arrays
+    if (typeof normalized.tags === 'string') {
+      try {
+        normalized.tags = JSON.parse(normalized.tags);
+      } catch {
+        normalized.tags = normalized.tags.split(',').map((t: string) => t.trim());
+      }
+    }
+    
+    if (typeof normalized.ingredients === 'string') {
+      try {
+        normalized.ingredients = JSON.parse(normalized.ingredients);
+      } catch {
+        normalized.ingredients = normalized.ingredients.split('\n').filter((i: string) => i.trim());
+      }
+    }
+    
+    if (typeof normalized.instructions === 'string') {
+      try {
+        normalized.instructions = JSON.parse(normalized.instructions);
+      } catch {
+        normalized.instructions = normalized.instructions.split('\n').filter((i: string) => i.trim());
+      }
+    }
+    
+    return normalized;
+  };
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    
+    try {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      let recipesData: any[] = [];
+
+      if (fileExtension === 'json') {
+        // Parse JSON file
+        const text = await file.text();
+        const jsonData = JSON.parse(text);
+        recipesData = Array.isArray(jsonData) ? jsonData : [jsonData];
+      } else if (fileExtension === 'csv') {
+        // Parse CSV file
+        await new Promise((resolve, reject) => {
+          Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              recipesData = results.data;
+              resolve(results);
+            },
+            error: (error) => reject(error)
+          });
+        });
+      } else {
+        toast.error("Unsupported file format. Please upload CSV or JSON files.");
+        setImporting(false);
+        return;
+      }
+
+      if (recipesData.length === 0) {
+        toast.error("No recipes found in the file.");
+        setImporting(false);
+        return;
+      }
+
+      // Normalize and validate recipes
+      const validRecipes: any[] = [];
+      const errors: string[] = [];
+
+      for (let i = 0; i < recipesData.length; i++) {
+        try {
+          const normalized = normalizeRecipeData(recipesData[i]);
+          const validated = recipeSchema.parse(normalized);
+          validRecipes.push(validated);
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            errors.push(`Row ${i + 1}: ${error.errors.map(e => e.message).join(', ')}`);
+          } else {
+            errors.push(`Row ${i + 1}: Invalid data format`);
+          }
+        }
+      }
+
+      if (validRecipes.length === 0) {
+        toast.error("No valid recipes found. Please check the file format.");
+        if (errors.length > 0) {
+          console.error("Validation errors:", errors);
+        }
+        setImporting(false);
+        return;
+      }
+
+      // Check for existing recipes
+      const { data: existingRecipes } = await supabase
+        .from("recipes")
+        .select("title");
+      
+      const existingTitles = new Set(existingRecipes?.map(r => r.title) || []);
+      const newRecipes = validRecipes.filter(recipe => !existingTitles.has(recipe.title));
+
+      if (newRecipes.length === 0) {
+        toast.info("All recipes from the file already exist in the database!");
+        setImporting(false);
+        return;
+      }
+
+      // Insert new recipes
+      const { error } = await supabase.from("recipes").insert(newRecipes);
+      
+      if (error) throw error;
+
+      toast.success(`✅ Successfully imported ${newRecipes.length} new recipes!`);
+      if (validRecipes.length - newRecipes.length > 0) {
+        toast.info(`${validRecipes.length - newRecipes.length} duplicate recipes were skipped.`);
+      }
+      if (errors.length > 0) {
+        toast.warning(`${errors.length} recipes had validation errors and were skipped.`);
+      }
+
+      fetchRecipes();
+    } catch (error: any) {
+      console.error("Import error:", error);
+      toast.error("Failed to import recipes: " + error.message);
+    } finally {
+      setImporting(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  const downloadSampleCSV = () => {
+    const sampleCSV = `title,description,meal_type,diet_type,calories,protein,carbs,fats,fiber,difficulty,prep_time,cook_time,access_level,goal_category,tags,ingredients,instructions,image_url
+"Sample Paneer Tikka","Grilled cottage cheese marinated in spices",lunch,veg,280,18,12,16,3,Medium,15,20,guest,maintenance,"high protein,indian","200 gm paneer cubed|2 tablespoon yogurt|1 tablespoon ginger-garlic paste|1 teaspoon garam masala|Salt to taste","Marinate paneer with yogurt and spices for 30 minutes|Thread onto skewers|Grill for 15-20 minutes until golden|Serve hot with chutney",https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8
+"Sample Chicken Salad","Healthy grilled chicken with fresh vegetables",dinner,non_veg,320,38,15,10,6,Easy,10,15,logged_in,weight_loss,"high protein,low calorie","200 gm chicken breast|Mixed greens 2 cups|1 cucumber diced|1 tomato diced|2 tablespoon olive oil|Lemon juice","Grill chicken breast until cooked through|Slice into strips|Toss with greens vegetables and dressing|Serve fresh",https://images.unsplash.com/photo-1546069901-ba9599a7e63c`;
+    
+    const blob = new Blob([sampleCSV], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recipe_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Sample CSV template downloaded!");
+  };
+
+  const downloadSampleJSON = () => {
+    const sampleJSON = [
+      {
+        title: "Sample Paneer Tikka",
+        description: "Grilled cottage cheese marinated in spices",
+        meal_type: "lunch",
+        diet_type: "veg",
+        calories: 280,
+        protein: 18,
+        carbs: 12,
+        fats: 16,
+        fiber: 3,
+        difficulty: "Medium",
+        prep_time: 15,
+        cook_time: 20,
+        access_level: "guest",
+        goal_category: "maintenance",
+        tags: ["high protein", "indian"],
+        ingredients: [
+          "200 gm paneer, cubed",
+          "2 tablespoon yogurt",
+          "1 tablespoon ginger-garlic paste",
+          "1 teaspoon garam masala",
+          "Salt to taste"
+        ],
+        instructions: [
+          "Marinate paneer with yogurt and spices for 30 minutes",
+          "Thread onto skewers",
+          "Grill for 15-20 minutes until golden",
+          "Serve hot with chutney"
+        ],
+        image_url: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8"
+      },
+      {
+        title: "Sample Chicken Salad",
+        description: "Healthy grilled chicken with fresh vegetables",
+        meal_type: "dinner",
+        diet_type: "non_veg",
+        calories: 320,
+        protein: 38,
+        carbs: 15,
+        fats: 10,
+        fiber: 6,
+        difficulty: "Easy",
+        prep_time: 10,
+        cook_time: 15,
+        access_level: "logged_in",
+        goal_category: "weight_loss",
+        tags: ["high protein", "low calorie"],
+        ingredients: [
+          "200 gm chicken breast",
+          "Mixed greens, 2 cups",
+          "1 cucumber, diced",
+          "1 tomato, diced",
+          "2 tablespoon olive oil",
+          "Lemon juice"
+        ],
+        instructions: [
+          "Grill chicken breast until cooked through",
+          "Slice into strips",
+          "Toss with greens, vegetables, and dressing",
+          "Serve fresh"
+        ],
+        image_url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
+      }
+    ];
+    
+    const blob = new Blob([JSON.stringify(sampleJSON, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recipe_template.json';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Sample JSON template downloaded!");
   };
 
   const fetchAuthors = async () => {
@@ -658,6 +926,68 @@ const BlogAdmin = () => {
                   View and manage all recipes in the database. Click on a recipe to view details on the recipes page.
                 </p>
               </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={seedRecipes} className="flex items-center gap-2">
+                    <Database className="h-4 w-4" />
+                    Seed 100+ Recipes
+                  </Button>
+                  
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="recipe-import"
+                      accept=".csv,.json"
+                      onChange={handleFileImport}
+                      className="hidden"
+                      disabled={importing}
+                    />
+                    <Button 
+                      onClick={() => document.getElementById('recipe-import')?.click()}
+                      variant="outline"
+                      disabled={importing}
+                      className="flex items-center gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {importing ? "Importing..." : "Import from CSV/JSON"}
+                    </Button>
+                  </div>
+
+                  <Button 
+                    onClick={downloadSampleCSV}
+                    variant="secondary"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    CSV Template
+                  </Button>
+
+                  <Button 
+                    onClick={downloadSampleJSON}
+                    variant="secondary"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    JSON Template
+                  </Button>
+                </div>
+                
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p><strong>Import Format Requirements:</strong></p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Accepts CSV or JSON files (max 20MB)</li>
+                    <li><strong>Required fields:</strong> title, description, meal_type, diet_type, calories, protein, carbs, fats</li>
+                    <li><strong>meal_type:</strong> breakfast, lunch, dinner, snack, or snack2</li>
+                    <li><strong>diet_type:</strong> veg or non_veg</li>
+                    <li><strong>goal_category:</strong> weight_gain, weight_loss, or maintenance</li>
+                    <li><strong>CSV format:</strong> Use pipe (|) to separate array items in ingredients/instructions columns</li>
+                    <li><strong>JSON format:</strong> Use proper arrays for ingredients, instructions, and tags</li>
+                    <li>Duplicate recipes (by title) are automatically skipped</li>
+                  </ul>
+                </div>
+              </CardContent>
             </Card>
 
             <div className="space-y-4">
