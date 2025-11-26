@@ -18,6 +18,7 @@ import { sampleRecipes } from "@/data/sampleRecipes";
 import type { Recipe } from "@/hooks/useRecipes";
 import Papa from "papaparse";
 import { z } from "zod";
+import { SitemapManager } from "@/components/SitemapManager";
 
 interface Author {
   id: string;
@@ -636,10 +637,11 @@ const BlogAdmin = () => {
         </div>
         
         <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="authors">Authors</TabsTrigger>
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
+            <TabsTrigger value="seo">SEO & Sitemaps</TabsTrigger>
           </TabsList>
           
           <TabsContent value="posts" className="space-y-6">
@@ -1034,6 +1036,10 @@ const BlogAdmin = () => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-6">
+            <SitemapManager />
           </TabsContent>
         </Tabs>
       </main>
