@@ -3383,8 +3383,303 @@ export const sampleRecipes = [
       "STEP 8 - PLATE AND SERVE: On each serving plate, arrange a bed of steamed broccoli. Place sliced chicken on top or beside the broccoli. Drizzle the remaining lemon juice over the chicken. Optionally, serve with a small side of low-sodium soy sauce or chilli sauce for dipping (1 tablespoon max as these are high in sodium). The green tea-poached chicken will have a very subtle tea flavor and be incredibly tender and moist. This meal is extremely low in calories (240 calories per serving) but high in protein (36g) and fiber (4g), keeping you full for hours. Perfect for a light, healthy dinner for weight loss."
     ],
     image_url: "https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?w=800&q=80"
-  }
+  },
 
-  // Note: To save space, I'm showing the pattern with 10 detailed recipes. The actual file would include 5 more recipes for MAINTENANCE category across different meal types with the same level of micro-detail.
+  // ============================================
+  // MAINTENANCE CATEGORY RECIPES
+  // Balanced macros for maintaining current weight
+  // ============================================
+
+  // MAINTENANCE - BREAKFAST (VEG)
+  {
+    title: "Masala Oats Upma with Mixed Vegetables",
+    description: "Nutritious South Indian style oats upma loaded with vegetables",
+    meal_type: "breakfast",
+    diet_type: "veg",
+    difficulty: "Easy",
+    prep_time: 10,
+    cook_time: 15,
+    calories: 320,
+    protein: 12,
+    carbs: 48,
+    fats: 10,
+    fiber: 7,
+    access_level: "guest",
+    goal_category: "maintenance",
+    tags: ["maintenance", "balanced", "fiber rich", "South Indian"],
+    ingredients: [
+      "80 gm rolled oats (not instant oats)",
+      "1 tablespoon oil (preferably coconut or sesame)",
+      "1/2 teaspoon mustard seeds",
+      "1/2 teaspoon cumin seeds",
+      "1/2 teaspoon urad dal",
+      "8-10 curry leaves",
+      "1 medium onion, finely chopped",
+      "1 green chilli, slit lengthwise",
+      "1/2 inch ginger, grated",
+      "1/4 cup green peas (fresh or frozen)",
+      "1/4 cup carrot, finely diced",
+      "1/4 cup beans, finely chopped",
+      "1/4 cup capsicum, finely diced",
+      "2 cups water",
+      "1/2 teaspoon turmeric powder",
+      "Salt to taste",
+      "Fresh coriander leaves, 2 tablespoon chopped",
+      "1 tablespoon lemon juice",
+      "For tempering: 1/4 teaspoon garam masala (optional)"
+    ],
+    instructions: [
+      "**STEP 1 - DRY ROAST OATS:** Heat a heavy-bottomed pan on medium heat for 1 minute until hot. Add 80 gm rolled oats (use thick rolled oats, not instant oats as they'll become mushy). Dry roast the oats for 4-5 minutes, stirring constantly with a spatula. You'll notice:\n• After 2 minutes: oats will start releasing a nutty aroma\n• After 4 minutes: oats will turn slightly golden and feel lighter\n• Be careful not to burn - if they start browning too much or smell burnt, reduce heat\nOnce roasted, transfer oats to a bowl and set aside. The roasting step is crucial - it prevents the oats from becoming sticky and gives a nice texture.",
+
+      "**STEP 2 - PREPARE VEGETABLES:** While oats are roasting, prepare all vegetables (this saves time):\n• Finely chop 1 medium onion into small pieces (2-3mm)\n• Dice carrot, beans, and capsicum into tiny cubes (3-4mm) - small pieces cook faster and mix better\n• If using frozen peas, no need to thaw - use directly\n• Grate ginger on the finest side of grater\n• Slit green chilli lengthwise but don't chop - this adds flavor without too much heat\nKeep all vegetables ready on a plate.",
+
+      "**STEP 3 - MAKE TEMPERING (TADKA):** In the same pan, heat 1 tablespoon oil on medium heat for 30 seconds. Test if oil is hot enough: drop one mustard seed - if it splutters immediately, oil is ready. Add in this order:\n• 1/2 teaspoon mustard seeds → wait 10 seconds until they crackle and pop\n• 1/2 teaspoon cumin seeds → wait 5 seconds until they sizzle and darken slightly\n• 1/2 teaspoon urad dal → stir for 15-20 seconds until dal turns golden (not brown)\n• 8-10 curry leaves → be careful, they splutter! Stand back slightly\nThe kitchen should smell wonderfully aromatic. The tempering should take about 45 seconds total.",
+
+      "**STEP 4 - SAUTÉ AROMATICS:** Immediately add chopped onions to the tempering. Stir and sauté on medium heat for 3-4 minutes until:\n• Onions turn translucent (you can see through them)\n• Edges start turning light golden\n• Raw smell disappears and you smell a sweet aroma\nAdd grated ginger and slit green chilli. Sauté for 30 seconds until the raw ginger smell goes away. Add 1/2 teaspoon turmeric powder and stir for 5 seconds.",
+
+      "**STEP 5 - COOK VEGETABLES:** Add all the chopped vegetables (carrot, beans, peas, capsicum) to the pan. Stir well to coat vegetables with the spices and tempering. Add salt to taste (approximately 3/4 teaspoon). Sauté vegetables on medium heat for 4-5 minutes, stirring occasionally:\n• After 2-3 minutes: vegetables will start softening\n• After 4-5 minutes: carrots and beans should be 70% cooked (tender but with a slight bite)\nDon't overcook - vegetables should retain some crunch.",
+
+      "**STEP 6 - ADD WATER AND BOIL:** Pour 2 cups water into the pan. Increase heat to high. Stir everything together and bring to a rolling boil. This will take 3-4 minutes. You'll see:\n• Large bubbles breaking vigorously on the surface\n• Steam rising\n• Water should be at a vigorous boil, not just simmering\nTaste the water - it should be slightly salty (like soup). If bland, add a pinch more salt now.",
+
+      "**STEP 7 - ADD ROASTED OATS:** Once water is boiling vigorously, reduce heat to low. Add the roasted oats gradually while stirring continuously with one hand. Keep stirring for 2-3 minutes without stopping:\n• Oats will absorb water immediately\n• The mixture will start thickening\n• After 2 minutes, it should resemble a thick porridge consistency\n• If too thick, add 2-3 tablespoon hot water and stir\n• If too watery, cook for 1-2 more minutes\nStirring prevents lumps from forming.",
+
+      "**STEP 8 - FINAL COOK:** Cover the pan with a lid and let it cook on low heat for 3-4 minutes. The low, gentle heat allows:\n• Oats to fully absorb moisture and soften completely\n• Vegetables to cook through\n• Flavors to meld together\nAfter 3 minutes, open lid and check - oats should be completely soft (not chewy), vegetables should be tender. If oats are still chewy, add 2 tablespoon water, cover, and cook 2 more minutes.",
+
+      "**STEP 9 - FINISHING TOUCHES:** Turn off heat. Add:\n• 2 tablespoon freshly chopped coriander leaves\n• 1 tablespoon lemon juice\n• Optional: 1/4 teaspoon garam masala for extra warmth\nFluff the upma gently with a fork to separate the oats and mix the ingredients. Let it rest covered for 2 minutes - this makes it fluffier.",
+
+      "**STEP 10 - SERVE:** Transfer to serving bowls. The upma should be:\n• Fluffy and grainy (not mushy or sticky)\n• Each oat grain separate and visible\n• Moist but not watery\n**SERVING SUGGESTIONS:**\n• Serve hot with coconut chutney or plain yogurt on the side\n• Pairs well with a cup of chai or filter coffee\n• Can be stored in refrigerator for 1 day - reheat with 1-2 tablespoon water\n\n**NUTRITION & BENEFITS:** This balanced breakfast provides 320 calories with good macros (12g protein, 48g carbs, 10g fat) and high fiber (7g). Perfect for maintaining weight - not too heavy, not too light. The oats provide sustained energy, vegetables add vitamins and minerals, and the spices aid digestion. You'll feel satisfied for 4-5 hours without energy crashes."
+    ],
+    image_url: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800&q=80"
+  },
+
+  // MAINTENANCE - LUNCH (NON-VEG)
+  {
+    title: "Grilled Tandoori Chicken with Jeera Rice and Raita",
+    description: "Perfectly marinated tandoori chicken with cumin rice and cooling cucumber raita",
+    meal_type: "lunch",
+    diet_type: "non_veg",
+    difficulty: "Medium",
+    prep_time: 120,
+    cook_time: 35,
+    calories: 480,
+    protein: 38,
+    carbs: 52,
+    fats: 12,
+    fiber: 3,
+    access_level: "logged_in",
+    goal_category: "maintenance",
+    tags: ["maintenance", "high protein", "balanced", "Indian classic"],
+    ingredients: [
+      "For chicken: 400 gm chicken (2 leg quarters or 4 drumsticks)",
+      "200 gm thick yogurt (hung curd preferred)",
+      "1 tablespoon ginger-garlic paste",
+      "1 tablespoon lemon juice",
+      "1 teaspoon Kashmiri red chilli powder",
+      "1/2 teaspoon turmeric powder",
+      "1 teaspoon garam masala",
+      "1 teaspoon coriander powder",
+      "1/2 teaspoon cumin powder",
+      "1/4 teaspoon black pepper",
+      "2 tablespoon mustard oil",
+      "Salt to taste",
+      "For rice: 100 gm basmati rice",
+      "1 teaspoon cumin seeds",
+      "1 teaspoon ghee",
+      "2 cups water",
+      "For raita: 150 gm yogurt",
+      "1/2 cucumber, grated",
+      "1/4 teaspoon roasted cumin powder"
+    ],
+    instructions: [
+      "**STEP 1 - PREPARE CHICKEN (2 HOURS BEFORE COOKING):** Wash 400 gm chicken pieces under cold running water. Pat completely dry with paper towels - this is important as moisture prevents marinade from sticking. Using a sharp knife, make 3-4 deep cuts (about 1 cm deep) on each chicken piece:\n• For drumsticks: make diagonal slashes across the meaty part\n• For thighs: make 4 deep cuts in a criss-cross pattern\n**WHY?** These cuts allow marinade to penetrate deep inside, flavoring the meat thoroughly and helping it cook faster and more evenly. Place chicken in a large bowl.",
+
+      "**STEP 2 - PREPARE HUNG CURD:** If using regular yogurt, we need to remove excess water to make it thick (hung curd). Take 200 gm yogurt and place it in a muslin cloth or clean thin cotton cloth. Tie the corners and hang it over a bowl in the refrigerator for 30-45 minutes. The liquid (whey) will drip out, leaving thick, creamy hung curd. After 45 minutes, you'll have approximately 150 gm hung curd with a thick, cream cheese-like consistency. If you're using Greek yogurt or already thick yogurt, skip this step.",
+
+      "**STEP 3 - MAKE MARINADE:** In a mixing bowl, combine:\n• 150 gm hung curd\n• 1 tablespoon ginger-garlic paste (freshly made is best)\n• 1 tablespoon lemon juice\n• 1 teaspoon Kashmiri red chilli powder (for color, not heat)\n• 1/2 teaspoon turmeric powder\n• 1 teaspoon garam masala\n• 1 teaspoon coriander powder\n• 1/2 teaspoon cumin powder\n• 1/4 teaspoon black pepper\n• Salt to taste (approximately 1 teaspoon)\n• 2 tablespoon mustard oil (authentic tandoori flavor - can use regular oil if unavailable)\nWhisk everything together vigorously for 1-2 minutes until you have a smooth, thick, orange-red marinade with no lumps.",
+
+      "**STEP 4 - MARINATE CHICKEN:** Pour the marinade over the chicken pieces. Using your hands (wear gloves if preferred), massage the marinade into the chicken:\n• Rub it all over each piece\n• Push marinade into the cuts you made\n• Coat evenly - every part should be covered\nCover the bowl with plastic wrap or transfer to a ziplock bag. Refrigerate for minimum 2 hours, maximum 24 hours. The longer it marinates, the more flavorful and tender it becomes. Remove from fridge 30 minutes before cooking to bring to room temperature.",
+
+      "**STEP 5 - PREPARE JEERA RICE:** Wash 100 gm basmati rice in cold water 3-4 times until water runs clear - this removes excess starch and prevents sticky rice. Soak rice in fresh water for 20 minutes, then drain completely using a strainer. In a heavy-bottomed pot, heat 1 teaspoon ghee on medium heat. Add 1 teaspoon cumin seeds - they should sizzle immediately. Let them splutter and turn golden brown (20-30 seconds). Add the drained rice and gently stir for 1 minute to coat rice with ghee and cumin. Add 2 cups water and salt to taste. Bring to a boil on high heat, then reduce to lowest heat, cover tightly, and cook for 12-15 minutes until rice is fluffy. Turn off heat and let it rest covered for 5 minutes. Fluff with fork before serving.",
+
+      "**STEP 6 - MAKE CUCUMBER RAITA:** While rice is cooking, grate 1/2 cucumber using the large holes of a grater. Squeeze the grated cucumber firmly between your palms to remove excess water - this prevents watery raita. In a bowl, whisk 150 gm fresh yogurt until smooth and creamy. Add the squeezed cucumber, 1/4 teaspoon roasted cumin powder, salt to taste, and a pinch of black pepper. Mix well. Refrigerate until serving - cold raita is refreshing with hot tandoori chicken.",
+
+      "**STEP 7 - GRILL CHICKEN (OVEN METHOD):** Preheat your oven to 220°C (430°F) for 10 minutes. Line a baking tray with aluminum foil and place a wire rack on top (this allows heat circulation around chicken). Arrange marinated chicken pieces on the rack with space between them. Don't overcrowd. Place tray in the middle rack of oven. Grill for 25-30 minutes:\n• After 15 minutes: chicken will start getting golden-brown char marks\n• At 15 minutes: open oven, brush chicken with 1 teaspoon oil or ghee, and turn pieces over\n• Continue grilling for 10-15 more minutes\n• Chicken is done when: juices run clear (not pink), internal temperature is 75°C, and outside has beautiful charred spots\nIf you don't have oven, use stovetop grill pan or gas tandoor.",
+
+      "**STEP 8 - ALTERNATIVE - STOVETOP GRILL PAN METHOD:** If no oven, heat a grill pan or heavy tawa on high heat for 2 minutes. Reduce to medium-high. Brush pan lightly with oil. Place chicken pieces on hot pan - you should hear a loud sizzle immediately. Cook without moving for 7-8 minutes until bottom develops char marks. Brush top with oil, flip, and cook another 7-8 minutes. Reduce heat to low, cover with a lid, and cook for 10-12 more minutes, flipping once midway, until chicken is cooked through. Total stovetop time: 25-30 minutes.",
+
+      "**STEP 9 - REST CHICKEN:** Once chicken is cooked (no pink inside, charred outside, juices clear), remove from heat. Transfer to a plate and cover loosely with foil. Let it rest for 5 minutes - this allows juices to redistribute, making chicken juicier. Squeeze fresh lemon juice over hot chicken.",
+
+      "**STEP 10 - PLATE AND SERVE:** On each serving plate:\n• Place a portion of hot jeera rice (should be fluffy with visible cumin seeds)\n• Place 1-2 pieces of tandoori chicken beside the rice\n• Serve raita in a small bowl on the side\n• Garnish with lemon wedges and onion rings\n• Optionally, sprinkle chaat masala on chicken for extra tang\n\n**EATING SUGGESTION:** Take a bite of the hot, smoky tandoori chicken, then a spoonful of cumin-scented rice, followed by cooling raita. The combination of temperatures and flavors is perfect.\n\n**NUTRITION & BALANCE:** At 480 calories with 38g protein, 52g carbs, and only 12g fat, this meal is perfectly balanced for maintaining weight. High protein keeps you full, carbs provide energy, and moderate fat ensures satisfaction. The yogurt-based marinade and raita also add probiotics for gut health. This portion will keep you satisfied for 5-6 hours without feeling too heavy."
+    ],
+    image_url: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=800&q=80"
+  },
+
+  // MAINTENANCE - DINNER (VEG)
+  {
+    title: "Dal Tadka with Whole Wheat Roti and Mixed Vegetable Sabzi",
+    description: "Classic protein-rich dal tadka with perfectly cooked rotis and seasonal vegetables",
+    meal_type: "dinner",
+    diet_type: "veg",
+    difficulty: "Medium",
+    prep_time: 20,
+    cook_time: 40,
+    calories: 420,
+    protein: 16,
+    carbs: 62,
+    fats: 12,
+    fiber: 12,
+    access_level: "guest",
+    goal_category: "maintenance",
+    tags: ["maintenance", "balanced", "traditional", "high fiber"],
+    ingredients: [
+      "For dal: 80 gm mixed dal (equal parts toor, moong, masoor)",
+      "2.5 cups water",
+      "1/4 teaspoon turmeric powder",
+      "Salt to taste",
+      "For tadka: 1 tablespoon ghee",
+      "1 teaspoon cumin seeds",
+      "4-5 garlic cloves, chopped",
+      "1 dried red chilli",
+      "A pinch of asafoetida (hing)",
+      "1 tomato, chopped",
+      "Fresh coriander leaves",
+      "For roti: 100 gm whole wheat flour",
+      "Water as needed",
+      "For sabzi: 200 gm mixed vegetables",
+      "1 teaspoon oil",
+      "Spices: turmeric, cumin, coriander powder"
+    ],
+    instructions: [
+      "**STEP 1 - WASH AND SOAK DAL:** Take 80 gm mixed dal (approximately 25-30 gm each of toor dal, moong dal, and masoor dal - this combination gives best texture and nutrition). Place in a bowl and wash thoroughly:\n• First wash: water will be very cloudy - rinse and drain\n• Second wash: water will be milky - rinse and drain\n• Third wash: water should run almost clear\n**WHY WASH?** Removes dust, impurities, and excess starch. After washing, soak dal in fresh water for 15-20 minutes. This reduces cooking time and makes dal more digestible. While dal soaks, prepare other ingredients.",
+
+      "**STEP 2 - PREPARE VEGETABLE SABZI:** Chop 200 gm mixed seasonal vegetables into small, uniform pieces (about 1 cm cubes):\n• Options: cauliflower, beans, carrots, peas, potatoes, capsicum\n• Keep 2-3 types for variety\nHeat 1 teaspoon oil in a pan on medium heat. Add 1/4 teaspoon cumin seeds - wait until they splutter (10 seconds). Add chopped vegetables, 1/4 teaspoon turmeric, 1/2 teaspoon coriander powder, salt to taste. Stir well. Add 2-3 tablespoon water, cover, and cook on low heat for 10-12 minutes, stirring occasionally until vegetables are tender. Set aside.",
+
+      "**STEP 3 - MAKE ROTI DOUGH:** In a mixing bowl, add 100 gm whole wheat flour (atta) and a pinch of salt. Gradually add water (approximately 50-60 ml) while mixing with your other hand:\n• Add water little by little, not all at once\n• Mix flour and water to form a rough dough\n• Once it comes together, knead with the heel of your palm\n• Knead for 5-6 minutes until dough becomes smooth, soft, and elastic\n• The dough should not stick to your hands\n• Test: press a finger into dough - it should bounce back slowly\nCover with a damp cloth and let rest for 15-20 minutes. Resting makes gluten relax, resulting in softer rotis.",
+
+      "**STEP 4 - PRESSURE COOK DAL:** Drain the soaked dal completely. Transfer to a pressure cooker. Add:\n• 2.5 cups fresh water\n• 1/4 teaspoon turmeric powder\n• Salt to taste (approximately 3/4 teaspoon)\nStir once. Close pressure cooker lid securely. Cook on high heat until you hear the first whistle:\n• **For stovetop cooker:** After first whistle, reduce heat to low and cook for 8-10 minutes (you might hear 2-3 more whistles). Then turn off heat.\n• **For electric cooker:** Set to dal/lentil mode for 10 minutes.\nLet pressure release naturally - don't open until pressure indicator drops completely (10-15 minutes). When you open, dal should be completely soft and mushy - you shouldn't be able to feel individual lentils between your fingers.",
+
+      "**STEP 5 - MASH AND CHECK CONSISTENCY:** Once pressure releases, open cooker carefully. The dal should be well-cooked and soft. Using a wooden spoon or dal masher, mash the dal lightly:\n• It should have a creamy, thick soup consistency\n• Some lentils can be visible, but most should be mashed\n• If too thick (spoon stands upright), add 1/2 cup hot water and stir\n• If too thin (very watery), cook uncovered on low heat for 5 minutes to thicken\nIdeal consistency: pourable but slightly thick, coating the back of a spoon. Keep dal warm on low heat.",
+
+      "**STEP 6 - MAKE TADKA (TEMPERING):** This is the soul of dal tadka. In a small tadka pan or ladle, heat 1 tablespoon ghee on medium heat for 30 seconds. Add in this sequence:\n• A small pinch of asafoetida (hing) → sizzles immediately, adds aroma\n• 1 teaspoon cumin seeds → wait 10 seconds until they turn brown and crackle\n• 4-5 garlic cloves (roughly chopped) → fry for 30-40 seconds until golden (not burnt) and fragrant\n• 1 dried red chilli (broken into 2 pieces) → fry for 5 seconds\n• 1 medium tomato (finely chopped) → add and cook for 2-3 minutes on medium heat until tomatoes become soft and oil separates\nThe tadka should smell incredible - garlicky, spicy, and aromatic. Immediately pour this hot tadka over the cooked dal. You'll hear a sizzling sound - this is good! The hot oil infuses flavor into the dal. Stir well to incorporate. Add chopped fresh coriander leaves. Let dal simmer on low heat for 2-3 minutes so flavors meld.",
+
+      "**STEP 7 - ROLL ROTIS:** Divide the rested dough into 5-6 equal portions (each about the size of a lime). Roll each into a smooth ball between your palms. Dust your work surface and rolling pin with dry flour. Flatten one ball slightly between your palms. Place on floured surface and roll with rolling pin:\n• Start from center and roll outward in all directions\n• Rotate the roti 90 degrees after a few rolls\n• Apply even, gentle pressure\n• Roll into a 6-7 inch diameter circle, about 2mm thick\n• It should be uniformly thin - no thick or thin spots\n• If dough sticks, dust with flour\nRoll all rotis and keep them covered with a cloth.",
+
+      "**STEP 8 - COOK ROTIS:** Heat a flat iron tawa or griddle on medium-high heat for 3-4 minutes until very hot (test by sprinkling water - it should evaporate immediately). Pick up one rolled roti and place gently on the hot tawa:\n• **First side (30-40 seconds):** Don't move the roti. After 20-30 seconds, you'll see small bubbles forming on the surface and the edges will start lifting slightly. The bottom should have light golden spots.\n• **Flip to second side (30-40 seconds):** Use tongs or fingers to flip. Press gently with a clean cloth or spatula in circular motions. You'll see the roti puffing up in sections or completely.\n• **Final puff (optional, 10 seconds):** Using tongs, lift the roti and place directly on the flame (if gas stove) for 5 seconds on each side. It should puff up completely like a balloon.\nBrush cooked roti with 1/4 teaspoon ghee and place in a roti basket or container lined with cloth. Repeat for remaining rotis.",
+
+      "**STEP 9 - FINAL TOUCHES TO DAL:** Taste the dal and adjust:\n• If bland: add more salt and a squeeze of lemon juice\n• If too thick: add hot water to desired consistency\n• For extra flavor: add 1/2 teaspoon garam masala and stir\nThe dal should be aromatic, slightly tangy from tomatoes, and have visible tadka on top.",
+
+      "**STEP 10 - SERVE:** Serve hot with:\n• 2 whole wheat rotis per person (soft, slightly puffed)\n• 1 bowl of dal tadka (should be steaming hot with tadka visible on top)\n• A side of mixed vegetable sabzi\n• Optional: small onion slices, lemon wedges, and green chillies on the side\n\n**HOW TO EAT:** Break a piece of roti, use it to scoop up dal and sabzi together, and eat. The combination is perfect - soft roti, creamy dal, and textured vegetables.\n\n**NUTRITION & BENEFITS:** This traditional Indian dinner provides 420 calories with excellent macros: 16g protein from dal, 62g complex carbs from roti and dal, 12g healthy fats from ghee, and a whopping 12g fiber. Perfect for maintaining weight - it's filling, balanced, and nutritionally complete. The high fiber and protein keep you satisfied through the night without feeling heavy. This meal digests slowly, preventing midnight hunger and maintaining stable blood sugar."
+    ],
+    image_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&q=80"
+  },
+
+  // MAINTENANCE - SNACK (VEG)
+  {
+    title: "Whole Wheat Vegetable Sandwich with Mint Chutney",
+    description: "Fresh, crunchy vegetable sandwich with protein-rich filling and green chutney",
+    meal_type: "snack",
+    diet_type: "veg",
+    difficulty: "Easy",
+    prep_time: 15,
+    cook_time: 5,
+    calories: 280,
+    protein: 10,
+    carbs: 42,
+    fats: 8,
+    fiber: 6,
+    access_level: "guest",
+    goal_category: "maintenance",
+    tags: ["maintenance", "quick", "portable", "fresh"],
+    ingredients: [
+      "4 slices whole wheat bread",
+      "1 medium potato, boiled",
+      "1/4 cup cucumber, thinly sliced",
+      "1/4 cup tomato, thinly sliced",
+      "1/4 cup onion, thinly sliced (optional)",
+      "2 tablespoon boiled sweet corn",
+      "1 tablespoon paneer, crumbled (optional)",
+      "For chutney: 1 cup mint leaves",
+      "1/2 cup coriander leaves",
+      "1 green chilli",
+      "1 tablespoon lemon juice",
+      "Salt to taste",
+      "For spread: 2 tablespoon butter or ghee",
+      "Chaat masala: 1/2 teaspoon",
+      "Black salt: 1/4 teaspoon",
+      "Black pepper: 1/4 teaspoon"
+    ],
+    instructions: [
+      "**STEP 1 - BOIL POTATO:** Take 1 medium potato (approximately 150 gm), wash thoroughly. Place in a small pot, add enough water to cover potato completely, and add a pinch of salt. Bring to boil on high heat, then reduce to medium and cook for 15-20 minutes:\n• Test doneness: insert a knife - it should slide in easily without resistance\n• Alternatively, pressure cook for 2 whistles\nOnce done, drain water and let potato cool for 10 minutes. Peel the skin (it should come off easily). Mash the boiled potato roughly with a fork in a bowl - leave some small chunks for texture, don't make it completely smooth. Set aside.",
+
+      "**STEP 2 - PREPARE MINT CHUTNEY:** This is the flavor hero of the sandwich. Rinse 1 cup fresh mint leaves and 1/2 cup coriander leaves in cold water. Shake off excess water. In a blender or mixer jar, add:\n• Mint and coriander leaves\n• 1 green chilli (remove seeds if you want less heat)\n• 1 tablespoon lemon juice\n• 1/4 teaspoon cumin powder (optional)\n• Salt to taste\n• 2-3 tablespoon water\nBlend on high speed for 1-2 minutes, scraping down sides once, until you get a smooth, vibrant green paste:\n• Consistency should be thick but spreadable, like ketchup\n• If too thick, add 1 tablespoon water and blend again\n• If too thin, add 1-2 tablespoon roasted peanuts and blend\nTransfer to a small bowl. The chutney should smell fresh, minty, and slightly tangy. This chutney can be stored in refrigerator for 3 days.",
+
+      "**STEP 3 - SLICE VEGETABLES:** Wash all vegetables under cold running water. Using a sharp knife:\n• **Cucumber:** Cut into very thin round slices (2mm thick) - thin slices fit better in sandwich\n• **Tomato:** Cut into thin round slices (3mm thick) - remove the seedy watery center part if tomato is very juicy\n• **Onion (optional):** Cut into very thin rings - thin onions are less pungent\nPlace each vegetable on a separate plate. Pat dry with paper towel if they're wet - excess moisture makes sandwich soggy.",
+
+      "**STEP 4 - PREPARE POTATO FILLING:** To the mashed potato, add:\n• 2 tablespoon boiled sweet corn (adds sweetness and crunch)\n• 1 tablespoon crumbled paneer (optional - adds protein and creaminess)\n• 1/4 teaspoon chaat masala (tangy, spicy flavor)\n• 1/4 teaspoon black salt (kala namak - adds unique flavor)\n• 1/4 teaspoon black pepper powder\n• Salt to taste\n• 1 tablespoon mint chutney (to bind and add flavor)\nMix everything well with a spoon. Taste and adjust seasoning - it should be flavorful on its own. The filling should be moist but not watery.",
+
+      "**STEP 5 - ASSEMBLE SANDWICH:** Take 4 slices of whole wheat bread. If bread is very soft and fresh, use as is. If slightly dry or want extra flavor, lightly toast the bread:\n• Heat a tawa or pan on medium heat\n• Place bread slices on the hot tawa for 30-40 seconds per side\n• Bread should be warm and slightly crispy on the surface, not completely toasted\n\n**ASSEMBLY:**\n• Take 2 bread slices\n• Spread 1 teaspoon butter or ghee on one side of each slice\n• On one slice (butter side up): spread 1 tablespoon mint chutney evenly\n• Add half the potato filling and spread it evenly, leaving 1 cm border\n• Layer cucumber slices overlapping slightly\n• Layer tomato slices\n• Layer onion rings (if using)\n• Sprinkle a tiny pinch of chaat masala and black salt on vegetables\n• Spread mint chutney on the second bread slice (butter side)\n• Place it on top, chutney side down, pressing gently\n\nRepeat for second sandwich with remaining 2 slices.",
+
+      "**STEP 6 - GRILL SANDWICH (OPTIONAL):** You can eat the sandwich as is (fresh and cold) or grill it for warm, crispy exterior:\n\n**METHOD 1 - Sandwich Maker:** Preheat sandwich maker. Brush plates lightly with oil. Place sandwich in maker, close lid, and cook for 3-4 minutes until golden and crispy with grill marks.\n\n**METHOD 2 - Stovetop (Tawa Method):** Heat tawa on medium heat. Brush lightly with butter. Place sandwich on tawa. Place a heavy plate on top to press it down. Cook for 2-3 minutes until bottom is golden with brown spots. Brush top with butter, flip carefully, press again, cook 2-3 more minutes.\n\n**METHOD 3 - Fresh (No Grilling):** If you prefer fresh, cold sandwich with crunchy vegetables, skip grilling entirely. Just cut and serve.",
+
+      "**STEP 7 - CUT AND SERVE:** Using a sharp knife, cut each sandwich:\n• Diagonally from corner to corner for 2 triangle pieces (classic cut), OR\n• Straight down the middle for 2 rectangles, OR\n• Cut off crusts first, then cut into 4 small squares (tea sandwich style)\nArrange cut pieces on a serving plate. The colorful layers of vegetables should be visible from the sides - looks appetizing!",
+
+      "**STEP 8 - SERVE WITH SIDES:** Serve sandwiches with:\n• Extra mint chutney on the side for dipping\n• Tomato ketchup (optional)\n• Potato chips or banana chips (only if not worried about calories)\n• A cup of masala chai or fresh fruit juice\n\n**STORAGE TIP:** If making ahead:\n• Prepare all components separately\n• Assemble sandwiches just before eating\n• Don't add tomatoes until last minute (they release water)\n• If packing for lunch box, wrap in aluminum foil or butter paper\n• Can stay fresh for 4-5 hours at room temperature\n\n**NUTRITION & BALANCE:** Each sandwich provides 280 calories with balanced macros: 10g protein (from paneer, bread, potato), 42g carbs (from whole wheat bread and potato), 8g fat (from butter), and 6g fiber (from vegetables and whole wheat). Perfect for a mid-meal snack that keeps you satisfied for 2-3 hours without being too heavy. The fresh vegetables add vitamins and minerals, while mint aids digestion. This is the ideal snack for maintaining weight - substantial enough to prevent unhealthy snacking but not so heavy that it ruins your next meal."
+    ],
+    image_url: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80"
+  },
+
+  // MAINTENANCE - SNACK (NON-VEG)
+  {
+    title: "Egg Bhurji with Multigrain Toast",
+    description: "Spiced Indian scrambled eggs with vegetables on crispy multigrain toast",
+    meal_type: "snack",
+    diet_type: "non_veg",
+    difficulty: "Easy",
+    prep_time: 5,
+    cook_time: 10,
+    calories: 310,
+    protein: 20,
+    carbs: 28,
+    fats: 14,
+    fiber: 4,
+    access_level: "guest",
+    goal_category: "maintenance",
+    tags: ["maintenance", "high protein", "quick", "Indian style"],
+    ingredients: [
+      "3 large eggs",
+      "1 tablespoon oil (preferably olive or mustard oil)",
+      "1/2 teaspoon cumin seeds",
+      "1 small onion, finely chopped",
+      "1 small tomato, finely chopped",
+      "1 green chilli, finely chopped",
+      "1/4 teaspoon turmeric powder",
+      "1/4 teaspoon red chilli powder",
+      "1/4 teaspoon garam masala",
+      "2 tablespoon bell pepper, finely chopped (optional)",
+      "Fresh coriander leaves, 2 tablespoon chopped",
+      "Salt to taste",
+      "Black pepper to taste",
+      "2 slices multigrain bread (or whole wheat)",
+      "1 teaspoon butter for toast"
+    ],
+    instructions: [
+      "**STEP 1 - PREPARE INGREDIENTS:** This is a quick dish, so having everything ready (mise en place) is crucial:\n• Crack 3 large eggs into a bowl\n• Beat eggs lightly with a fork or whisk for 30 seconds - just until yolks and whites are combined (don't overbeat - you should still see streaks of white and yellow)\n• Add a pinch of salt and black pepper to beaten eggs, whisk once\n• Finely chop 1 small onion into tiny pieces (2-3mm) - fine pieces cook faster\n• Finely chop 1 small tomato - remove seeds if tomato is very watery\n• Finely chop 1 green chilli - remove seeds for less heat\n• Optionally, finely chop 2 tablespoon bell pepper (capsicum) for color and crunch\n• Chop 2 tablespoon fresh coriander leaves\nKeep everything within reach on a plate.",
+
+      "**STEP 2 - TOAST BREAD:** While preparing ingredients, start toasting bread to save time. You can use:\n\n**METHOD 1 - Toaster:** Place 2 multigrain bread slices in toaster. Toast on medium setting until golden brown and crispy (about 2-3 minutes). \n\n**METHOD 2 - Stovetop:** Heat a tawa or pan on medium heat. Add 1/2 teaspoon butter. Place bread slices on tawa. Toast each side for 1-2 minutes until golden with brown spots and crispy. \n\nOnce toasted, spread remaining 1/2 teaspoon butter on one side of each toast while hot - butter melts and soaks in. Keep toast warm by covering with a cloth or placing in a warm oven (at 80°C).",
+
+      "**STEP 3 - HEAT PAN:** This step is important for fluffy, non-stick bhurji. Heat a non-stick pan on medium heat for 1-2 minutes until hot:\n• Test: sprinkle a few drops of water - they should dance and evaporate immediately\n• Don't overheat - very high heat makes eggs rubbery\nAdd 1 tablespoon oil (olive oil or mustard oil for authentic flavor). Swirl to coat the pan bottom evenly. Heat oil for 30 seconds until it shimmers but doesn't smoke.",
+
+      "**STEP 4 - MAKE TEMPERING:** Add 1/2 teaspoon cumin seeds to the hot oil. They should sizzle and splutter immediately:\n• If they don't sizzle, oil isn't hot enough - wait 10 more seconds\n• Let cumin seeds crackle and turn darker brown for 10-15 seconds\n• They'll release a wonderful nutty aroma\nImmediately add finely chopped onions. Stir with a spatula. Sauté onions on medium heat for 2-3 minutes:\n• After 1 minute: onions will turn translucent\n• After 2-3 minutes: edges will turn light golden and smell sweet\n• Don't burn - if browning too fast, reduce heat slightly",
+
+      "**STEP 5 - ADD VEGETABLES AND SPICES:** Add chopped green chilli and bell pepper (if using) to the sautéed onions. Stir and cook for 30 seconds. Add chopped tomatoes. Stir well. Cook for 2-3 minutes until tomatoes soften:\n• They should break down and become mushy\n• Liquid from tomatoes will evaporate\n• You'll see oil separating at the edges - this means tomatoes are cooked\nNow add the spices:\n• 1/4 teaspoon turmeric powder\n• 1/4 teaspoon red chilli powder\n• Salt to taste\nStir for 10 seconds to cook the spices (raw spice smell should disappear). The mixture should look like a thick, dry masala base with no excess liquid.",
+
+      "**STEP 6 - ADD EGGS (CRUCIAL STEP):** Reduce heat to low-medium. Pour the beaten eggs over the masala mixture:\n• Don't stir immediately - let eggs sit undisturbed for 10-15 seconds\n• You'll see edges starting to set and turn opaque\nNow, using a spatula, **gently scramble** the eggs:\n• Don't stir vigorously - use a folding motion\n• Scrape the bottom and fold eggs over themselves\n• Break up large chunks, but don't over-scramble into tiny pieces\n• Cook for 2-3 minutes, stirring every 10-15 seconds\n\n**DONENESS INDICATORS:**\n• Eggs should be mostly cooked but still slightly soft (they'll continue cooking from residual heat)\n• They should look creamy, not dry or rubbery\n• You should see distinct curds/chunks of egg, not a fine mush\n• Color should be bright yellow from turmeric, speckled with red tomatoes",
+
+      "**STEP 7 - FINAL SEASONING:** When eggs are 90% cooked (still slightly wet), turn off heat. Add:\n• 1/4 teaspoon garam masala (adds warmth and aroma)\n• Fresh black pepper to taste\n• 2 tablespoon chopped coriander leaves\nStir gently once to incorporate. Let bhurji sit in the hot pan for 30 seconds - residual heat will finish cooking the eggs to perfect doneness. The bhurji should look:\n• Fluffy and chunky, not dense or wet\n• Bright yellow with visible pieces of vegetables\n• Moist but not watery - no liquid pooling at bottom\n\n**TROUBLESHOOTING:**\n• If too dry/rubbery: you overcooked - next time, turn off heat sooner\n• If too wet/runny: cook 30 seconds more or increase heat slightly\n• If sticking to pan: pan wasn't hot enough or needs more oil",
+
+      "**STEP 8 - PLATE AND SERVE:** Transfer egg bhurji immediately to a serving plate (don't leave in hot pan or it'll overcook). Arrange the buttered multigrain toasts on the side or on a separate plate. Garnish bhurji with:\n• Extra coriander leaves on top\n• A tiny sprinkle of red chilli powder for color\n• A lemon wedge on the side - squeeze over bhurji just before eating for freshness\n\n**SERVING SUGGESTIONS:**\n• Use toast to scoop up the bhurji and eat\n• Or create an open-face sandwich: spread bhurji on toast\n• Serve with tomato ketchup or green chutney on the side\n• Pairs wonderfully with masala chai or black coffee\n\n**VARIATIONS:**\n• **Cheese Bhurji:** Add 2 tablespoon grated cheese in last 30 seconds of cooking\n• **Mushroom Bhurji:** Add 1/4 cup chopped mushrooms with onions\n• **Paneer Bhurji:** Replace 1 egg with 30 gm crumbled paneer\n\n**NUTRITION & BENEFITS:** This protein-packed snack delivers 310 calories with an excellent 20g protein (from eggs), 28g carbs (from multigrain toast), and 14g healthy fats (from eggs and oil). The 4g fiber from toast keeps you satisfied. Perfect for:\n• Post-workout snack (high protein for muscle recovery)\n• Evening snack (keeps hunger at bay until dinner)\n• Quick breakfast (fast to make, nutritionally complete)\nEggs provide all 9 essential amino acids, while vegetables add vitamins and antioxidants. The combination keeps you energized and satisfied for 3-4 hours, making it ideal for weight maintenance. Eggs also contain choline for brain health and lutein for eye health."
+    ],
+    image_url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80"
+  }
 ];
 
