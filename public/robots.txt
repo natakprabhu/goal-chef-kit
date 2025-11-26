@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
 
-# Sitemaps - Dynamic sitemap includes all blog posts and recipes
-Sitemap: https://kaqjnyjkosefosbncwki.supabase.co/functions/v1/generate-sitemap
+# Sitemaps - Organized sitemap index with separate sitemaps for blog, recipes, and static pages
+Sitemap: https://kaqjnyjkosefosbncwki.supabase.co/functions/v1/sitemap-index
 Sitemap: https://goalchef.vercel.app/sitemap.xml
 
 # Disallow admin pages

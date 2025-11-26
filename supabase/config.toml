@@ -2,3 +2,24 @@ project_id = "kaqjnyjkosefosbncwki"
 
 [functions.calculate-calories]
 verify_jwt = false
+
+[functions.generate-sitemap]
+verify_jwt = false
+
+[functions.sitemap-blog]
+verify_jwt = false
+
+[functions.sitemap-recipes]
+verify_jwt = false
+
+[functions.sitemap-static]
+verify_jwt = false
+
+[functions.sitemap-index]
+verify_jwt = false
+
+[functions.submit-sitemap]
+verify_jwt = false
+
+[functions.notify-content-update]
+verify_jwt = false
