@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import HealthNews from "@/components/HealthNews";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarIcon, TrendingUp, Heart, ChefHat, Trash2, Clock, CheckCircle2, Info, NotebookPen } from "lucide-react";
@@ -158,6 +159,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <SEO 
+        title="Dashboard - GoalChef"
+        description="Track your daily meals, calories, and macros. Monitor your nutrition goals and progress in one place."
+        url="https://goalchef.vercel.app/dashboard"
+        noindex={true}
+      />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-8">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -255,6 +256,13 @@ const Planner = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
+      <SEO 
+        title="Weekly Meal Planner - GoalChef"
+        description="Plan your weekly meals with our smart meal planner. Get balanced nutrition for breakfast, lunch, dinner, and snacks tailored to your goals."
+        keywords={['meal planner', 'weekly meal plan', 'diet planner', 'meal prep', 'nutrition planning']}
+        url="https://goalchef.vercel.app/planner"
+        noindex={true}
+      />
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">

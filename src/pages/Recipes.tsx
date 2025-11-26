@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
+import { SEO } from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,6 +64,13 @@ const Recipes = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
+      <SEO 
+        title="Healthy Indian Recipes - GoalChef"
+        description="Discover 300+ healthy Indian recipes for weight loss, muscle gain, and maintenance. Vegetarian and non-vegetarian options with detailed nutrition info."
+        keywords={['Indian recipes', 'healthy recipes', 'weight loss recipes', 'muscle gain recipes', 'vegetarian recipes', 'high protein meals', 'low calorie Indian food']}
+        url="https://goalchef.vercel.app/recipes"
+        type="website"
+      />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-8">
