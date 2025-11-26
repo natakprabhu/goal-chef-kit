@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO, generateRecipeSchema } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +67,38 @@ const RecipeDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <SEO 
+        title={`${recipe.title} - GoalChef`}
+        description={recipe.description || `Healthy ${recipe.diet_type === 'veg' ? 'vegetarian' : 'non-vegetarian'} recipe with ${recipe.calories} calories, ${recipe.protein}g protein. Perfect for ${recipe.meal_type}.`}
+        image={recipe.image_url || "https://goalchef.vercel.app/og-image.jpg"}
+        url={`https://goalchef.vercel.app/recipe/${recipe.id}`}
+        type="article"
+        keywords={[
+          recipe.title,
+          recipe.diet_type === 'veg' ? 'vegetarian recipe' : 'non-vegetarian recipe',
+          `${recipe.meal_type} recipe`,
+          'healthy recipe',
+          'Indian recipe',
+          ...(recipe.tags || [])
+        ]}
+        schema={generateRecipeSchema({
+          name: recipe.title,
+          description: recipe.description || `Delicious ${recipe.meal_type} recipe`,
+          image: recipe.image_url || "https://goalchef.vercel.app/og-image.jpg",
+          prepTime: recipe.prep_time,
+          cookTime: recipe.cook_time,
+          calories: recipe.calories,
+          protein: recipe.protein,
+          carbs: recipe.carbs,
+          fats: recipe.fats,
+          ingredients: (recipe.ingredients as any[]).map((ing: any) => 
+            typeof ing === 'string' ? ing : `${ing.amount || ''} ${ing.name || ing}`.trim()
+          ),
+          instructions: (recipe.instructions as any[]).map((inst: any) => 
+            typeof inst === 'string' ? inst : inst.text || inst
+          ),
+        })}
+      />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-8">

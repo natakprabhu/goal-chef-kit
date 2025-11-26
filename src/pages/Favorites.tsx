@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,12 @@ const Favorites = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/5">
+      <SEO 
+        title="My Favorite Recipes - GoalChef"
+        description="Access your saved favorite recipes. Quick access to the meals you love for easy meal planning."
+        url="https://goalchef.vercel.app/favorites"
+        noindex={true}
+      />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-8">

@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +40,12 @@ const Progress = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <SEO 
+        title="My Progress - GoalChef"
+        description="Track your fitness journey with detailed progress metrics, weight tracking, and achievement milestones."
+        url="https://goalchef.vercel.app/my-progress"
+        noindex={true}
+      />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-8">
