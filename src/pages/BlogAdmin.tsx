@@ -126,8 +126,23 @@ const BlogAdmin = () => {
 
   const seedRecipes = async () => {
     try {
+      // Check if recipes already exist
+      const { data: existingRecipes } = await supabase
+        .from("recipes")
+        .select("title");
+      
+      const existingTitles = new Set(existingRecipes?.map(r => r.title) || []);
+      
+      // Filter out recipes that already exist
+      const newRecipes = sampleRecipes.filter(recipe => !existingTitles.has(recipe.title));
+      
+      if (newRecipes.length === 0) {
+        toast.info("All recipes already exist in the database!");
+        return;
+      }
+      
       // Add goal_category to each recipe based on tags
-      const recipesWithGoal = sampleRecipes.map(recipe => {
+      const recipesWithGoal = newRecipes.map(recipe => {
         let goal_category = 'maintenance'; // default
         
         if (recipe.tags.some(tag => tag.toLowerCase().includes('weight gain'))) {
@@ -141,7 +156,7 @@ const BlogAdmin = () => {
 
       const { error } = await supabase.from("recipes" as any).insert(recipesWithGoal);
       if (error) throw error;
-      toast.success("✅ 100+ recipes added successfully!");
+      toast.success(`✅ ${newRecipes.length} new recipes added successfully!`);
       fetchRecipes();
     } catch (error: any) {
       toast.error("Failed to seed recipes: " + error.message);
