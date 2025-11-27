@@ -69,7 +69,7 @@ const SignIn = () => {
       <SEO 
         title="Sign In - GoalChef"
         description="Sign in to your GoalChef account to access your personalized meal plans, recipes, and nutrition tracking."
-        url="https://goalchef.vercel.app/sign-in"
+        url="https://goalchef.in/sign-in"
         type="website"
       />
       <Card className="w-full max-w-md">

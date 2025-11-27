@@ -47,7 +47,7 @@ const Favorites = () => {
       <SEO 
         title="My Favorite Recipes - GoalChef"
         description="Access your saved favorite recipes. Quick access to the meals you love for easy meal planning."
-        url="https://goalchef.vercel.app/favorites"
+        url="https://goalchef.in/favorites"
         noindex={true}
       />
       <Navigation />

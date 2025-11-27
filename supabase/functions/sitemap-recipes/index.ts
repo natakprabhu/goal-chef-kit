@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${recipes?.length || 0} guest recipes`);
 
-    const baseUrl = 'https://goalchef.vercel.app';
+    const baseUrl = 'https://goalchef.in';
     const currentDate = new Date().toISOString().split('T')[0];
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>

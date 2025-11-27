@@ -260,7 +260,7 @@ const Planner = () => {
         title="Weekly Meal Planner - GoalChef"
         description="Plan your weekly meals with our smart meal planner. Get balanced nutrition for breakfast, lunch, dinner, and snacks tailored to your goals."
         keywords={['meal planner', 'weekly meal plan', 'diet planner', 'meal prep', 'nutrition planning']}
-        url="https://goalchef.vercel.app/planner"
+        url="https://goalchef.in/planner"
         noindex={true}
       />
       <Navigation />

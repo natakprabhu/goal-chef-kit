@@ -94,7 +94,7 @@ const GetStarted = () => {
       <SEO 
         title="Get Started - GoalChef"
         description="Create your free GoalChef account to start tracking your nutrition, planning meals, and achieving your fitness goals."
-        url="https://goalchef.vercel.app/get-started"
+        url="https://goalchef.in/get-started"
         type="website"
       />
       <Card className="w-full max-w-md">

@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   try {
     console.log('Generating static pages sitemap...');
 
-    const baseUrl = 'https://goalchef.vercel.app';
+    const baseUrl = 'https://goalchef.in';
     const currentDate = new Date().toISOString().split('T')[0];
 
     const staticPages = [

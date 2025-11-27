@@ -118,8 +118,8 @@ const BlogPost = () => {
         <SEO
           title={post.meta_title || post.title}
           description={post.meta_description || post.excerpt}
-          image={post.og_image || post.image_url || "https://goalchef.vercel.app/og-image.jpg"}
-          url={`https://goalchef.vercel.app/blog/${post.slug}`}
+          image={post.og_image || post.image_url || "https://goalchef.in/og-image.jpg"}
+          url={`https://goalchef.in/blog/${post.slug}`}
           type="article"
           author={post.blog_authors?.name}
           publishedTime={post.created_at}
@@ -128,11 +128,11 @@ const BlogPost = () => {
           schema={generateArticleSchema({
             title: post.title,
             description: post.excerpt,
-            image: post.image_url || "https://goalchef.vercel.app/og-image.jpg",
+            image: post.image_url || "https://goalchef.in/og-image.jpg",
             datePublished: post.created_at,
             dateModified: post.updated_at,
             authorName: post.blog_authors?.name || "Goal Chef Team",
-            url: `https://goalchef.vercel.app/blog/${post.slug}`,
+            url: `https://goalchef.in/blog/${post.slug}`,
           })}
         />
       )}
