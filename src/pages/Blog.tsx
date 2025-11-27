@@ -68,7 +68,7 @@ const Blog = () => {
         description="Discover expert nutrition tips, healthy recipes, and fitness advice from certified Indian nutritionists and dietitians."
         keywords={['nutrition', 'fitness', 'healthy recipes', 'diet tips', 'weight management', 'Indian nutrition']}
         type="website"
-        url="https://goalchef.vercel.app/blog"
+        url="https://goalchef.in/blog"
       />
       <Navigation />
       

@@ -68,7 +68,7 @@ const Recipes = () => {
         title="Healthy Indian Recipes - GoalChef"
         description="Discover 300+ healthy Indian recipes for weight loss, muscle gain, and maintenance. Vegetarian and non-vegetarian options with detailed nutrition info."
         keywords={['Indian recipes', 'healthy recipes', 'weight loss recipes', 'muscle gain recipes', 'vegetarian recipes', 'high protein meals', 'low calorie Indian food']}
-        url="https://goalchef.vercel.app/recipes"
+        url="https://goalchef.in/recipes"
         type="website"
       />
       <Navigation />

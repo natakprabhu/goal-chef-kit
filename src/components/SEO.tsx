@@ -29,7 +29,7 @@ interface SEOProps {
 export const SEO = ({
   title,
   description,
-  image = 'https://goalchef.vercel.app/og-image.jpg',
+  image = 'https://goalchef.in/og-image.jpg',
   url,
   type = 'website',
   keywords = [],
@@ -177,7 +177,7 @@ export const generateArticleSchema = ({
     name: 'Goal Chef',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://goalchef.vercel.app/favicon.ico',
+      url: 'https://goalchef.in/favicon.ico',
     },
   },
   mainEntityOfPage: {

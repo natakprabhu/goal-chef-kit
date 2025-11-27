@@ -70,8 +70,8 @@ const RecipeDetail = () => {
       <SEO 
         title={`${recipe.title} - GoalChef`}
         description={recipe.description || `Healthy ${recipe.diet_type === 'veg' ? 'vegetarian' : 'non-vegetarian'} recipe with ${recipe.calories} calories, ${recipe.protein}g protein. Perfect for ${recipe.meal_type}.`}
-        image={recipe.image_url || "https://goalchef.vercel.app/og-image.jpg"}
-        url={`https://goalchef.vercel.app/recipe/${recipe.id}`}
+        image={recipe.image_url || "https://goalchef.in/og-image.jpg"}
+        url={`https://goalchef.in/recipe/${recipe.id}`}
         type="article"
         keywords={[
           recipe.title,
@@ -84,7 +84,7 @@ const RecipeDetail = () => {
         schema={generateRecipeSchema({
           name: recipe.title,
           description: recipe.description || `Delicious ${recipe.meal_type} recipe`,
-          image: recipe.image_url || "https://goalchef.vercel.app/og-image.jpg",
+          image: recipe.image_url || "https://goalchef.in/og-image.jpg",
           prepTime: recipe.prep_time,
           cookTime: recipe.cook_time,
           calories: recipe.calories,

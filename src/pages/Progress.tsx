@@ -43,7 +43,7 @@ const Progress = () => {
       <SEO 
         title="My Progress - GoalChef"
         description="Track your fitness journey with detailed progress metrics, weight tracking, and achievement milestones."
-        url="https://goalchef.vercel.app/my-progress"
+        url="https://goalchef.in/my-progress"
         noindex={true}
       />
       <Navigation />

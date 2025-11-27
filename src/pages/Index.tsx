@@ -18,7 +18,7 @@ const Index = () => {
         title="GoalChef - AI-Powered Meal Planning for Your Fitness Goals"
         description="Achieve your fitness goals with personalized meal plans, Indian recipes, and nutrition tracking. Perfect for weight loss, muscle gain, or maintenance."
         keywords={['meal planning', 'nutrition tracking', 'Indian recipes', 'fitness goals', 'weight loss', 'muscle gain', 'healthy eating', 'diet planning']}
-        url="https://goalchef.vercel.app"
+        url="https://goalchef.in"
         type="website"
       />
       <Navigation />

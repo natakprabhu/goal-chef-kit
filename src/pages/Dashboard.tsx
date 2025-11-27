@@ -162,7 +162,7 @@ const Dashboard = () => {
       <SEO 
         title="Dashboard - GoalChef"
         description="Track your daily meals, calories, and macros. Monitor your nutrition goals and progress in one place."
-        url="https://goalchef.vercel.app/dashboard"
+        url="https://goalchef.in/dashboard"
         noindex={true}
       />
       <Navigation />
