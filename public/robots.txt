@@ -1,9 +1,8 @@
 User-agent: *
 Allow: /
 
-# Sitemaps - Organized sitemap index with separate sitemaps for blog, recipes, and static pages
-Sitemap: https://kaqjnyjkosefosbncwki.supabase.co/functions/v1/sitemap-index
-Sitemap: https://goalchef.in/sitemap.xml
+# Dynamic sitemap - auto-updated with all blog posts and recipes
+Sitemap: https://kaqjnyjkosefosbncwki.supabase.co/storage/v1/object/public/sitemaps/sitemap.xml
 
 # Disallow admin pages
 Disallow: /doremon
