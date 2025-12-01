@@ -3,7 +3,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml',
 };
 
 Deno.serve(async (req) => {
@@ -96,11 +95,6 @@ Deno.serve(async (req) => {
         const lastmod = recipe.updated_at 
           ? new Date(recipe.updated_at).toISOString().split('T')[0]
           : currentDate;
-        // Create URL-friendly slug from title
-        const slug = recipe.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
         sitemap += `  <url>
     <loc>${baseUrl}/recipes/${recipe.id}</loc>
     <lastmod>${lastmod}</lastmod>
@@ -116,8 +110,40 @@ Deno.serve(async (req) => {
     const totalUrls = staticPages.length + (blogPosts?.length || 0) + (recipes?.length || 0);
     console.log(`Complete sitemap generated with ${totalUrls} URLs`);
 
-    return new Response(sitemap, {
-      headers: corsHeaders,
+    // Save sitemap to Supabase Storage
+    const encoder = new TextEncoder();
+    const sitemapBytes = encoder.encode(sitemap);
+    
+    const { error: uploadError } = await supabase.storage
+      .from('sitemaps')
+      .upload('sitemap.xml', sitemapBytes, {
+        contentType: 'application/xml',
+        upsert: true, // Overwrite if exists
+      });
+
+    if (uploadError) {
+      console.error('Error uploading sitemap to storage:', uploadError);
+      // Still return the sitemap even if upload fails
+    } else {
+      console.log('Sitemap successfully saved to storage');
+    }
+
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('sitemaps')
+      .getPublicUrl('sitemap.xml');
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `Sitemap generated with ${totalUrls} URLs`,
+      totalUrls,
+      blogPosts: blogPosts?.length || 0,
+      recipes: recipes?.length || 0,
+      staticPages: staticPages.length,
+      storageUrl: publicUrlData?.publicUrl,
+      sitemap: sitemap,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (error) {
