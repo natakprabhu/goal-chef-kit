@@ -31,6 +31,9 @@ const Navigation = () => {
           <Link to="/planner">
             <Button variant="ghost">Planner</Button>
           </Link>
+          <Link to="/blog">
+            <Button variant="ghost">Blog</Button>
+          </Link>
           {user && (
             <Link to="/my-progress">
               <Button variant="ghost">My Progress</Button>
