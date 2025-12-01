@@ -101,30 +101,59 @@ const BlogAdmin = () => {
     }
   };
 
-  const seedSampleData = async () => {
-    try {
-      await supabase.from("blog_posts" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from("blog_authors" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const [seeding, setSeeding] = useState(false);
 
+  const seedSampleData = async () => {
+    setSeeding(true);
+    console.log("Starting blog seed...");
+    try {
+      // Delete existing data
+      const { error: deletePostsError } = await supabase.from("blog_posts" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (deletePostsError) {
+        console.error("Delete posts error:", deletePostsError);
+        throw deletePostsError;
+      }
+      
+      const { error: deleteAuthorsError } = await supabase.from("blog_authors" as any).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (deleteAuthorsError) {
+        console.error("Delete authors error:", deleteAuthorsError);
+        throw deleteAuthorsError;
+      }
+
+      console.log("Inserting authors...");
       const { data: authorsData, error: authorsError } = await supabase
         .from("blog_authors" as any)
         .insert(sampleAuthors)
         .select();
 
-      if (authorsError) throw authorsError;
+      if (authorsError) {
+        console.error("Insert authors error:", authorsError);
+        throw authorsError;
+      }
+      
+      console.log("Authors inserted:", authorsData);
       const authorIds = (authorsData as any[]).map(a => a.id);
 
-      const { error: postsError } = await supabase
+      console.log("Inserting posts with author IDs:", authorIds);
+      const { data: postsData, error: postsError } = await supabase
         .from("blog_posts" as any)
-        .insert(getSamplePosts(authorIds));
+        .insert(getSamplePosts(authorIds))
+        .select();
 
-      if (postsError) throw postsError;
+      if (postsError) {
+        console.error("Insert posts error:", postsError);
+        throw postsError;
+      }
 
-      toast.success("✅ Blog data added successfully!");
-      fetchAuthors();
-      fetchPosts();
+      console.log("Posts inserted:", postsData);
+      toast.success(`✅ Blog data added! ${authorsData?.length || 0} authors, ${postsData?.length || 0} posts`);
+      await fetchAuthors();
+      await fetchPosts();
     } catch (error: any) {
-      toast.error("Failed to seed blog data.");
+      console.error("Seed error:", error);
+      toast.error("Failed to seed blog data: " + (error.message || "Unknown error"));
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -625,9 +654,9 @@ const BlogAdmin = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">Content Management</h1>
           <div className="flex gap-2">
-            <Button onClick={seedSampleData} variant="outline">
+            <Button onClick={seedSampleData} variant="outline" disabled={seeding}>
               <Database className="h-4 w-4 mr-2" />
-              Seed Blog Data
+              {seeding ? "Seeding..." : "Seed Blog Data"}
             </Button>
             <Button onClick={seedRecipes} variant="outline">
               <Database className="h-4 w-4 mr-2" />
