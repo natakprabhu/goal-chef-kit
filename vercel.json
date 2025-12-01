@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://kaqjnyjkosefosbncwki.supabase.co/storage/v1/object/public/sitemaps/sitemap.xml",
+      "permanent": true
+    }
+  ]
+}
