@@ -5,5 +5,11 @@
       "destination": "https://kaqjnyjkosefosbncwki.supabase.co/storage/v1/object/public/sitemaps/sitemap.xml",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
