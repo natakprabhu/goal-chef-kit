@@ -562,6 +562,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string | null
@@ -600,10 +621,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       access_level: "guest" | "logged_in" | "subscribed"
+      app_role: "admin" | "moderator" | "user"
       diet_type: "veg" | "non_veg"
       meal_type: "breakfast" | "lunch" | "dinner" | "snack" | "snack2"
     }
@@ -734,6 +762,7 @@ export const Constants = {
   public: {
     Enums: {
       access_level: ["guest", "logged_in", "subscribed"],
+      app_role: ["admin", "moderator", "user"],
       diet_type: ["veg", "non_veg"],
       meal_type: ["breakfast", "lunch", "dinner", "snack", "snack2"],
     },
