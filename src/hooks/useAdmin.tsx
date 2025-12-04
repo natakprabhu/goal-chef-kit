@@ -16,18 +16,19 @@ export const useAdmin = () => {
       }
 
       try {
+        // Check user_profiles table for role = 'admin'
         const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
+          .from("user_profiles")
+          .select("*")
           .eq("user_id", user.id)
-          .eq("role", "admin")
           .maybeSingle();
 
         if (error) {
           console.error("Error checking admin role:", error);
           setIsAdmin(false);
         } else {
-          setIsAdmin(!!data);
+          // Check if role field exists and equals 'admin'
+          setIsAdmin((data as any)?.role === "admin");
         }
       } catch (err) {
         console.error("Error checking admin role:", err);
