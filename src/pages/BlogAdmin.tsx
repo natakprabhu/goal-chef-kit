@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Trash2, Edit, Database, Upload, Download } from "lucide-react";
+import { Trash2, Edit, Database, Upload, Download, ShieldAlert } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ReactQuill from "react-quill";
@@ -19,6 +19,8 @@ import type { Recipe } from "@/hooks/useRecipes";
 import Papa from "papaparse";
 import { z } from "zod";
 import { SitemapManager } from "@/components/SitemapManager";
+import { useAdmin } from "@/hooks/useAdmin";
+import { RecipeEditDialog } from "@/components/RecipeEditDialog";
 
 interface Author {
   id: string;
@@ -43,6 +45,7 @@ interface BlogPost {
 
 const BlogAdmin = () => {
   const navigate = useNavigate();
+  const { isAdmin, loading: adminLoading } = useAdmin();
   const [authors, setAuthors] = useState<Author[]>([]);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -50,6 +53,7 @@ const BlogAdmin = () => {
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [recipeEditOpen, setRecipeEditOpen] = useState(false);
 
   // Author form state
   const [authorForm, setAuthorForm] = useState({
@@ -77,11 +81,17 @@ const BlogAdmin = () => {
   });
 
   useEffect(() => {
-    checkAuth();
-    fetchAuthors();
-    fetchPosts();
-    fetchRecipes();
-  }, []);
+    if (!adminLoading && !isAdmin) {
+      toast.error("Access denied. Admin privileges required.");
+      navigate("/");
+      return;
+    }
+    if (!adminLoading && isAdmin) {
+      fetchAuthors();
+      fetchPosts();
+      fetchRecipes();
+    }
+  }, [adminLoading, isAdmin, navigate]);
 
   const quillModules = useMemo(() => ({
     toolbar: [
@@ -94,11 +104,43 @@ const BlogAdmin = () => {
     ],
   }), []);
 
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/sign-in");
-    }
+  // Show loading while checking admin status
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1 container mx-auto px-4 py-8 mt-16 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking permissions...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1 container mx-auto px-4 py-8 mt-16 flex items-center justify-center">
+          <div className="text-center">
+            <ShieldAlert className="h-16 w-16 text-destructive mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+            <p className="text-muted-foreground mb-4">You need admin privileges to access this page.</p>
+            <Button onClick={() => navigate("/")}>Go Home</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const editRecipe = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
+    setRecipeEditOpen(true);
   };
 
   const [seeding, setSeeding] = useState(false);
@@ -1025,31 +1067,47 @@ const BlogAdmin = () => {
               {recipes.map((recipe) => (
                 <Card key={recipe.id}>
                   <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{recipe.title}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-muted-foreground">
-                          {recipe.diet_type === "veg" ? "🥗 Veg" : "🍗 Non-Veg"}
-                        </span>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground capitalize">
-                          {recipe.meal_type}
-                        </span>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">
-                          {recipe.calories} kcal
-                        </span>
-                        {(recipe as any).goal_category && (
-                          <>
-                            <span className="text-sm text-muted-foreground">•</span>
-                            <span className="text-sm text-muted-foreground capitalize">
-                              {(recipe as any).goal_category.replace('_', ' ')}
-                            </span>
-                          </>
-                        )}
+                    <div className="flex items-center gap-4 flex-1">
+                      {recipe.image_url && (
+                        <img
+                          src={recipe.image_url}
+                          alt={recipe.title}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{recipe.title}</h3>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-sm text-muted-foreground">
+                            {recipe.diet_type === "veg" ? "🥗 Veg" : "🍗 Non-Veg"}
+                          </span>
+                          <span className="text-sm text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground capitalize">
+                            {recipe.meal_type}
+                          </span>
+                          <span className="text-sm text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground">
+                            {recipe.calories} kcal
+                          </span>
+                          {(recipe as any).goal_category && (
+                            <>
+                              <span className="text-sm text-muted-foreground">•</span>
+                              <span className="text-sm text-muted-foreground capitalize">
+                                {(recipe as any).goal_category.replace('_', ' ')}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => editRecipe(recipe)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -1065,6 +1123,13 @@ const BlogAdmin = () => {
                 </Card>
               ))}
             </div>
+
+            <RecipeEditDialog
+              recipe={selectedRecipe}
+              open={recipeEditOpen}
+              onOpenChange={setRecipeEditOpen}
+              onSaved={fetchRecipes}
+            />
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">
