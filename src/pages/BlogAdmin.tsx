@@ -1,23 +1,23 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "../integrations/supabase/client";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { toast } from "sonner";
 import { Trash2, Edit, Database, Upload, Download, ShieldAlert, Search } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-import { sampleAuthors, getSamplePosts } from "@/data/sampleBlogData";
-import { sampleRecipes } from "@/data/sampleRecipes";
-import type { Recipe } from "@/hooks/useRecipes";
+import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
+import { sampleAuthors, getSamplePosts } from "../data/sampleBlogData";
+import { sampleRecipes } from "../data/sampleRecipes";
+import type { Recipe } from "../hooks/useRecipes";
 import { z } from "zod";
-import { SitemapManager } from "@/components/SitemapManager";
-import { useAdmin } from "@/hooks/useAdmin";
-import { RecipeEditDialog } from "@/components/RecipeEditDialog";
+import { SitemapManager } from "../components/SitemapManager";
+import { useAdmin } from "../hooks/useAdmin";
+import { RecipeEditDialog } from "../components/RecipeEditDialog";
 import {
   Pagination,
   PaginationContent,
@@ -26,7 +26,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "../components/ui/pagination";
 
 interface Author {
   id: string;
@@ -287,6 +287,7 @@ const BlogAdmin = () => {
         let goal_category = 'maintenance';
         if (recipe.tags.some(tag => tag.toLowerCase().includes('weight gain'))) goal_category = 'weight_gain';
         else if (recipe.tags.some(tag => tag.toLowerCase().includes('weight loss'))) goal_category = 'weight_loss';
+        else if (recipe.tags.some(tag => tag.toLowerCase().includes('diabetic'))) goal_category = 'diabetic_friendly';
         return { ...recipe, goal_category };
       });
 
@@ -314,7 +315,7 @@ const BlogAdmin = () => {
     fats: z.number().min(0, "Fats must be positive"),
     fiber: z.number().min(0).optional().nullable(),
     access_level: z.enum(["guest", "logged_in", "subscribed"]).default("guest"),
-    goal_category: z.enum(["weight_gain", "weight_loss", "maintenance"]).optional().nullable(),
+    goal_category: z.enum(["weight_gain", "weight_loss", "maintenance", "diabetic_friendly"]).optional().nullable(),
     tags: z.array(z.string()).optional().default([]),
     ingredients: z.union([
       z.array(z.string()),
