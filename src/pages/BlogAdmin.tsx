@@ -54,7 +54,7 @@ const BlogAdmin = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [recipeEditOpen, setRecipeEditOpen] = useState(false);
-
+  const [seeding, setSeeding] = useState(false);
   // Author form state
   const [authorForm, setAuthorForm] = useState({
     name: "",
@@ -143,7 +143,7 @@ const BlogAdmin = () => {
     setRecipeEditOpen(true);
   };
 
-  const [seeding, setSeeding] = useState(false);
+
 
   const seedSampleData = async () => {
     setSeeding(true);
